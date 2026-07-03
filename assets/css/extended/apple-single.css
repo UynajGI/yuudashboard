@@ -86,20 +86,14 @@
 .apple-meta-pill a { color: var(--secondary); text-decoration: none; }
 .apple-meta-pill a:hover { color: var(--primary); }
 
-/* ── 正文两栏布局 ── */
+/* ── 正文区 ── */
 .apple-layout {
   width: min(var(--dash-max), calc(100% - 48px));
   margin: var(--dash-gap) auto 64px;
 }
-.apple-article-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: var(--dash-gap);
-  align-items: start;
-}
 
-.apple-content-shell {
-  grid-column: 1;
+/* TL;DR — 全宽 panel，标题和正文之间 */
+.apple-tldr {
   position: relative;
   background: var(--entry);
   border-radius: var(--dash-radius);
@@ -108,35 +102,10 @@
   box-shadow:
     0 1px 3px rgba(0,0,0,.04),
     0 8px 32px rgba(0,0,0,.06);
-  padding: 32px 36px;
+  padding: 20px 24px 18px;
+  margin-bottom: var(--dash-gap);
   animation: panel-rise 0.6s var(--dash-ease) both;
   animation-delay: 0.1s;
-}
-.apple-content-shell::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  z-index: 2;
-  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-}
-
-/* TL;DR —— sticky 侧栏 panel */
-.apple-tldr {
-  grid-column: 2;
-  grid-row: 1;
-  position: sticky;
-  top: 96px;
-  background: var(--entry);
-  border-radius: var(--dash-radius);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow:
-    0 1px 3px rgba(0,0,0,.04),
-    0 8px 32px rgba(0,0,0,.06);
-  padding: 20px 22px;
-  animation: panel-rise 0.6s var(--dash-ease) both;
-  animation-delay: 0.15s;
 }
 .apple-tldr::before {
   content: "";
@@ -173,6 +142,29 @@
 }
 .apple-tldr-list li { margin: 6px 0; }
 .apple-tldr-list li::marker { color: var(--accent-blue); }
+
+/* 正文 panel */
+.apple-content-shell {
+  position: relative;
+  background: var(--entry);
+  border-radius: var(--dash-radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 1px 3px rgba(0,0,0,.04),
+    0 8px 32px rgba(0,0,0,.06);
+  padding: 32px 36px;
+  animation: panel-rise 0.6s var(--dash-ease) both;
+  animation-delay: 0.15s;
+}
+.apple-content-shell::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 2;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+}
 
 /* 内容排版 */
 .apple-content {
@@ -225,7 +217,6 @@
 
 /* 页脚 + 标签 */
 .apple-footer {
-  grid-column: 1 / -1;
   margin-top: var(--dash-gap);
   padding: 24px 0 0;
   border-top: 1px solid var(--border);
@@ -254,13 +245,6 @@
 .floating-tag:hover { color: var(--primary); border-color: var(--accent-blue); background: var(--theme); }
 
 /* ── 响应式 ── */
-@media (max-width: 960px) {
-  .apple-article-grid {
-    grid-template-columns: 1fr;
-  }
-  .apple-tldr { grid-column: 1; grid-row: auto; position: static; }
-  .apple-content-shell { grid-column: 1; }
-}
 @media (max-width: 720px) {
   .apple-hero, .apple-layout {
     width: min(var(--dash-max), calc(100% - 24px));

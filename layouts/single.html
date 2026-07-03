@@ -41,44 +41,43 @@
   </section>
 
   <section class="apple-layout">
-    <div class="apple-article-grid">
-      <article class="apple-content-shell">
-        {{- if .Content }}
-        <div class="post-content md-content apple-content">
-          {{- if not (.Param "disableAnchoredHeadings") }}
-          {{- partial "anchored_headings.html" .Content -}}
-          {{- else }}{{ .Content }}{{ end }}
-        </div>
-        {{- end }}
-      </article>
 
-      {{- with .Params.tldr }}
-      <aside class="apple-tldr">
-        <div class="apple-tldr-head">
-          <span class="apple-tldr-dot"></span>
-          <span class="apple-tldr-title">TL;DR</span>
-        </div>
-        <ul class="apple-tldr-list">
-          {{- range . }}
-          <li>{{ . | markdownify }}</li>
-          {{- end }}
-        </ul>
-      </aside>
+    {{- with .Params.tldr }}
+    <aside class="apple-tldr">
+      <div class="apple-tldr-head">
+        <span class="apple-tldr-dot"></span>
+        <span class="apple-tldr-title">TL;DR</span>
+      </div>
+      <ul class="apple-tldr-list">
+        {{- range . }}
+        <li>{{ . | markdownify }}</li>
+        {{- end }}
+      </ul>
+    </aside>
+    {{- end }}
+
+    <article class="apple-content-shell">
+      {{- if .Content }}
+      <div class="post-content md-content apple-content">
+        {{- if not (.Param "disableAnchoredHeadings") }}
+        {{- partial "anchored_headings.html" .Content -}}
+        {{- else }}{{ .Content }}{{ end }}
+      </div>
       {{- end }}
+    </article>
 
-      <footer class="apple-footer">
-        {{- if $tagList }}
-        <div class="floating-tags">
-          {{- range $tagList }}
-          <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
-          {{- end }}
-        </div>
+    <footer class="apple-footer">
+      {{- if $tagList }}
+      <div class="floating-tags">
+        {{- range $tagList }}
+        <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
         {{- end }}
-        {{- if (.Param "ShowPostNavLinks") }}
-        {{- partial "post_nav_links.html" . }}
-        {{- end }}
-      </footer>
-    </div>
+      </div>
+      {{- end }}
+      {{- if (.Param "ShowPostNavLinks") }}
+      {{- partial "post_nav_links.html" . }}
+      {{- end }}
+    </footer>
   </section>
 </main>
 {{- end }}{{/* end main */}}
