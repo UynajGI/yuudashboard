@@ -108,6 +108,9 @@
   z-index: 2;
   background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
 }
+.home-card-news::before    { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
+.home-card-finance::before { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+.home-card-research::before{ background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
 .home-card:hover {
   transform: translateY(-4px);
   box-shadow:

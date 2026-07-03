@@ -19,7 +19,7 @@
 
   <section class="home-feed">
     {{- range $paginator.Pages }}
-    <article class="home-card" id="post-{{ .File.UniqueID }}">
+    <article class="home-card home-card-{{ .Section }}" id="post-{{ .File.UniqueID }}">
       <div class="home-card-section">
         {{- if eq .Section "news" }}📰 时事
         {{- else if eq .Section "finance" }}📈 金融
