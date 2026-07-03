@@ -1,6 +1,8 @@
 pre-commit:
   parallel: false
   jobs:
+    - name: hugo-build
+      run: hugo --gc --minify
     - name: trailing-whitespace
       glob:
         - "**/*.md"

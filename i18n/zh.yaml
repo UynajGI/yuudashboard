@@ -1,2 +1,2 @@
-[home]
-other = "首页"
+- id: home
+  translation: "首页"
