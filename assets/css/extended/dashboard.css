@@ -145,7 +145,21 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 16px;
 }
+
+.home-card-body {
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: var(--primary);
+}
+.home-card-body h2 { font-size: 1.25rem; margin: 1.8em 0 0.5em; }
+.home-card-body h3 { font-size: 1.05rem; margin: 1.4em 0 0.4em; }
+.home-card-body ul, .home-card-body ol { padding-left: 1.5em; }
+.home-card-body li { margin: 0.3em 0; }
+.home-card-body table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+.home-card-body th, .home-card-body td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.home-card-body th { font-weight: 700; background: var(--theme); }
 
 /* ── 响应式 ── */
 @media (max-width: 860px) {

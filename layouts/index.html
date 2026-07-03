@@ -1,5 +1,5 @@
 {{/*
-  首页：左侧分类导航 + 中间文章瀑布流
+  首页：左侧悬浮导航 + 中间文章全文流
 */}}
 {{ define "main" }}
 {{- $allPages := where .Site.RegularPages "Section" "in" (slice "news" "finance" "research") }}
@@ -8,36 +8,32 @@
 <div class="home-layout">
   <aside class="home-sidebar">
     <nav class="home-nav">
-      <a href="{{ site.Home.RelPermalink }}" class="home-nav-item active">全部</a>
-      {{- range site.Menus.main }}
-      {{- if .URL }}
-      <a href="{{ .URL | absLangURL }}" class="home-nav-item">{{ .Name }}</a>
-      {{- end }}
+      <a href="#" class="home-nav-item active" data-scroll="top">全部</a>
+      {{- range $paginator.Pages }}
+      <a href="#post-{{ .File.UniqueID }}" class="home-nav-item">{{ .Title | truncate 12 }}</a>
       {{- end }}
     </nav>
   </aside>
 
   <section class="home-feed">
     {{- range $paginator.Pages }}
-    <a class="home-card" href="{{ .RelPermalink }}">
+    <article class="home-card" id="post-{{ .File.UniqueID }}">
       <div class="home-card-section">
         {{- if eq .Section "news" }}📰 时事
         {{- else if eq .Section "finance" }}📈 金融
         {{- else }}🔬 科研{{ end }}
       </div>
       <h2 class="home-card-title">{{ .Title }}</h2>
-      {{- with .Description }}
-      <p class="home-card-desc">{{ . }}</p>
-      {{- else }}
-      <p class="home-card-desc">{{ .Summary | plainify | truncate 140 }}</p>
-      {{- end }}
+      {{- if not .Date.IsZero }}
       <div class="home-card-meta">
-        {{- if not .Date.IsZero }}
         <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
-        {{- end }}
         {{- if gt .ReadingTime 0 }}<span>{{ .ReadingTime }} min</span>{{- end }}
       </div>
-    </a>
+      {{- end }}
+      <div class="home-card-body">
+        {{ .Content }}
+      </div>
+    </article>
     {{- end }}
 
     {{- if gt $paginator.TotalPages 1 }}
