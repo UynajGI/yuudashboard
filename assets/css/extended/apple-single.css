@@ -1,7 +1,11 @@
 /* ═══════════════════════════════════════════
    Apple Single — 文章详情页布局
-   只负责 single.html 特有布局，不复定义 token
    ═══════════════════════════════════════════ */
+
+/* 覆盖 PaperMod main 容器宽度限制 */
+.main {
+  max-width: var(--dash-max);
+}
 
 /* ── Hero Panel ── */
 .apple-hero {
@@ -36,10 +40,10 @@
   align-items: center;
   max-width: 100%;
   margin-bottom: 16px;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   color: var(--secondary);
 }
-.apple-breadcrumbs a { color: var(--secondary); text-decoration: none; }
+.apple-breadcrumbs a { color: var(--secondary); text-decoration: underline; }
 .apple-breadcrumbs a:hover { color: var(--primary); }
 
 .apple-kicker {
@@ -169,7 +173,7 @@
 /* 内容排版 */
 .apple-content {
   color: var(--primary);
-  font-size: 1.02rem;
+  font-size: 1.1rem;
   line-height: 1.85;
 }
 .apple-content h2, .apple-content h3, .apple-content h4 {
