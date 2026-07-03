@@ -36,7 +36,7 @@
         {{- if gt .ReadingTime 0 }}<span>{{ .ReadingTime }} min</span>{{- end }}
       </div>
       {{- end }}
-      <div class="home-card-body">
+      <div class="home-card-body post-apple-{{ .Section }}">
         {{ .Content }}
       </div>
     </article>

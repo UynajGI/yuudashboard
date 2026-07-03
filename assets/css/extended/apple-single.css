@@ -283,7 +283,8 @@
    ═══════════════════════════════════════════ */
 
 /* ── 时事：分类卡片式 ── */
-.post-apple-news .apple-content h2 {
+.post-apple-news .apple-content h2,
+.home-card-body.post-apple-news h2 {
   font-size: 1.05rem;
   font-weight: 700;
   margin: 16px 0 0;
@@ -292,8 +293,10 @@
   background: rgba(238,90,36,.08);
   color: var(--primary);
 }
-.post-apple-news .apple-content h2:first-child { margin-top: 0; }
-.post-apple-news .apple-content ul {
+.post-apple-news .apple-content h2:first-child,
+.home-card-body.post-apple-news h2:first-child { margin-top: 0; }
+.post-apple-news .apple-content ul,
+.home-card-body.post-apple-news ul {
   margin: 0;
   padding: 12px 18px 14px;
   background: var(--entry);
@@ -303,7 +306,8 @@
   list-style: none;
   counter-reset: news-item;
 }
-.post-apple-news .apple-content li {
+.post-apple-news .apple-content li,
+.home-card-body.post-apple-news li {
   padding: 8px 0;
   counter-increment: news-item;
   display: flex;
@@ -311,8 +315,10 @@
   gap: 10px;
   border-bottom: 1px solid var(--border);
 }
-.post-apple-news .apple-content li:last-child { border-bottom: none; }
-.post-apple-news .apple-content li::before {
+.post-apple-news .apple-content li:last-child,
+.home-card-body.post-apple-news li:last-child { border-bottom: none; }
+.post-apple-news .apple-content li::before,
+.home-card-body.post-apple-news li::before {
   content: counter(news-item);
   flex: 0 0 auto;
   width: 20px; height: 20px;
