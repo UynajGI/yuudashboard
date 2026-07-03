@@ -9,8 +9,6 @@
   <div class="home-feed">
     <section class="apple-section-hero" style="width:100%;margin:0">
       <div class="apple-section-hero-inner">
-        <a href="{{ site.Home.RelPermalink }}" class="apple-back-btn">← 首页</a>
-        <div class="apple-section-kicker">{{ .Title }}</div>
         <h1 class="apple-section-title">{{ .Title }}</h1>
         {{- with .Description }}<p class="apple-section-description">{{ . }}</p>{{- end }}
         <div class="apple-section-stats">

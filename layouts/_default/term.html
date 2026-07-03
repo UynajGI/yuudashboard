@@ -7,7 +7,6 @@
   <div class="home-feed">
     <section class="apple-term-hero" style="width:100%;margin:0">
       <div class="apple-term-hero-inner">
-        <a href="{{ (site.GetPage "tags").RelPermalink }}" class="apple-back-btn">← 所有标签</a>
         <div class="apple-section-kicker">Tag</div>
         <h1 class="apple-section-title">{{ .Title }}</h1>
         <p class="apple-section-description">{{ .Data.Term | humanize }} · {{ $paginator.TotalNumberOfElements }} 篇</p>
