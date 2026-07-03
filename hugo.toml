@@ -1,0 +1,47 @@
+baseURL = 'https://uynajgi.github.io/yuudashboard/'
+title = 'Yuunagi Dashboard'
+theme = 'hugo-PaperMod'
+
+enableGitInfo = true
+disablePathToLower = true
+uglyurls = true
+
+copyright = '© Yuunagi'
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+  [markup.goldmark.extensions]
+    typographer = false
+  [markup.goldmark.extensions.passthrough]
+    enable = true
+    [markup.goldmark.extensions.passthrough.delimiters]
+      block = [['$$', '$$'], ['\\[', '\\]']]
+      inline = [['$', '$'], ['\\(', '\\)']]
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
+    ordered = false
+  [markup.highlight]
+    style = 'github'
+    lineNos = false
+    noClasses = false
+
+[outputs]
+  home = ['html', 'rss']
+
+[taxonomies]
+  tag = 'tags'
+  category = 'categories'
+
+[params]
+  env = 'production'
+  ShowReadingTime = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowToc = true
+  TocOpen = false
+  defaultTheme = 'auto'
+  DateFormat = '2006-01-02'

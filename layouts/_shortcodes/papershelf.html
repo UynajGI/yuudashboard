@@ -1,0 +1,268 @@
+{{/*
+  论文分类书架 shortcode — 全自动生成。
+  遍历所有论文的 _index.md front matter，根据 tags 归类，自动生成卡片 + 论文列表。
+  末尾自动追加"全部论文"卡片。
+*/}}
+
+{{/* ── 分类定义 ── */}}
+{{ $catDefs := slice
+  (dict
+    "key" "mechanical"
+    "icon" "🔬"
+    "title" "机械振子量子化"
+    "desc" "纳米机械振子从经典走向量子：色散耦合、边带冷却、反馈控制、低于 SQL 的测量"
+    "tags" (slice "纳米机械" "NEMS" "机械振子" "边带冷却" "光机械" "力测量" "位移测量" "反馈控制" "SQL")
+  )
+  (dict
+    "key" "geometric-phase"
+    "icon" "🌀"
+    "title" "几何相位与几何量子计算"
+    "desc" "Berry 相位——从固态首次观测到非阿贝尔 holonomic 门，覆盖超导/离子阱/量子点三平台"
+    "tags" (slice "几何相位" "几何量子计算")
+  )
+  (dict
+    "key" "quantum-optics"
+    "icon" "⚛️"
+    "title" "电路 QED 量子光学"
+    "desc" "超导电路中的微波光子层析、耗散诱导量子相变"
+    "tags" (slice "电路QED" "光子层析" "量子相变" "微波光子" "超导量子比特" "Rabi模型" "量子基态")
+  )
+  (dict
+    "key" "ion-trap"
+    "icon" "⚡"
+    "title" "离子阱量子技术"
+    "desc" "囚禁离子运动态的特征函数层析、量子态重建与诊断"
+    "tags" (slice "离子阱" "量子层析" "特征函数" "囚禁离子")
+  )
+  (dict
+    "key" "phonon"
+    "icon" "🌊"
+    "title" "声子量子光学"
+    "desc" "表面声波声子作为量子信息的传播载体——声学量子光学"
+    "tags" (slice "声子" "表面声波" "人工原子")
+  )
+}}
+
+{{/* ── 收集所有论文 section 页（排除 papers 根 _index.md）── */}}
+{{ $allPapers := where .Site.Pages "Section" "papers" }}
+{{ $paperSections := slice }}
+{{ range $allPapers }}
+  {{ if and .IsSection .Params.year (ne .RelPermalink "/yuulibrary/papers/") (ne .RelPermalink "/papers/") }}
+    {{ $paperSections = $paperSections | append . }}
+  {{ end }}
+{{ end }}
+{{ $paperSections = sort $paperSections "Params.weight" "asc" }}
+
+{{/* ── category 字段精确归类 ── */}}
+{{ $catPapers := dict }}
+{{ range $paperSections }}
+  {{ $paper := . }}
+  {{ $cat := .Params.category | default "" }}
+  {{ if ne $cat "" }}
+    {{ $existing := index $catPapers $cat | default (slice) }}
+    {{ $catPapers = merge $catPapers (dict $cat ($existing | append $paper)) }}
+  {{ end }}
+{{ end }}
+
+{{/* ── 渲染分类卡片网格 ── */}}
+<div class="category-grid" data-shelf="papers">
+  {{ range $catDefs }}
+    {{ $key := .key }}
+    {{ $papers := index $catPapers $key | default (slice) }}
+    {{ if gt (len $papers) 0 }}
+    <div class="category-card" data-category="{{ $key }}">
+      <span class="category-card-icon">{{ .icon }}</span>
+      <h3 class="category-card-title">{{ .title }}</h3>
+      <span class="category-card-count">{{ len $papers }} 篇</span>
+      <p class="category-card-desc">{{ .desc }}</p>
+    </div>
+    {{ end }}
+  {{ end }}
+  {{/* ── 全部论文卡片（始终在末尾） ── */}}
+  {{ if gt (len $paperSections) 0 }}
+  <div class="category-card category-card-all" data-category="all-papers">
+    <span class="category-card-icon">📚</span>
+    <h3 class="category-card-title">全部论文</h3>
+    <span class="category-card-count">{{ len $paperSections }} 篇</span>
+    <p class="category-card-desc">浏览所有论文笔记，不按主题筛选</p>
+  </div>
+  {{ end }}
+</div>
+
+{{/* ── 渲染每个分类的论文列表 ── */}}
+{{ range $catDefs }}
+  {{ $key := .key }}
+  {{ $papers := index $catPapers $key | default (slice) }}
+  {{ if gt (len $papers) 0 }}
+  <div class="bookshelf" data-category="{{ $key }}" style="display:none">
+    <button class="back-btn">← 返回论文分类</button>
+    <div class="sort-bar">
+      <span class="sort-bar-label">排序：</span>
+      <button class="sort-btn active" data-sort="year" data-dir="desc">年份 ↓</button>
+      <button class="sort-btn" data-sort="title" data-dir="asc">名称</button>
+      <button class="sort-btn" data-sort="default" data-dir="desc">入库</button>
+    </div>
+    {{ range $papers }}
+    <a class="book-row" href="{{ .RelPermalink }}" data-year="{{ .Params.year | default "0" }}" data-title="{{ .Title }}">
+      <span class="book-row-title">{{ .Title }}</span>
+      <span class="book-row-meta">{{ index (split .Params.author ",") 0 }}, {{ .Params.year | default "" }}</span>
+      <span class="book-row-desc">{{ .Params.description | default "" }}</span>
+      <span class="book-row-arrow">›</span>
+    </a>
+    {{ end }}
+  </div>
+  {{ end }}
+{{ end }}
+
+{{/* ── 全部论文列表 ── */}}
+{{ if gt (len $paperSections) 0 }}
+<div class="bookshelf" data-category="all-papers" style="display:none">
+  <button class="back-btn">← 返回论文分类</button>
+  <div class="sort-bar">
+    <span class="sort-bar-label">排序：</span>
+    <button class="sort-btn active" data-sort="year" data-dir="desc">年份 ↓</button>
+    <button class="sort-btn" data-sort="title" data-dir="asc">名称</button>
+    <button class="sort-btn" data-sort="default" data-dir="desc">入库</button>
+  </div>
+  {{ range $paperSections }}
+  <a class="book-row" href="{{ .RelPermalink }}" data-year="{{ .Params.year | default "0" }}" data-title="{{ .Title }}">
+    <span class="book-row-title">{{ .Title }}</span>
+    <span class="book-row-meta">{{ index (split .Params.author ",") 0 }}, {{ .Params.year | default "" }}</span>
+    <span class="book-row-desc">{{ .Params.description | default "" }}</span>
+    <span class="book-row-arrow">›</span>
+  </a>
+  {{ end }}
+</div>
+{{ end }}
+
+{{/* ── 缩放动画 + 排序 JS ── */}}
+<script>
+(function() {
+  function bind() {
+    var grids = document.querySelectorAll('.category-grid[data-shelf="papers"]');
+    grids.forEach(function(grid) {
+      if (grid.dataset.shelfbound === '1') return;
+      grid.dataset.shelfbound = '1';
+
+      grid.querySelectorAll('.category-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+          var cat = card.dataset.category;
+          var shelf = document.querySelector('.bookshelf[data-category="' + cat + '"]');
+          if (!shelf) return;
+          grid.classList.add('zoom-out');
+          setTimeout(function() {
+            grid.style.display = 'none';
+            grid.classList.remove('zoom-out');
+            shelf.style.display = 'block';
+            shelf.classList.add('zoom-in');
+            shelf.querySelectorAll('.book-row').forEach(function(row, i) {
+              row.style.opacity = '0';
+              row.style.animation = 'fadeSlideIn 0.3s ease forwards';
+              row.style.animationDelay = (i * 0.06) + 's';
+            });
+          }, 200);
+        });
+      });
+    });
+
+    document.querySelectorAll('.bookshelf[data-category] .back-btn').forEach(function(btn) {
+      if (btn.dataset.shelfbound === '1') return;
+      btn.dataset.shelfbound = '1';
+      btn.addEventListener('click', function() {
+        var shelf = btn.closest('.bookshelf');
+        var grid = document.querySelector('.category-grid[data-shelf="papers"]') ||
+                   document.querySelector('.category-grid');
+        shelf.classList.add('zoom-out');
+        setTimeout(function() {
+          shelf.style.display = 'none';
+          shelf.classList.remove('zoom-out', 'zoom-in');
+          shelf.querySelectorAll('.book-row').forEach(function(row) {
+            row.style.animation = '';
+            row.style.opacity = '';
+          });
+          if (grid) {
+            grid.style.display = '';
+            grid.classList.add('zoom-in');
+            setTimeout(function() { grid.classList.remove('zoom-in'); }, 300);
+          }
+        }, 200);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind);
+  } else {
+    bind();
+  }
+
+  /* ── 排序功能 ── */
+  function bindSort(shelf) {
+    if (shelf.dataset.sortbound === '1') return;
+    shelf.dataset.sortbound = '1';
+
+    var btns = shelf.querySelectorAll('.sort-btn');
+    var originalOrder = Array.from(shelf.querySelectorAll('.book-row'));
+    var rows = originalOrder.slice();
+    var arrows = { asc: '↑', desc: '↓' };
+    var labels = { year: '年份', title: '名称', default: '入库' };
+
+    function sortAndRender(mode, dir) {
+      var sorted;
+      switch (mode) {
+        case 'year':
+          sorted = rows.slice().sort(function(a, b) { return dir === 'asc' ? (a.dataset.year|0) - (b.dataset.year|0) : (b.dataset.year|0) - (a.dataset.year|0); });
+          break;
+        case 'title':
+          sorted = rows.slice().sort(function(a, b) { var cmp = a.dataset.title.localeCompare(b.dataset.title, 'zh'); return dir === 'asc' ? cmp : -cmp; });
+          break;
+        default:
+          sorted = originalOrder.slice();
+          if (dir === 'asc') sorted.reverse();
+          break;
+      }
+      var parent = rows[0].parentNode;
+      sorted.forEach(function(r, i) {
+        r.style.opacity = '0';
+        r.style.animation = 'fadeSlideIn 0.25s ease forwards';
+        r.style.animationDelay = (i * 0.04) + 's';
+        parent.appendChild(r);
+      });
+      rows = Array.from(parent.querySelectorAll('.book-row'));
+    }
+
+    function updateBtnLabels() {
+      btns.forEach(function(b) {
+        var m = b.dataset.sort;
+        if (b.classList.contains('active')) {
+          b.textContent = labels[m] + ' ' + arrows[b.dataset.dir];
+        } else {
+          b.textContent = labels[m];
+        }
+      });
+    }
+
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var mode = btn.dataset.sort;
+        var currentDir = btn.dataset.dir;
+        var newDir;
+
+        if (btn.classList.contains('active')) {
+          newDir = currentDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          newDir = currentDir;
+          btns.forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        }
+
+        btn.dataset.dir = newDir;
+        updateBtnLabels();
+        sortAndRender(mode, newDir);
+      });
+    });
+  }
+
+  document.querySelectorAll('.bookshelf[data-category]').forEach(function(s) { bindSort(s); });
+})();
+</script>
