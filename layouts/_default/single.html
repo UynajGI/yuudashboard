@@ -1,56 +1,88 @@
 {{- define "main" }}
 {{- $section := .Section }}
-
-<article class="post-single post-apple post-apple-{{ $section }}">
-  <header class="post-header">
-    {{ partial "breadcrumbs.html" . }}
-    <h1 class="post-title entry-hint-parent">
-      {{ .Title }}
-      {{- if .Draft }}
-      <span class="entry-hint" title="Draft">
-        <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" fill="currentColor">
-          <path d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
-        </svg>
-      </span>
-      {{- end }}
-    </h1>
-    {{- if .Description }}
-    <div class="post-description">{{ .Description }}</div>
-    {{- end }}
-    {{- if not (.Param "hideMeta") }}
-    <div class="post-meta">
-      {{- partial "post_meta.html" . -}}
-      {{- partial "translation_list.html" . -}}
-    </div>
-    {{- end }}
-  </header>
-
-  {{- if (.Param "ShowToc") }}
-  {{- partial "toc.html" . }}
-  {{- end }}
-
-  {{- if .Content }}
-  <div class="post-content md-content">
-    {{- if not (.Param "disableAnchoredHeadings") }}
-    {{- partial "anchored_headings.html" .Content -}}
-    {{- else }}{{ .Content }}{{ end }}
-  </div>
-  {{- end }}
-
-  <footer class="post-footer">
-    {{- if (.Param "ShowPostNavLinks") }}
-    {{- partial "post_nav_links.html" . }}
-    {{- end }}
-  </footer>
-</article>
-
 {{- $tags := .Language.Params.Taxonomies.tag | default "tags" }}
 {{- $tagList := ($.GetTerms $tags) }}
-{{- if $tagList }}
-<aside class="floating-tags">
-  {{- range $tagList }}
-  <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+
+<main class="apple-single-page post-apple post-apple-{{ $section }}">
+  <section class="apple-hero">
+    <div class="apple-hero-inner">
+      <div class="apple-breadcrumbs">
+        {{ partial "breadcrumbs.html" . }}
+      </div>
+
+      {{- with .CurrentSection }}
+      <div class="apple-kicker">{{ .Title }}</div>
+      {{- else }}
+      {{- with $section }}
+      <div class="apple-kicker">{{ . }}</div>
+      {{- end }}
+      {{- end }}
+
+      <h1 class="apple-title post-title entry-hint-parent">
+        {{ .Title }}
+        {{- if .Draft }}
+        <span class="apple-draft-icon entry-hint" title="Draft">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+            <path d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+          </svg>
+        </span>
+        {{- end }}
+      </h1>
+
+      {{- if .Description }}
+      <div class="apple-description post-description">
+        {{ .Description }}
+      </div>
+      {{- end }}
+
+      {{- if not (.Param "hideMeta") }}
+      <div class="apple-meta-row post-meta">
+        <div class="apple-meta-pill">
+          {{- partial "post_meta.html" . -}}
+        </div>
+        <div class="apple-meta-pill">
+          {{- partial "translation_list.html" . -}}
+        </div>
+      </div>
+      {{- end }}
+    </div>
+  </section>
+
+  <section class="apple-layout">
+    <article class="apple-content-shell">
+      <div class="apple-inner">
+        {{- if (.Param "ShowToc") }}
+        <div class="apple-toc-card">
+          <div class="apple-toc-title">On this page</div>
+          {{- partial "toc.html" . }}
+        </div>
+        {{- end }}
+
+        {{- if .Content }}
+        <div class="post-content md-content apple-content">
+          {{- if not (.Param "disableAnchoredHeadings") }}
+          {{- partial "anchored_headings.html" .Content -}}
+          {{- else }}
+          {{ .Content }}
+          {{- end }}
+        </div>
+        {{- end }}
+
+        <footer class="post-footer apple-footer">
+          {{- if (.Param "ShowPostNavLinks") }}
+          {{- partial "post_nav_links.html" . }}
+          {{- end }}
+        </footer>
+      </div>
+    </article>
+  </section>
+
+  {{- if $tagList }}
+  <aside class="floating-tags">
+    {{- range $tagList }}
+    <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+    {{- end }}
+  </aside>
   {{- end }}
-</aside>
-{{- end }}
+</main>
 {{- end }}{{/* end main */}}
