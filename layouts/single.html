@@ -6,8 +6,8 @@
 <main class="post-apple post-apple-{{ $section }}">
   <section class="apple-hero">
     <div class="apple-hero-inner">
+      <a href="{{ .CurrentSection.RelPermalink | default "/" | relLangURL }}" class="apple-back-btn">← 返回</a>
       <div class="apple-breadcrumbs">
-        <a href="{{ .CurrentSection.RelPermalink | default "/" | relLangURL }}" class="apple-back-btn">← 返回</a>
         {{ partial "breadcrumbs.html" . }}
       </div>
 
