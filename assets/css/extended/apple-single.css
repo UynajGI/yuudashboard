@@ -551,14 +551,82 @@ body {
   .floating-tag:hover {
     background: rgba(41, 151, 255, 0.12);
   }
+
+  .apple-tag-chip,
+  .apple-card,
+  .apple-pagination-link {
+    background: #111113;
+  }
+
+  .apple-tag-chip:hover,
+  .apple-card:hover,
+  .apple-pagination-link:hover {
+    background: rgba(41, 151, 255, 0.12);
+  }
+
+  .apple-tag-count {
+    background: #1c1c1e;
+  }
 }
 
-/* ================================
-   Apple Taxonomy / Tag Pages
-   ================================ */
+/* PaperMod 手动切换暗色 */
+html[data-theme="dark"] {
+  --apple-bg: #000000;
+  --apple-bg-soft: #1c1c1e;
+  --apple-bg-elevated: #111113;
+  --apple-text: #f5f5f7;
+  --apple-muted: #a1a1a6;
+  --apple-soft: #86868b;
+  --apple-border: rgba(255, 255, 255, 0.16);
+  --apple-border-soft: rgba(255, 255, 255, 0.10);
+  --apple-blue: #2997ff;
+}
 
-.apple-taxonomy-hero {
-  padding-bottom: 2.5rem;
+html[data-theme="dark"] body {
+  background: var(--apple-bg);
+}
+
+html[data-theme="dark"] .apple-single-page {
+  background: linear-gradient(180deg, #111113 0%, #000000 380px);
+}
+
+html[data-theme="dark"] .apple-hero {
+  border-bottom-color: var(--apple-border-soft);
+}
+
+html[data-theme="dark"] .apple-meta-pill,
+html[data-theme="dark"] .apple-toc-card,
+html[data-theme="dark"] .floating-tag,
+html[data-theme="dark"] .apple-tag-chip,
+html[data-theme="dark"] .apple-card,
+html[data-theme="dark"] .apple-pagination-link {
+  background: #111113;
+}
+
+html[data-theme="dark"] .apple-tldr,
+html[data-theme="dark"] .apple-content blockquote,
+html[data-theme="dark"] .apple-content th {
+  background: #1c1c1e;
+}
+
+html[data-theme="dark"] .apple-content code {
+  background: rgba(255, 255, 255, 0.11);
+}
+
+html[data-theme="dark"] .apple-content pre {
+  background: #111113;
+  border: 1px solid var(--apple-border-soft);
+}
+
+html[data-theme="dark"] .floating-tag:hover,
+html[data-theme="dark"] .apple-tag-chip:hover,
+html[data-theme="dark"] .apple-card:hover,
+html[data-theme="dark"] .apple-pagination-link:hover {
+  background: rgba(41, 151, 255, 0.12);
+}
+
+html[data-theme="dark"] .apple-tag-count {
+  background: #1c1c1e;
 }
 
 .apple-taxonomy-inner {
@@ -705,23 +773,5 @@ body {
 
   .apple-pagination-link {
     justify-content: center;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .apple-tag-chip,
-  .apple-card,
-  .apple-pagination-link {
-    background: #111113;
-  }
-
-  .apple-tag-chip:hover,
-  .apple-card:hover,
-  .apple-pagination-link:hover {
-    background: rgba(41, 151, 255, 0.12);
-  }
-
-  .apple-tag-count {
-    background: #1c1c1e;
   }
 }
