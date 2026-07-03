@@ -4,22 +4,9 @@
 {{ define "main" }}
 {{- $allPages := where .Site.RegularPages "Section" "in" (slice "news" "finance" "research") }}
 {{- $paginator := .Paginate ($allPages.ByDate.Reverse) }}
-{{- $newsPage := site.GetPage "news" }}
-{{- $financePage := site.GetPage "finance" }}
-{{- $researchPage := site.GetPage "research" }}
-{{- $tagsPage := site.GetPage "tags" }}
 
 <div class="home-layout">
-  <aside class="home-sidebar">
-    <nav class="home-nav">
-      <a href="{{ site.Home.RelPermalink }}" class="home-nav-item active">首页</a>
-      <a href="{{ $newsPage.RelPermalink }}" class="home-nav-item">时事</a>
-      <a href="{{ $financePage.RelPermalink }}" class="home-nav-item">金融</a>
-      <a href="{{ $researchPage.RelPermalink }}" class="home-nav-item">科研</a>
-      <a href="{{ $tagsPage.RelPermalink }}" class="home-nav-item">标签</a>
-      <a href="{{ "/about.html" | absLangURL }}" class="home-nav-item">关于</a>
-    </nav>
-  </aside>
+  {{ partial "sidebar.html" . }}
 
   <section class="home-feed">
     {{- range $paginator.Pages }}

@@ -1,71 +1,53 @@
-{{/* Section 列表页：统一 Bento 卡片网格 */}}
+{{/* Section 列表页 */}}
 {{- define "main" }}
 {{- $section := .Section }}
 {{- $pages := .Pages.ByDate.Reverse }}
 {{- $paginator := .Paginate $pages }}
 
-<main data-apple-section="{{ $section }}">
-  <section class="apple-section-hero">
-    <div class="apple-section-hero-inner">
-      <a href="{{ site.Home.RelPermalink }}" class="apple-back-btn">← 首页</a>
-      <div class="apple-section-kicker">{{ .Title }}</div>
-      <h1 class="apple-section-title">{{ .Title }}</h1>
-      {{- with .Description }}
-      <p class="apple-section-description">{{ . }}</p>
-      {{- end }}
-      <div class="apple-section-stats">
-        <span>{{ len $pages }} 篇内容</span>
-        {{- if gt $paginator.TotalPages 1 }}
-        <span>第 {{ $paginator.PageNumber }} / {{ $paginator.TotalPages }} 页</span>
+<div class="home-layout">
+  {{ partial "sidebar.html" . }}
+  <div class="home-feed">
+    <section class="apple-section-hero" style="width:100%;margin:0">
+      <div class="apple-section-hero-inner">
+        <a href="{{ site.Home.RelPermalink }}" class="apple-back-btn">← 首页</a>
+        <div class="apple-section-kicker">{{ .Title }}</div>
+        <h1 class="apple-section-title">{{ .Title }}</h1>
+        {{- with .Description }}<p class="apple-section-description">{{ . }}</p>{{- end }}
+        <div class="apple-section-stats">
+          <span>{{ len $pages }} 篇</span>
+          {{- if gt $paginator.TotalPages 1 }}<span>{{ $paginator.PageNumber }}/{{ $paginator.TotalPages }}</span>{{- end }}
+        </div>
+      </div>
+    </section>
+
+    <section class="apple-section-body" style="width:100%;margin:16px 0 0">
+      {{- with .Content }}<article class="apple-content" style="margin-bottom:var(--dash-gap)">{{- . -}}</article>{{- end }}
+      <div class="apple-card-grid">
+        {{- range $i, $p := $paginator.Pages }}
+        <a class="apple-card{{ if eq $i 0 }} apple-card-featured{{ end }}" href="{{ .RelPermalink }}">
+          <div>
+            <div class="apple-card-eyebrow">{{ with .CurrentSection }}{{ .Title }}{{ else }}{{ $section }}{{ end }}</div>
+            <h2 class="apple-card-title">{{ .Title }}</h2>
+            {{- with .Description }}<p class="apple-card-desc">{{ . }}</p>{{- else }}<p class="apple-card-desc">{{ .Summary | plainify | truncate 128 }}</p>{{- end }}
+          </div>
+          <div class="apple-card-footer">
+            <div class="apple-card-meta">
+              {{- if not .Date.IsZero }}<time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>{{- end }}
+              {{- if gt .ReadingTime 0 }}<span>{{ .ReadingTime }} min</span>{{- end }}
+            </div>
+            <span class="apple-card-arrow">↗</span>
+          </div>
+        </a>
         {{- end }}
       </div>
-    </div>
-  </section>
-
-  <section class="apple-section-body">
-    {{- with .Content }}
-    <article class="apple-content" style="margin-bottom:var(--dash-gap)">{{- . -}}</article>
-    {{- end }}
-
-    <div class="apple-card-grid">
-      {{- range $i, $p := $paginator.Pages }}
-      <a class="apple-card{{ if eq $i 0 }} apple-card-featured{{ end }}" href="{{ .RelPermalink }}">
-        <div>
-          <div class="apple-card-eyebrow">
-            {{- with .CurrentSection }}{{ .Title }}{{ else }}{{ $section }}{{ end }}
-          </div>
-          <h2 class="apple-card-title">{{ .Title }}</h2>
-          {{- with .Description }}
-          <p class="apple-card-desc">{{ . }}</p>
-          {{- else }}
-          <p class="apple-card-desc">{{ .Summary | plainify | truncate 128 }}</p>
-          {{- end }}
-        </div>
-        <div class="apple-card-footer">
-          <div class="apple-card-meta">
-            {{- if not .Date.IsZero }}
-            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
-            {{- end }}
-            {{- if gt .ReadingTime 0 }}<span>{{ .ReadingTime }} min</span>{{- end }}
-          </div>
-          <span class="apple-card-arrow">↗</span>
-        </div>
-      </a>
+      {{- if gt $paginator.TotalPages 1 }}
+      <nav class="apple-pagination">
+        {{- if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}" class="apple-pagination-link">← 上一页</a>{{- end }}
+        {{- if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}" class="apple-pagination-link">下一页 →</a>{{- end }}
+      </nav>
       {{- end }}
-    </div>
-
-    {{- if gt $paginator.TotalPages 1 }}
-    <nav class="apple-pagination">
-      {{- if $paginator.HasPrev }}
-      <a href="{{ $paginator.Prev.URL }}" class="apple-pagination-link">← 上一页</a>
-      {{- end }}
-      {{- if $paginator.HasNext }}
-      <a href="{{ $paginator.Next.URL }}" class="apple-pagination-link">下一页 →</a>
-      {{- end }}
-    </nav>
-    {{- end }}
-  </section>
-</main>
+    </section>
+  </div>
+</div>
 {{- end }}
-
 {{ define "toc-container" }}{{ end }}

@@ -1,29 +1,26 @@
-{{/* 标签首页（/tags/）：Tag Cloud */}}
+{{/* 标签首页 */}}
 {{- define "main" }}
-<main>
-  <section class="apple-section-hero">
-    <div class="apple-section-hero-inner">
-      <div class="apple-section-kicker">Tags</div>
-      <h1 class="apple-section-title">{{ .Title }}</h1>
-      <p class="apple-section-description">按主题浏览所有文章</p>
-    </div>
-  </section>
-
-  <section class="apple-section-body">
-    {{- with .Content }}
-    <article class="apple-content" style="margin-bottom:var(--dash-gap)">{{- . -}}</article>
-    {{- end }}
-
-    <div class="apple-tag-cloud">
-      {{- range .Data.Terms.Alphabetical }}
-      <a href="{{ .Page.RelPermalink }}" class="apple-tag-chip">
-        <span class="tag-name">{{ .Page.LinkTitle }}</span>
-        <span class="apple-tag-count">{{ .Count }}</span>
-      </a>
-      {{- end }}
-    </div>
-  </section>
-</main>
+<div class="home-layout">
+  {{ partial "sidebar.html" . }}
+  <div class="home-feed">
+    <section class="apple-section-hero" style="width:100%;margin:0">
+      <div class="apple-section-hero-inner">
+        <div class="apple-section-kicker">Tags</div>
+        <h1 class="apple-section-title">{{ .Title }}</h1>
+        <p class="apple-section-description">按主题浏览所有文章</p>
+      </div>
+    </section>
+    <section class="apple-section-body" style="width:100%;margin:16px 0 0">
+      <div class="apple-tag-cloud">
+        {{- range .Data.Terms.Alphabetical }}
+        <a href="{{ .Page.RelPermalink }}" class="apple-tag-chip">
+          <span class="tag-name">{{ .Page.LinkTitle }}</span>
+          <span class="apple-tag-count">{{ .Count }}</span>
+        </a>
+        {{- end }}
+      </div>
+    </section>
+  </div>
+</div>
 {{- end }}
-
 {{ define "toc-container" }}{{ end }}
