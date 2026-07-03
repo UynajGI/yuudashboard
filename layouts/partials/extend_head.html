@@ -1,0 +1,6 @@
+{{- /* 自定义 SCSS 编译并注入 */ -}}
+{{- $custom_scss := resources.Get "_custom.scss" }}
+{{- if $custom_scss }}
+  {{- $custom_css := $custom_scss | css.Sass | resources.Minify | resources.Fingerprint }}
+  <link crossorigin="anonymous" href="{{ $custom_css.RelPermalink }}" integrity="{{ $custom_css.Data.Integrity }}" rel="stylesheet">
+{{- end }}

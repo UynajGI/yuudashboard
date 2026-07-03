@@ -3,98 +3,80 @@
   三栏面板 —— 时事 / 金融 / 科研
 */}}
 {{ define "main" }}
-  <header class="hero">
-    <h1 class="hero-title">Yuunagi Dashboard</h1>
-    <p class="hero-subtitle">个人信息看板</p>
-  </header>
-
   <div class="dashboard">
+
     {{/* --- 时事 --- */}}
-    {{ $news := where .Site.RegularPages "Section" "news" | first 5 }}
-    <section class="panel">
+    {{ $news := where .Site.RegularPages "Section" "news" | first 6 }}
+    <section class="panel panel-news">
       <div class="panel-header">
         <span class="panel-icon">📰</span>
         <h2 class="panel-title">时事</h2>
-        <a class="panel-more" href="/news/">查看全部 →</a>
       </div>
-      <div class="panel-body">
-        {{ if $news }}
-          <ul class="panel-list">
-            {{ range $news }}
-              <li>
-                <a href="{{ .RelPermalink }}">
-                  <span class="panel-item-title">{{ .Title }}</span>
-                  <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "01-02" }}</time>
-                </a>
-                {{ with .Description }}
-                  <span class="panel-item-desc">{{ . }}</span>
-                {{ end }}
-              </li>
-            {{ end }}
-          </ul>
-        {{ else }}
-          <p class="panel-empty">暂无数据</p>
-        {{ end }}
-      </div>
+      {{ if $news }}
+        <ul class="panel-list">
+          {{ range $news }}
+            <li>
+              <a href="{{ .RelPermalink }}">
+                <span class="item-title">{{ .Title }}</span>
+                <span class="item-date">{{ .Date.Format "01-02" }}</span>
+              </a>
+            </li>
+          {{ end }}
+        </ul>
+      {{ else }}
+        <p class="panel-empty">暂无数据</p>
+      {{ end }}
+      <a class="panel-more" href="/news/">查看全部 →</a>
     </section>
 
     {{/* --- 金融 --- */}}
-    {{ $finance := where .Site.RegularPages "Section" "finance" | first 5 }}
-    <section class="panel">
+    {{ $finance := where .Site.RegularPages "Section" "finance" | first 6 }}
+    <section class="panel panel-finance">
       <div class="panel-header">
         <span class="panel-icon">📈</span>
         <h2 class="panel-title">金融</h2>
-        <a class="panel-more" href="/finance/">查看全部 →</a>
       </div>
-      <div class="panel-body">
-        {{ if $finance }}
-          <ul class="panel-list">
-            {{ range $finance }}
-              <li>
-                <a href="{{ .RelPermalink }}">
-                  <span class="panel-item-title">{{ .Title }}</span>
-                  <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "01-02" }}</time>
-                </a>
-                {{ with .Description }}
-                  <span class="panel-item-desc">{{ . }}</span>
-                {{ end }}
-              </li>
-            {{ end }}
-          </ul>
-        {{ else }}
-          <p class="panel-empty">暂无数据</p>
-        {{ end }}
-      </div>
+      {{ if $finance }}
+        <ul class="panel-list">
+          {{ range $finance }}
+            <li>
+              <a href="{{ .RelPermalink }}">
+                <span class="item-title">{{ .Title }}</span>
+                <span class="item-date">{{ .Date.Format "01-02" }}</span>
+              </a>
+            </li>
+          {{ end }}
+        </ul>
+      {{ else }}
+        <p class="panel-empty">暂无数据</p>
+      {{ end }}
+      <a class="panel-more" href="/finance/">查看全部 →</a>
     </section>
 
     {{/* --- 科研 --- */}}
-    {{ $research := where .Site.RegularPages "Section" "research" | first 5 }}
-    <section class="panel">
+    {{ $research := where .Site.RegularPages "Section" "research" | first 6 }}
+    <section class="panel panel-research">
       <div class="panel-header">
         <span class="panel-icon">🔬</span>
         <h2 class="panel-title">科研</h2>
-        <a class="panel-more" href="/research/">查看全部 →</a>
       </div>
-      <div class="panel-body">
-        {{ if $research }}
-          <ul class="panel-list">
-            {{ range $research }}
-              <li>
-                <a href="{{ .RelPermalink }}">
-                  <span class="panel-item-title">{{ .Title }}</span>
-                  <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "01-02" }}</time>
-                </a>
-                {{ with .Description }}
-                  <span class="panel-item-desc">{{ . }}</span>
-                {{ end }}
-              </li>
-            {{ end }}
-          </ul>
-        {{ else }}
-          <p class="panel-empty">暂无数据</p>
-        {{ end }}
-      </div>
+      {{ if $research }}
+        <ul class="panel-list">
+          {{ range $research }}
+            <li>
+              <a href="{{ .RelPermalink }}">
+                <span class="item-title">{{ .Title }}</span>
+                <span class="item-date">{{ .Date.Format "01-02" }}</span>
+              </a>
+            </li>
+          {{ end }}
+        </ul>
+      {{ else }}
+        <p class="panel-empty">暂无数据</p>
+      {{ end }}
+      <a class="panel-more" href="/research/">查看全部 →</a>
     </section>
+
   </div>
 {{ end }}
 
