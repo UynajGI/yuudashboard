@@ -45,17 +45,8 @@
 }
 
 // === 字体 ===
-:root {
-  --body-font: "Inter", "Noto Sans SC", -apple-system, BlinkMacSystemFont,
-    "PingFang SC", "Microsoft YaHei", sans-serif;
-  --code-font: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, monospace;
-}
-body {
-  font-family: var(--body-font);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+// body 字体由 apple-single.css 统一管理
+// :root { --body-font: ... } 保留供其他组件引用
 .markdown {
   font-size: 1rem;
   line-height: 1.8;

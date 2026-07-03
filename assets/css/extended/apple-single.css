@@ -793,3 +793,15 @@ html[data-theme="dark"] .apple-tag-count {
     justify-content: center;
   }
 }
+
+/* ================================
+   Section 列表页
+   ================================ */
+
+.apple-section-hero {
+  padding-bottom: 2.5rem;
+}
+
+.apple-section-inner {
+  width: min(960px, 100%);
+}
