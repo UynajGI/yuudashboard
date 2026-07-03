@@ -8,7 +8,7 @@
   {{ partial "sidebar.html" . }}
   <div class="home-feed">
     <section class="apple-section-hero" style="width:100%;margin:0">
-      <div class="apple-section-hero-inner">
+      <div class="apple-section-hero-inner dash-accent-{{ $section }}">
         <h1 class="apple-section-title">{{ .Title }}</h1>
         {{- with .Description }}<p class="apple-section-description">{{ . }}</p>{{- end }}
         <div class="apple-section-stats">

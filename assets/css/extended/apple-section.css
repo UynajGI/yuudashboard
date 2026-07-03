@@ -31,6 +31,9 @@
   z-index: 2;
   background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
 }
+.dash-accent-news::before    { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
+.dash-accent-finance::before { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+.dash-accent-research::before{ background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
 
 .apple-section-kicker {
   margin-bottom: 6px;
