@@ -8,10 +8,12 @@
 <div class="home-layout">
   <aside class="home-sidebar">
     <nav class="home-nav">
-      <a href="#" class="home-nav-item active" data-scroll="top">全部</a>
-      {{- range $paginator.Pages }}
-      <a href="#post-{{ .File.UniqueID }}" class="home-nav-item">{{ .Title | truncate 12 }}</a>
-      {{- end }}
+      <a href="{{ site.Home.RelPermalink }}" class="home-nav-item active">首页</a>
+      <a href="{{ "/news/" | relLangURL }}" class="home-nav-item">时事</a>
+      <a href="{{ "/finance/" | relLangURL }}" class="home-nav-item">金融</a>
+      <a href="{{ "/research/" | relLangURL }}" class="home-nav-item">科研</a>
+      <a href="{{ "/tags/" | relLangURL }}" class="home-nav-item">标签</a>
+      <a href="{{ "/about.html" | relLangURL }}" class="home-nav-item">关于</a>
     </nav>
   </aside>
 
