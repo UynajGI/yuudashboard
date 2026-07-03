@@ -228,6 +228,7 @@
   overflow-x: auto;
 }
 .apple-content table {
+  display: table;
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
@@ -347,6 +348,7 @@
 .home-card-body.post-apple-finance h2:first-child { margin-top: 0; }
 .post-apple-finance .apple-content table,
 .home-card-body.post-apple-finance table {
+  display: table;
   width: 100%;
   min-width: 520px;
   table-layout: fixed;
