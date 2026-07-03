@@ -2,7 +2,7 @@
 title: 关于
 description: Yuunagi Dashboard — 个人信息看板
 date: 2025-07-03
-layout: single
+layout: about
 ---
 
 ## 这是什么
