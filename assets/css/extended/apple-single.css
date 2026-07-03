@@ -335,6 +335,10 @@
 .post-apple-finance .apple-content li {
   padding: 3px 0;
 }
+.post-apple-finance .xkcd-chart {
+  max-width: 100%;
+  margin: 1.5em auto;
+}
 
 /* ── 科研：论文条目 ── */
 .post-apple-research .apple-content h2 {

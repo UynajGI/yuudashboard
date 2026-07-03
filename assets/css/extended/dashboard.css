@@ -109,8 +109,11 @@
   background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
 }
 .home-card-news::before    { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
+.home-card-news    { background: linear-gradient(135deg, var(--entry), rgba(238,90,36,.06)); }
 .home-card-finance::before { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+.home-card-finance { background: linear-gradient(135deg, var(--entry), rgba(32,191,107,.06)); }
 .home-card-research::before{ background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+.home-card-research{ background: linear-gradient(135deg, var(--entry), rgba(79,172,254,.06)); }
 .home-card:hover {
   transform: translateY(-4px);
   box-shadow:
@@ -160,9 +163,10 @@
 .home-card-body h3 { font-size: 1.05rem; margin: 1.4em 0 0.4em; }
 .home-card-body ul, .home-card-body ol { padding-left: 1.5em; }
 .home-card-body li { margin: 0.3em 0; }
-.home-card-body table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-.home-card-body th, .home-card-body td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.home-card-body table { width: 100%; border-collapse: collapse; margin: 1em auto; }
+.home-card-body th, .home-card-body td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: center; }
 .home-card-body th { font-weight: 700; background: var(--theme); }
+.home-card-body img { display: block; max-width: 100%; margin: 1em auto; }
 
 /* ── 响应式 ── */
 @media (max-width: 860px) {

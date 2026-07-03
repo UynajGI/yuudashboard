@@ -4,3 +4,4 @@
   {{- $custom_css := $custom_scss | css.Sass | resources.Minify | resources.Fingerprint }}
   <link crossorigin="anonymous" href="{{ $custom_css.RelPermalink }}" integrity="{{ $custom_css.Data.Integrity }}" rel="stylesheet">
 {{- end }}
+<script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1/dist/chart.xkcd.min.js"></script>
