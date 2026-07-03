@@ -284,20 +284,47 @@
 
 /* ── 时事：分类卡片式 ── */
 .post-apple-news .apple-content h2 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  margin: 1.5em 0 0.6em;
-  padding: 6px 14px;
-  border-radius: 8px;
+  margin: 16px 0 0;
+  padding: 14px 18px;
+  border-radius: var(--dash-radius) var(--dash-radius) 0 0;
   background: rgba(238,90,36,.08);
-  border-left: 3px solid var(--accent-news);
+  color: var(--primary);
 }
 .post-apple-news .apple-content h2:first-child { margin-top: 0; }
+.post-apple-news .apple-content ul {
+  margin: 0;
+  padding: 12px 18px 14px;
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--dash-radius) var(--dash-radius);
+  list-style: none;
+  counter-reset: news-item;
+}
 .post-apple-news .apple-content li {
-  padding: 4px 0;
+  padding: 8px 0;
+  counter-increment: news-item;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   border-bottom: 1px solid var(--border);
 }
 .post-apple-news .apple-content li:last-child { border-bottom: none; }
+.post-apple-news .apple-content li::before {
+  content: counter(news-item);
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(238,90,36,.12);
+  color: var(--accent-news);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
 
 /* ── 金融：美化表格 + 新闻要点 ── */
 .post-apple-finance .apple-content table {
