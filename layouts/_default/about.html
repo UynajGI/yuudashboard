@@ -2,18 +2,14 @@
 <div class="home-layout">
   {{ partial "sidebar.html" . }}
   <div class="home-feed">
-    <section class="apple-section-hero" style="width:100%;margin:0">
-      <div class="apple-section-hero-inner">
-        <div class="apple-section-kicker">关于</div>
-        <h1 class="apple-section-title">{{ .Title }}</h1>
-        {{- with .Description }}<p class="apple-section-description">{{ . }}</p>{{- end }}
-      </div>
-    </section>
-    <section class="apple-section-body" style="width:100%;margin:16px 0 0">
-      <article class="apple-content" style="background:var(--entry);border:1px solid var(--border);border-radius:var(--dash-radius);padding:24px 28px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.06)">
+    <article style="background:var(--entry);border:1px solid var(--border);border-radius:var(--dash-radius);padding:40px 36px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.06);animation:panel-rise .6s cubic-bezier(.16,1,.3,1) both;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-purple),var(--accent-blue))"></div>
+      <h1 style="font-size:1.8rem;font-weight:750;letter-spacing:-.035em;margin:0 0 8px;color:var(--primary)">{{ .Title }}</h1>
+      {{- with .Description }}<p style="font-size:1rem;color:var(--secondary);margin:0 0 28px">{{ . }}</p>{{- end }}
+      <div style="font-size:1.05rem;line-height:1.85;color:var(--primary)">
         {{ .Content }}
-      </article>
-    </section>
+      </div>
+    </article>
   </div>
 </div>
 {{- end }}
