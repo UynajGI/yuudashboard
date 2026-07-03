@@ -65,20 +65,20 @@
         </ul>
       </aside>
       {{- end }}
-    </div>
 
-    <footer class="apple-footer">
-      {{- if $tagList }}
-      <div class="floating-tags">
-        {{- range $tagList }}
-        <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+      <footer class="apple-footer">
+        {{- if $tagList }}
+        <div class="floating-tags">
+          {{- range $tagList }}
+          <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+          {{- end }}
+        </div>
         {{- end }}
-      </div>
-      {{- end }}
-      {{- if (.Param "ShowPostNavLinks") }}
-      {{- partial "post_nav_links.html" . }}
-      {{- end }}
-    </footer>
+        {{- if (.Param "ShowPostNavLinks") }}
+        {{- partial "post_nav_links.html" . }}
+        {{- end }}
+      </footer>
+    </div>
   </section>
 </main>
 {{- end }}{{/* end main */}}
