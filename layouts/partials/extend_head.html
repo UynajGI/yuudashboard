@@ -4,6 +4,3 @@
   {{- $custom_css := $custom_scss | css.Sass | resources.Minify | resources.Fingerprint }}
   <link crossorigin="anonymous" href="{{ $custom_css.RelPermalink }}" integrity="{{ $custom_css.Data.Integrity }}" rel="stylesheet">
 {{- end }}
-
-{{- /* 滚动 Reveal 动画 */ -}}
-<script defer src="{{ "js/apple-reveal.js" | relURL }}"></script>

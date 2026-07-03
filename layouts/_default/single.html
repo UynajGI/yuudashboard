@@ -3,7 +3,7 @@
 {{- $tags := .Language.Params.Taxonomies.tag | default "tags" }}
 {{- $tagList := ($.GetTerms $tags) }}
 
-<main class="apple-single-page post-apple post-apple-{{ $section }}">
+<main class="post-apple post-apple-{{ $section }}">
   <section class="apple-hero">
     <div class="apple-hero-inner">
       <div class="apple-breadcrumbs">
@@ -22,75 +22,63 @@
         {{ .Title }}
         {{- if .Draft }}
         <span class="apple-draft-icon entry-hint" title="Draft">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-            <path d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor"><path d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z"/></svg>
         </span>
         {{- end }}
       </h1>
 
       {{- if .Description }}
-      <div class="apple-description post-description">
-        {{ .Description }}
-      </div>
+      <div class="apple-description post-description">{{ .Description }}</div>
       {{- end }}
 
       {{- if not (.Param "hideMeta") }}
       <div class="apple-meta-row post-meta">
-        <div class="apple-meta-pill">
-          {{- partial "post_meta.html" . -}}
-        </div>
-        <div class="apple-meta-pill">
-          {{- partial "translation_list.html" . -}}
-        </div>
+        <div class="apple-meta-pill">{{- partial "post_meta.html" . -}}</div>
+        <div class="apple-meta-pill">{{- partial "translation_list.html" . -}}</div>
       </div>
       {{- end }}
     </div>
   </section>
 
   <section class="apple-layout">
-    <article class="apple-content-shell">
-      <div class="apple-inner">
-
-        {{- with .Params.tldr }}
-        <section class="apple-tldr" aria-label="TLDR">
-          <div class="apple-tldr-head">
-            <span class="apple-tldr-dot"></span>
-            <span class="apple-tldr-title">TL;DR</span>
-          </div>
-          <ul class="apple-tldr-list">
-            {{- range . }}
-            <li>{{ . | markdownify }}</li>
-            {{- end }}
-          </ul>
-        </section>
-        {{- end }}
-
+    <div class="apple-article-grid">
+      <article class="apple-content-shell">
         {{- if .Content }}
         <div class="post-content md-content apple-content">
           {{- if not (.Param "disableAnchoredHeadings") }}
           {{- partial "anchored_headings.html" .Content -}}
-          {{- else }}
-          {{ .Content }}
-          {{- end }}
+          {{- else }}{{ .Content }}{{ end }}
         </div>
         {{- end }}
+      </article>
 
-        <footer class="post-footer apple-footer">
-          {{- if (.Param "ShowPostNavLinks") }}
-          {{- partial "post_nav_links.html" . }}
+      {{- with .Params.tldr }}
+      <aside class="apple-tldr">
+        <div class="apple-tldr-head">
+          <span class="apple-tldr-dot"></span>
+          <span class="apple-tldr-title">TL;DR</span>
+        </div>
+        <ul class="apple-tldr-list">
+          {{- range . }}
+          <li>{{ . | markdownify }}</li>
           {{- end }}
-        </footer>
-      </div>
-    </article>
-  </section>
+        </ul>
+      </aside>
+      {{- end }}
+    </div>
 
-  {{- if $tagList }}
-  <aside class="floating-tags">
-    {{- range $tagList }}
-    <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
-    {{- end }}
-  </aside>
-  {{- end }}
+    <footer class="apple-footer">
+      {{- if $tagList }}
+      <div class="floating-tags">
+        {{- range $tagList }}
+        <a class="floating-tag" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+        {{- end }}
+      </div>
+      {{- end }}
+      {{- if (.Param "ShowPostNavLinks") }}
+      {{- partial "post_nav_links.html" . }}
+      {{- end }}
+    </footer>
+  </section>
 </main>
 {{- end }}{{/* end main */}}

@@ -1,50 +1,74 @@
 /* ═══════════════════════════════════════════
-   信息看板 — Apple 风格
+   Dashboard — 统一设计系统
+   所有页面共用同一套 token / 动画 / panel
    ═══════════════════════════════════════════ */
 
-/* ---- 入场动画 ---- */
+/* ── 公共设计 Token ── */
+:root {
+  --dash-max: 1180px;
+  --dash-gap: 28px;
+  --dash-radius: 20px;
+  --dash-radius-lg: 28px;
+  --dash-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --accent-news: #ee5a24;
+  --accent-finance: #20bf6b;
+  --accent-research: #4facfe;
+  --accent-blue: #4facfe;
+  --accent-cyan: #00f2fe;
+  --accent-purple: #af52de;
+}
+
+/* ── 公共入场动画 ── */
 @keyframes panel-rise {
-  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes item-fade {
-  from { opacity: 0; transform: translateX(-8px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ---- 网格 ---- */
+/* ── 公共 Page 容器 ── */
+.dash-page {
+  width: min(var(--dash-max), calc(100% - 48px));
+  margin: 32px auto 64px;
+}
+
+/* ═══════════════════════════════════════════
+   首页 Dashboard — 三栏面板
+   ═══════════════════════════════════════════ */
+
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-  gap: 28px;
-  margin: 32px 0 48px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--dash-gap);
+  width: min(var(--dash-max), calc(100% - 48px));
+  margin: 32px auto 64px;
 }
 
-/* ---- 面板 ---- */
 .panel {
   position: relative;
   background: var(--entry);
-  border-radius: 20px;
+  border-radius: var(--dash-radius);
   overflow: hidden;
+  border: 1px solid var(--border);
   box-shadow:
     0 1px 3px rgba(0,0,0,.04),
     0 8px 32px rgba(0,0,0,.06);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: panel-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: panel-rise 0.6s var(--dash-ease) both;
+  transition: transform 0.35s var(--dash-ease), box-shadow 0.35s var(--dash-ease);
 }
-.panel:nth-child(1) { animation-delay: 0.05s; }
-.panel:nth-child(2) { animation-delay: 0.15s; }
-.panel:nth-child(3) { animation-delay: 0.25s; }
-
 .panel:hover {
   transform: translateY(-4px);
   box-shadow:
     0 2px 8px rgba(0,0,0,.06),
     0 16px 48px rgba(0,0,0,.10);
 }
+.panel:nth-child(1) { animation-delay: 0.05s; }
+.panel:nth-child(2) { animation-delay: 0.15s; }
+.panel:nth-child(3) { animation-delay: 0.25s; }
 
-/* 顶部渐变条 */
 .panel::before {
   content: "";
   position: absolute;
@@ -52,24 +76,23 @@
   height: 3px;
   z-index: 2;
 }
-.panel-news::before    { background: linear-gradient(90deg, #ff6b6b, #ee5a24); }
-.panel-finance::before { background: linear-gradient(90deg, #20bf6b, #0fb9b1); }
-.panel-research::before{ background: linear-gradient(90deg, #4facfe, #00f2fe); }
+.panel-news::before    { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
+.panel-finance::before { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+.panel-research::before{ background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
 
-/* ---- 头部 ---- */
 .panel-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 26px 24px 12px;
+  padding: 20px 24px 12px;
 }
 .panel-icon {
-  font-size: 1.5rem;
   width: 42px; height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 13px;
+  font-size: 1.3rem;
+  border-radius: 12px;
   background: var(--theme);
   transition: transform 0.3s ease;
 }
@@ -80,13 +103,12 @@
 
 .panel-title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--primary);
 }
 
-/* ---- 条目 ---- */
 .panel-list {
   list-style: none;
   margin: 0;
@@ -94,7 +116,7 @@
 }
 .panel-list li {
   margin: 0;
-  animation: item-fade 0.45s ease both;
+  animation: item-fade 0.4s ease both;
 }
 .panel-list li:nth-child(1) { animation-delay: 0.35s; }
 .panel-list li:nth-child(2) { animation-delay: 0.40s; }
@@ -108,24 +130,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 11px 24px;
+  padding: 10px 24px;
   text-decoration: none;
   color: var(--primary);
-  font-size: 0.92rem;
-  font-weight: 450;
-  transition: background 0.2s ease, padding-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 0.9rem;
+  transition: background 0.15s, padding-left 0.25s var(--dash-ease);
 }
+.panel-list li a:hover { background: var(--theme); padding-left: 30px; }
+.panel-list li a:active { transform: scale(0.98); }
 
-.panel-list li a:hover {
-  background: var(--theme);
-  padding-left: 32px;
-}
-.panel-list li a:active {
-  transform: scale(0.98);
-  transition: transform 0.1s ease;
-}
-
-/* hover 时出现小圆点 */
 .panel-list li a::before {
   content: "";
   width: 6px; height: 6px;
@@ -133,15 +146,12 @@
   flex: 0 0 auto;
   opacity: 0;
   transform: scale(0.5);
-  transition: opacity 0.25s, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.2s, transform 0.2s var(--dash-ease);
 }
-.panel-news .panel-list li a::before    { background: #ee5a24; }
-.panel-finance .panel-list li a::before { background: #20bf6b; }
-.panel-research .panel-list li a::before{ background: #4facfe; }
-.panel-list li a:hover::before {
-  opacity: 1;
-  transform: scale(1);
-}
+.panel-news .panel-list li a::before    { background: var(--accent-news); }
+.panel-finance .panel-list li a::before { background: var(--accent-finance); }
+.panel-research .panel-list li a::before{ background: var(--accent-blue); }
+.panel-list li a:hover::before { opacity: 1; transform: scale(1); }
 
 .item-title {
   flex: 1 1 auto;
@@ -150,57 +160,62 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .item-date {
   flex: 0 0 auto;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.78rem;
   color: var(--secondary);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
-  transition: color 0.2s;
 }
-.panel-list li a:hover .item-date { color: var(--primary); }
 
-/* ---- 查看全部 ---- */
 .panel-more {
   display: block;
-  padding: 14px 24px;
+  padding: 12px 24px;
   text-align: center;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 550;
   color: var(--secondary);
   text-decoration: none;
   border-top: 1px solid var(--border);
   transition: color 0.2s, background 0.2s, letter-spacing 0.3s;
-  letter-spacing: 0;
 }
-.panel-more:hover {
-  color: var(--primary);
-  background: var(--theme);
-  letter-spacing: 0.05em;
-}
-.panel-more:active {
-  transform: scale(0.97);
-  transition: transform 0.1s ease;
-}
+.panel-more:hover { color: var(--primary); background: var(--theme); letter-spacing: 0.05em; }
+.panel-more:active { transform: scale(0.97); }
 
-/* ---- 空状态 ---- */
 .panel-empty {
-  padding: 44px 24px;
+  padding: 40px 24px;
   text-align: center;
   color: var(--secondary);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 }
 
-/* ---- 暗色模式 ---- */
-[data-theme="dark"] .panel {
+/* ── 暗色模式 ── */
+[data-theme="dark"] .panel,
+[data-theme="dark"] .apple-card,
+[data-theme="dark"] .apple-content-shell,
+[data-theme="dark"] .apple-tldr,
+[data-theme="dark"] .apple-section-hero-inner,
+[data-theme="dark"] .apple-term-hero-inner,
+[data-theme="dark"] .apple-tag-chip {
   box-shadow:
     0 1px 3px rgba(0,0,0,.15),
     0 8px 32px rgba(0,0,0,.25);
 }
-[data-theme="dark"] .panel:hover {
+[data-theme="dark"] .panel:hover,
+[data-theme="dark"] .apple-card:hover,
+[data-theme="dark"] .apple-content-shell:hover,
+[data-theme="dark"] .apple-tldr:hover,
+[data-theme="dark"] .apple-tag-chip:hover {
   box-shadow:
     0 2px 8px rgba(0,0,0,.2),
     0 16px 48px rgba(0,0,0,.35);
+}
+
+@media (max-width: 720px) {
+  .dashboard {
+    width: min(var(--dash-max), calc(100% - 24px));
+    grid-template-columns: 1fr;
+  }
+  .dash-page {
+    width: min(var(--dash-max), calc(100% - 24px));
+  }
 }
