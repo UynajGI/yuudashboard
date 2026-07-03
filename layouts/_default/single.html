@@ -51,6 +51,21 @@
   <section class="apple-layout">
     <article class="apple-content-shell">
       <div class="apple-inner">
+
+        {{- with .Params.tldr }}
+        <section class="apple-tldr" aria-label="TLDR">
+          <div class="apple-tldr-head">
+            <span class="apple-tldr-dot"></span>
+            <span class="apple-tldr-title">TL;DR</span>
+          </div>
+          <ul class="apple-tldr-list">
+            {{- range . }}
+            <li>{{ . | markdownify }}</li>
+            {{- end }}
+          </ul>
+        </section>
+        {{- end }}
+
         {{- if (.Param "ShowToc") }}
         <div class="apple-toc-card">
           <div class="apple-toc-title">On this page</div>
