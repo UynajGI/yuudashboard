@@ -66,13 +66,6 @@
         </section>
         {{- end }}
 
-        {{- if (.Param "ShowToc") }}
-        <div class="apple-toc-card">
-          <div class="apple-toc-title">On this page</div>
-          {{- partial "toc.html" . }}
-        </div>
-        {{- end }}
-
         {{- if .Content }}
         <div class="post-content md-content apple-content">
           {{- if not (.Param "disableAnchoredHeadings") }}
