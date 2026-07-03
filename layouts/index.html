@@ -1,83 +1,57 @@
 {{/*
-  首页：个人信息看板
-  三栏面板 —— 时事 / 金融 / 科研
+  首页：左侧分类导航 + 中间文章瀑布流
 */}}
 {{ define "main" }}
-  <div class="dashboard">
+{{- $allPages := where .Site.RegularPages "Section" "in" (slice "news" "finance" "research") }}
+{{- $paginator := .Paginate ($allPages.ByDate.Reverse) }}
 
-    {{/* --- 时事 --- */}}
-    {{ $news := where .Site.RegularPages "Section" "news" | first 6 }}
-    <section class="panel panel-news">
-      <div class="panel-header">
-        <span class="panel-icon">📰</span>
-        <h2 class="panel-title">时事</h2>
+<div class="home-layout">
+  <aside class="home-sidebar">
+    <nav class="home-nav">
+      <a href="{{ site.Home.RelPermalink }}" class="home-nav-item active">全部</a>
+      {{- range site.Menus.main }}
+      {{- if .URL }}
+      <a href="{{ .URL | absLangURL }}" class="home-nav-item">{{ .Name }}</a>
+      {{- end }}
+      {{- end }}
+    </nav>
+  </aside>
+
+  <section class="home-feed">
+    {{- range $paginator.Pages }}
+    <a class="home-card" href="{{ .RelPermalink }}">
+      <div class="home-card-section">
+        {{- if eq .Section "news" }}📰 时事
+        {{- else if eq .Section "finance" }}📈 金融
+        {{- else }}🔬 科研{{ end }}
       </div>
-      {{ if $news }}
-        <ul class="panel-list">
-          {{ range $news }}
-            <li>
-              <a href="{{ .RelPermalink }}">
-                <span class="item-title">{{ .Title }}</span>
-                <span class="item-date">{{ .Date.Format "01-02" }}</span>
-              </a>
-            </li>
-          {{ end }}
-        </ul>
-      {{ else }}
-        <p class="panel-empty">暂无数据</p>
-      {{ end }}
-      <a class="panel-more" href="{{ "news" | relLangURL }}">查看全部 →</a>
-    </section>
-
-    {{/* --- 金融 --- */}}
-    {{ $finance := where .Site.RegularPages "Section" "finance" | first 6 }}
-    <section class="panel panel-finance">
-      <div class="panel-header">
-        <span class="panel-icon">📈</span>
-        <h2 class="panel-title">金融</h2>
+      <h2 class="home-card-title">{{ .Title }}</h2>
+      {{- with .Description }}
+      <p class="home-card-desc">{{ . }}</p>
+      {{- else }}
+      <p class="home-card-desc">{{ .Summary | plainify | truncate 140 }}</p>
+      {{- end }}
+      <div class="home-card-meta">
+        {{- if not .Date.IsZero }}
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+        {{- end }}
+        {{- if gt .ReadingTime 0 }}<span>{{ .ReadingTime }} min</span>{{- end }}
       </div>
-      {{ if $finance }}
-        <ul class="panel-list">
-          {{ range $finance }}
-            <li>
-              <a href="{{ .RelPermalink }}">
-                <span class="item-title">{{ .Title }}</span>
-                <span class="item-date">{{ .Date.Format "01-02" }}</span>
-              </a>
-            </li>
-          {{ end }}
-        </ul>
-      {{ else }}
-        <p class="panel-empty">暂无数据</p>
-      {{ end }}
-      <a class="panel-more" href="{{ "finance" | relLangURL }}">查看全部 →</a>
-    </section>
+    </a>
+    {{- end }}
 
-    {{/* --- 科研 --- */}}
-    {{ $research := where .Site.RegularPages "Section" "research" | first 6 }}
-    <section class="panel panel-research">
-      <div class="panel-header">
-        <span class="panel-icon">🔬</span>
-        <h2 class="panel-title">科研</h2>
-      </div>
-      {{ if $research }}
-        <ul class="panel-list">
-          {{ range $research }}
-            <li>
-              <a href="{{ .RelPermalink }}">
-                <span class="item-title">{{ .Title }}</span>
-                <span class="item-date">{{ .Date.Format "01-02" }}</span>
-              </a>
-            </li>
-          {{ end }}
-        </ul>
-      {{ else }}
-        <p class="panel-empty">暂无数据</p>
-      {{ end }}
-      <a class="panel-more" href="{{ "research" | relLangURL }}">查看全部 →</a>
-    </section>
-
-  </div>
+    {{- if gt $paginator.TotalPages 1 }}
+    <nav class="apple-pagination">
+      {{- if $paginator.HasPrev }}
+      <a href="{{ $paginator.Prev.URL }}" class="apple-pagination-link">← 上一页</a>
+      {{- end }}
+      {{- if $paginator.HasNext }}
+      <a href="{{ $paginator.Next.URL }}" class="apple-pagination-link">下一页 →</a>
+      {{- end }}
+    </nav>
+    {{- end }}
+  </section>
+</div>
 {{ end }}
 
 {{ define "toc-container" }}{{ end }}
