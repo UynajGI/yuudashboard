@@ -590,6 +590,24 @@ html[data-theme="dark"] .apple-single-page {
   background: linear-gradient(180deg, #111113 0%, #000000 380px);
 }
 
+html[data-theme="dark"] .apple-title,
+html[data-theme="dark"] .apple-kicker,
+html[data-theme="dark"] .apple-description,
+html[data-theme="dark"] .apple-tldr-title,
+html[data-theme="dark"] .apple-tldr-list,
+html[data-theme="dark"] .apple-card-title,
+html[data-theme="dark"] .apple-card-desc,
+html[data-theme="dark"] .apple-card-meta,
+html[data-theme="dark"] .apple-content,
+html[data-theme="dark"] .apple-content h2,
+html[data-theme="dark"] .apple-content h3,
+html[data-theme="dark"] .apple-content h4,
+html[data-theme="dark"] .apple-breadcrumbs,
+html[data-theme="dark"] .apple-content p,
+html[data-theme="dark"] .apple-content li {
+  color: var(--apple-text);
+}
+
 html[data-theme="dark"] .apple-hero {
   border-bottom-color: var(--apple-border-soft);
 }
