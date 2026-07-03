@@ -26,7 +26,7 @@
       {{ else }}
         <p class="panel-empty">暂无数据</p>
       {{ end }}
-      <a class="panel-more" href="/news/">查看全部 →</a>
+      <a class="panel-more" href="{{ "news" | relLangURL }}">查看全部 →</a>
     </section>
 
     {{/* --- 金融 --- */}}
@@ -50,7 +50,7 @@
       {{ else }}
         <p class="panel-empty">暂无数据</p>
       {{ end }}
-      <a class="panel-more" href="/finance/">查看全部 →</a>
+      <a class="panel-more" href="{{ "finance" | relLangURL }}">查看全部 →</a>
     </section>
 
     {{/* --- 科研 --- */}}
@@ -74,7 +74,7 @@
       {{ else }}
         <p class="panel-empty">暂无数据</p>
       {{ end }}
-      <a class="panel-more" href="/research/">查看全部 →</a>
+      <a class="panel-more" href="{{ "research" | relLangURL }}">查看全部 →</a>
     </section>
 
   </div>
