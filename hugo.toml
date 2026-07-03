@@ -45,3 +45,20 @@ copyright = '© Yuunagi'
   TocOpen = false
   defaultTheme = 'auto'
   DateFormat = '2006-01-02'
+
+[[menu.main]]
+  name = '时事'
+  url = '/news/'
+  weight = 1
+[[menu.main]]
+  name = '金融'
+  url = '/finance/'
+  weight = 2
+[[menu.main]]
+  name = '科研'
+  url = '/research/'
+  weight = 3
+[[menu.main]]
+  name = '标签'
+  url = '/tags/'
+  weight = 4
