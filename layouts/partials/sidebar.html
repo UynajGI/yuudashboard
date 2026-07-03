@@ -6,6 +6,6 @@
     <a href="{{ (site.GetPage "finance").RelPermalink }}" class="home-nav-item{{ if eq $current "finance" }} active{{ end }}">金融</a>
     <a href="{{ (site.GetPage "research").RelPermalink }}" class="home-nav-item{{ if eq $current "research" }} active{{ end }}">科研</a>
     <a href="{{ (site.GetPage "tags").RelPermalink }}" class="home-nav-item{{ if eq .Kind "taxonomy" }} active{{ end }}">标签</a>
-    <a href="{{ "/about.html" | relLangURL }}" class="home-nav-item{{ if eq .RelPermalink ("/about.html" | relLangURL) }} active{{ end }}">关于</a>
+    <a href="{{ (site.GetPage "about.md").RelPermalink }}" class="home-nav-item{{ if eq .RelPermalink (site.GetPage "about.md").RelPermalink }} active{{ end }}">关于</a>
   </nav>
 </aside>
