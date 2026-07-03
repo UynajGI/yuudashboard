@@ -332,65 +332,90 @@
   font-weight: 700;
 }
 
-/* ── 金融：美化表格 + 新闻要点 ── */
-.post-apple-finance .apple-content table {
-  border-radius: var(--dash-radius);
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-.post-apple-finance .apple-content th {
+/* ── 金融：数据表格卡片化 ── */
+.post-apple-finance .apple-content h2,
+.home-card-body.post-apple-finance h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 16px 0 0;
+  padding: 14px 18px;
+  border-radius: var(--dash-radius) var(--dash-radius) 0 0;
   background: rgba(32,191,107,.08);
   color: var(--primary);
-  font-size: 0.82rem;
 }
-.post-apple-finance .apple-content td {
+.post-apple-finance .apple-content h2:first-child,
+.home-card-body.post-apple-finance h2:first-child { margin-top: 0; }
+.post-apple-finance .apple-content table,
+.home-card-body.post-apple-finance table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--dash-radius) var(--dash-radius);
+  overflow: hidden;
+}
+.post-apple-finance .apple-content th,
+.home-card-body.post-apple-finance th {
+  background: rgba(32,191,107,.06);
+  color: var(--secondary);
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+}
+.post-apple-finance .apple-content td,
+.home-card-body.post-apple-finance td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
   font-variant-numeric: tabular-nums;
 }
-.post-apple-finance .apple-content td:last-child {
-  color: var(--accent-finance);
+.post-apple-finance .apple-content td:last-child,
+.home-card-body.post-apple-finance td:last-child {
   font-weight: 600;
 }
-/* 涨跌颜色 */
-.post-apple-finance .apple-content td:last-child:has-text("+") { color: var(--accent-finance); }
-/* 用js做不到纯css检测，改为涨跌用span包裹 */
-.post-apple-finance .apple-content .up   { color: var(--accent-finance); font-weight: 600; }
-.post-apple-finance .apple-content .down { color: #e53935; font-weight: 600; }
-.post-apple-finance .apple-content h2 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 1.5em 0 0.5em;
-  padding: 6px 14px;
-  border-radius: 8px;
-  background: rgba(32,191,107,.06);
-  border-left: 3px solid var(--accent-finance);
-}
-.post-apple-finance .apple-content h2:first-child { margin-top: 0; }
-.post-apple-finance .apple-content li {
-  padding: 3px 0;
-}
-.post-apple-finance .xkcd-chart {
-  max-width: 100%;
-  margin: 1.5em auto;
-}
+.post-apple-finance .apple-content .up,
+.home-card-body.post-apple-finance .up   { color: var(--accent-finance); }
+.post-apple-finance .apple-content .down,
+.home-card-body.post-apple-finance .down { color: #e53935; }
 
-/* ── 科研：论文条目 ── */
-.post-apple-research .apple-content h2 {
-  font-size: 1.1rem;
+/* ── 科研：论文条目卡片化 ── */
+.post-apple-research .apple-content h2,
+.home-card-body.post-apple-research h2 {
+  font-size: 1.05rem;
   font-weight: 700;
-  margin: 1.5em 0 0.6em;
-  padding: 6px 14px;
-  border-radius: 8px;
-  background: rgba(79,172,254,.06);
-  border-left: 3px solid var(--accent-blue);
+  margin: 16px 0 0;
+  padding: 14px 18px;
+  border-radius: var(--dash-radius) var(--dash-radius) 0 0;
+  background: rgba(79,172,254,.08);
+  color: var(--primary);
 }
-.post-apple-research .apple-content h2:first-child { margin-top: 0; }
-.post-apple-research .apple-content li {
-  padding: 8px 0;
+.post-apple-research .apple-content h2:first-child,
+.home-card-body.post-apple-research h2:first-child { margin-top: 0; }
+.post-apple-research .apple-content ul,
+.home-card-body.post-apple-research ul {
+  margin: 0;
+  padding: 12px 18px 14px;
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--dash-radius) var(--dash-radius);
+  list-style: none;
+}
+.post-apple-research .apple-content li,
+.home-card-body.post-apple-research li {
+  padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
-.post-apple-research .apple-content li:last-child { border-bottom: none; }
-.post-apple-research .apple-content li strong {
+.post-apple-research .apple-content li:last-child,
+.home-card-body.post-apple-research li:last-child { border-bottom: none; }
+.post-apple-research .apple-content li strong,
+.home-card-body.post-apple-research li strong {
   display: block;
-  font-size: 1rem;
-  margin-bottom: 2px;
+  font-size: 0.98rem;
+  color: var(--primary);
+  margin-bottom: 3px;
 }
