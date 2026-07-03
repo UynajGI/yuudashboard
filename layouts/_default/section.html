@@ -22,7 +22,7 @@
       {{- with .Content }}<article class="apple-content" style="margin-bottom:var(--dash-gap)">{{- . -}}</article>{{- end }}
       <div class="apple-card-grid">
         {{- range $i, $p := $paginator.Pages }}
-        <a class="apple-card{{ if eq $i 0 }} apple-card-featured{{ end }}" href="{{ .RelPermalink }}">
+        <a class="apple-card apple-card-{{ $section }}{{ if eq $i 0 }} apple-card-featured{{ end }}" href="{{ .RelPermalink }}">
           <div>
             <div class="apple-card-eyebrow">{{ with .CurrentSection }}{{ .Title }}{{ else }}{{ $section }}{{ end }}</div>
             <h2 class="apple-card-title">{{ .Title }}</h2>
