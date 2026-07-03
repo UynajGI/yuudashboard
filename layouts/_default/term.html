@@ -1,11 +1,12 @@
 {{/* 标签详情页（/tags/foo/）：文章卡片列表 */}}
 {{- define "main" }}
 {{- $paginator := .Paginate .Pages.ByDate.Reverse }}
+{{- $tagsPage := site.GetPage "tags" }}
 
 <main>
   <section class="apple-term-hero">
     <div class="apple-term-hero-inner">
-      <a href="{{ "/tags/" | relLangURL }}" class="apple-back-btn">← 所有标签</a>
+      <a href="{{ $tagsPage.RelPermalink }}" class="apple-back-btn">← 所有标签</a>
       <div class="apple-section-kicker">Tag</div>
       <h1 class="apple-section-title">{{ .Title }}</h1>
       <p class="apple-section-description">

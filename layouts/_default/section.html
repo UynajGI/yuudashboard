@@ -7,7 +7,7 @@
 <main data-apple-section="{{ $section }}">
   <section class="apple-section-hero">
     <div class="apple-section-hero-inner">
-      <a href="{{ "/" | relLangURL }}" class="apple-back-btn">← 首页</a>
+      <a href="{{ site.Home.RelPermalink }}" class="apple-back-btn">← 首页</a>
       <div class="apple-section-kicker">{{ .Title }}</div>
       <h1 class="apple-section-title">{{ .Title }}</h1>
       {{- with .Description }}
