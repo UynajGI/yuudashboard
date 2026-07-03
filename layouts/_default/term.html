@@ -3,6 +3,9 @@
 <main class="apple-single-page apple-term-page">
   <section class="apple-hero apple-taxonomy-hero">
     <div class="apple-hero-inner">
+      <div class="apple-breadcrumbs">
+        {{ partial "breadcrumbs.html" . }}
+      </div>
       <div class="apple-kicker">Tag</div>
       <h1 class="apple-title">{{ .Title }}</h1>
       <div class="apple-description">
