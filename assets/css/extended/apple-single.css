@@ -552,3 +552,176 @@ body {
     background: rgba(41, 151, 255, 0.12);
   }
 }
+
+/* ================================
+   Apple Taxonomy / Tag Pages
+   ================================ */
+
+.apple-taxonomy-hero {
+  padding-bottom: 2.5rem;
+}
+
+.apple-taxonomy-inner {
+  width: min(900px, 100%);
+}
+
+.apple-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.apple-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid var(--apple-border-soft);
+  border-radius: var(--apple-radius-pill);
+  background: #ffffff;
+  color: var(--apple-text);
+  font-size: 0.94rem;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.apple-tag-chip::before {
+  content: "#";
+  color: var(--apple-blue);
+}
+
+.apple-tag-chip:hover {
+  color: var(--apple-blue);
+  border-color: rgba(0, 113, 227, 0.24);
+  background: rgba(0, 113, 227, 0.055);
+  transform: translateY(-1px);
+}
+
+.apple-tag-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.45rem;
+  height: 1.45rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--apple-bg-soft);
+  color: var(--apple-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.apple-term-inner {
+  width: min(960px, 100%);
+}
+
+.apple-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.apple-card {
+  display: block;
+  padding: 1.35rem 1.4rem;
+  border: 1px solid var(--apple-border-soft);
+  border-radius: var(--apple-radius-lg);
+  background: #ffffff;
+  color: var(--apple-text);
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.apple-card:hover {
+  border-color: rgba(0, 113, 227, 0.24);
+  background: rgba(0, 113, 227, 0.035);
+  transform: translateY(-2px);
+}
+
+.apple-card-title {
+  margin: 0;
+  color: var(--apple-text);
+  font-size: 1.12rem;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  font-weight: 720;
+}
+
+.apple-card-desc {
+  margin: 0.65rem 0 0;
+  color: var(--apple-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.apple-card-meta {
+  margin-top: 1rem;
+  color: var(--apple-soft);
+  font-size: 0.8rem;
+}
+
+.apple-pagination {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--apple-border-soft);
+}
+
+.apple-pagination-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--apple-border-soft);
+  border-radius: var(--apple-radius-pill);
+  color: var(--apple-blue);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.apple-pagination-link:hover {
+  background: rgba(0, 113, 227, 0.055);
+}
+
+@media (max-width: 768px) {
+  .apple-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .apple-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .apple-pagination-link {
+    justify-content: center;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .apple-tag-chip,
+  .apple-card,
+  .apple-pagination-link {
+    background: #111113;
+  }
+
+  .apple-tag-chip:hover,
+  .apple-card:hover,
+  .apple-pagination-link:hover {
+    background: rgba(41, 151, 255, 0.12);
+  }
+
+  .apple-tag-count {
+    background: #1c1c1e;
+  }
+}

@@ -1,19 +1,35 @@
 {{/* 分类法首页（/tags/）：标签云。*/}}
 {{ define "main" }}
-  {{ with .Content }}
-    <article class="markdown book-article">
-      {{- . -}}
-    </article>
-  {{ end }}
+<main class="apple-single-page apple-taxonomy-page">
+  <section class="apple-hero apple-taxonomy-hero">
+    <div class="apple-hero-inner">
+      <div class="apple-kicker">Topics</div>
+      <h1 class="apple-title">{{ .Title }}</h1>
+      <div class="apple-description">
+        按主题浏览所有文章。
+      </div>
+    </div>
+  </section>
 
-  <div class="tag-cloud">
-    {{ range .Data.Terms.Alphabetical }}
-      <a href="{{ .Page.RelPermalink }}" class="chip chip-lg">
-        {{ .Page.LinkTitle }}
-        <span class="chip-count">{{ .Count }}</span>
-      </a>
-    {{ end }}
-  </div>
+  <section class="apple-layout">
+    <div class="apple-inner apple-taxonomy-inner">
+      {{ with .Content }}
+      <article class="apple-content">
+        {{- . -}}
+      </article>
+      {{ end }}
+
+      <div class="apple-tag-cloud">
+        {{ range .Data.Terms.Alphabetical }}
+        <a href="{{ .Page.RelPermalink }}" class="apple-tag-chip">
+          <span>{{ .Page.LinkTitle }}</span>
+          <span class="apple-tag-count">{{ .Count }}</span>
+        </a>
+        {{ end }}
+      </div>
+    </div>
+  </section>
+</main>
 {{ end }}
 
 {{ define "toc-container" }}{{ end }}
