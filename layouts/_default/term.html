@@ -22,7 +22,7 @@
             {{- with .Description }}<p class="apple-card-desc">{{ . }}</p>{{- else }}<p class="apple-card-desc">{{ .Summary | plainify | truncate 128 }}</p>{{- end }}
           </div>
           <div class="apple-card-footer">
-            <div class="apple-card-meta">{{- if not .Date.IsZero }}<time>{{ .Date.Format "2006-01-02" }}</time>{{- end }}</div>
+            <div class="apple-card-meta">{{- if not .Date.IsZero }}<time>{{ .Date.Format "2006-01-02 15:04" }}</time>{{- end }}</div>
             <span class="apple-card-arrow">↗</span>
           </div>
         </a>
