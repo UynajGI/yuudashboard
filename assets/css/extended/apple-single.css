@@ -345,6 +345,23 @@
 }
 .post-apple-finance .apple-content h2:first-child,
 .home-card-body.post-apple-finance h2:first-child { margin-top: 0; }
+.post-apple-finance .apple-content h2,
+.home-card-body.post-apple-finance h2,
+.post-apple-finance .apple-content table,
+.home-card-body.post-apple-finance table,
+.post-apple-finance .apple-content ul,
+.home-card-body.post-apple-finance ul,
+.post-apple-news .apple-content h2,
+.home-card-body.post-apple-news h2,
+.post-apple-news .apple-content ul,
+.home-card-body.post-apple-news ul,
+.post-apple-research .apple-content h2,
+.home-card-body.post-apple-research h2,
+.post-apple-research .apple-content ul,
+.home-card-body.post-apple-research ul {
+  margin-left: -28px;
+  margin-right: -28px;
+}
 .post-apple-finance .apple-content table,
 .home-card-body.post-apple-finance table {
   width: 100%;
