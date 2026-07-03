@@ -365,13 +365,21 @@
 .post-apple-finance .apple-content table,
 .home-card-body.post-apple-finance table {
   width: 100%;
-  margin: 0;
+  min-width: 520px;
+  table-layout: fixed;
   border-collapse: collapse;
   background: var(--entry);
   border: 1px solid var(--border);
   border-top: none;
   border-radius: 0 0 var(--dash-radius) var(--dash-radius);
-  overflow: hidden;
+}
+.post-apple-finance .apple-content table thead,
+.home-card-body.post-apple-finance table thead {
+  display: table-header-group;
+}
+.post-apple-finance .apple-content table tbody,
+.home-card-body.post-apple-finance table tbody {
+  display: table-row-group;
 }
 .post-apple-finance .apple-content th,
 .home-card-body.post-apple-finance th {
@@ -381,18 +389,29 @@
   font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 10px 14px;
+  padding: 14px 18px;
   border-bottom: 2px solid var(--border);
+  text-align: left;
 }
+.post-apple-finance .apple-content th:nth-child(1),
+.home-card-body.post-apple-finance th:nth-child(1) { width: 40%; }
+.post-apple-finance .apple-content th:nth-child(2),
+.home-card-body.post-apple-finance th:nth-child(2) { width: 30%; }
+.post-apple-finance .apple-content th:nth-child(3),
+.home-card-body.post-apple-finance th:nth-child(3) { width: 30%; }
 .post-apple-finance .apple-content td,
 .home-card-body.post-apple-finance td {
-  padding: 10px 14px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--border);
   font-variant-numeric: tabular-nums;
+  text-align: left;
 }
+.post-apple-finance .apple-content td:nth-child(2),
+.home-card-body.post-apple-finance td:nth-child(2) { text-align: center; }
 .post-apple-finance .apple-content td:last-child,
 .home-card-body.post-apple-finance td:last-child {
   font-weight: 600;
+  text-align: right;
 }
 .post-apple-finance .apple-content .up,
 .home-card-body.post-apple-finance .up   { color: var(--accent-finance); }
