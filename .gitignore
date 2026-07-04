@@ -1,2 +1,13 @@
 public/
 .hugo_build.lock
+
+# Node（scripts/ 的抓取管道用）
+node_modules/
+
+# 本地 secrets —— 永不进 git，key 只走 GitHub Secrets
+.env
+scripts/.env
+*.local
+
+# 本地去重 state —— CI 用 data/seen.json（提交进 repo），本地用 seen.local.json（互不污染）
+data/seen.local.json
