@@ -5,7 +5,7 @@
   "type": "module",
   "description": "RSS → LLM 工作流 → Hugo 每日简报 抓取管道（不参与站点构建）",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "start": "node src/index.js",
