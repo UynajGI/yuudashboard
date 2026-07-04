@@ -3,7 +3,7 @@ name: Fetch Finance
 on:
   schedule:
     # UTC 11:15 = 北京时间 19:15（晚报时段，比 fetch-news 晚 15 分钟避免并发 push 冲突）
-    - cron: '15 11 * * *'
+    - cron: '30 11 * * *'
   workflow_dispatch:
     inputs:
       job:
