@@ -1,41 +1,52 @@
 ---
 title: 每日晚报：2026-07-04
-date: 2026-07-04T14:58:17+08:00
+date: 2026-07-04T15:01:14+08:00
 description: 每日晚报：2026-07-04
 tags: [时事]
 tldr:
-  - 辽宁等多地暴雨预警升级至红色，地质灾害风险高。
-  - 广州空港口岸年内出入境客流突破1000万人次。
-  - 联合国称乍得湖盆地安全恶化，350万人流离失所。
-  - 燃油危机冲击下俄罗斯出现中国电动车抢购潮。
-  - 太阳爆发X1.1级耀斑导致北美无线电信号短暂中断。
-  - 久坐不动者肌肉线粒体功能显著下降需警惕。
+  - 俄军宣称完全解放卢甘斯克，并对基辅空袭致30死近百伤
+  - OpenAI被曝下周或发布GPT-5.6模型
+  - 欧美遭遇严重热浪，多国启动紧急措施
+  - 习近平发表建党105周年讲话，为香港奋进指明方向
+  - 快手可灵AI获190亿元融资，阿里腾讯百度参投
+  - 秘鲁选举委员会宣布藤森庆子当选总统
 ---
 
 ## 国内
 
-- [**新华时评丨以严法明规促进平台经济健康发展**](http://www.news.cn/20260704/c056d111ae22419cba7216a50802c0a6/c.html)：（新华社新闻 - 新华网）
-- [**辽宁多地迎暴雨 地质灾害预警升级至红色**](http://www.news.cn/20260704/0631e1cffeb2495eae3f5c1d967253ed/c.html)：（新华社新闻 - 新华网）
-- [**广州空港口岸年内客流提前34天突破1000万人次**](http://www.news.cn/20260704/bf751f789d214c058b0ecb75626540ba/c.html)：（新华社新闻 - 新华网）
-- [**通达山海畅流通 立体交通绘就发展新图景**](http://www.news.cn/20260704/61c38a183e8c480ba547869339b40e6a/c.html)：（新华社新闻 - 新华网）
-- [**“科学”号开启第15次西太平洋科学考察任务**](http://www.news.cn/20260704/96929470a42e4c3a8181032e314fa834/c.html)：（新华社新闻 - 新华网）
+- [**推进由治及兴 共筑复兴伟业——习近平总书记在庆祝中国共产党成立105周年大会上的重要讲话为香港各界奋进新征程指明方向**](http://www.news.cn/20260704/e5a3d560755d40cfb820e0a086f90b5e/c.html)：（新华社新闻 - 新华网）
+- [**一条“红军街”，90余载征程兴侗乡**](http://www.news.cn/20260704/854b40fc65b749b39b559f63d356df0d/c.html)：（新华社新闻 - 新华网）
+- [**从敦煌到东盟：共谋文化遗产保护传承新路径**](http://www.news.cn/20260704/95291345c9b3472cb6ccdf5645b02750/c.html)：（新华社新闻 - 新华网）
+- [**通讯丨“希望之路”带来好日子——中企承建刚果（金）公路项目见闻**](http://www.news.cn/20260704/59d4ff8fe9044a488d208e2bdb8abfb3/c.html)：（新华社新闻 - 新华网）
+- [**对话英国媒体人亚历克斯·巴特勒：深耕双语传播向世界讲述真实中国**](http://www.news.cn/20260704/032b0e84456d4e3aa95d97dc985455bc/c.html)：（新华社新闻 - 新华网）
+- [**别让“小电车”成身边消防“大隐患”**](http://www.news.cn/20260704/a588480658014e3189027159e711b96f/c.html)：（新华社新闻 - 新华网）
 
 ## 国际
 
-- [**联合国：乍得湖盆地安全恶化 350万人流离失所**](https://www.zaobao.com/news/world/story20260704-9312077)：（联合早报 - 国际）
-- [**美国半导体业致信政府：干预恐加剧储存芯片短缺**](https://www.zaobao.com/news/world/story20260703-9308366)：（联合早报 - 国际）
-- [**传部分欧洲波斯湾国家已接受为霍尔木兹海峡支付通行费**](https://www.zaobao.com/news/world/story20260703-9309636)：（联合早报 - 国际）
-- [**英国据悉争取参加欧盟部分会议，引发不满**](https://www.zaobao.com/news/world/story20260703-9310566)：（联合早报 - 国际）
-- [**燃油危机冲击 俄罗斯出现中国电动车抢购潮**](https://www.zaobao.com/news/world/story20260703-9310727)：（联合早报 - 国际）
-- [**宇宙神5号发射亚马逊卫星 完成最后一次551构型任务**](https://m.idai.ly/se/b20U8H)：（iDaily 每日环球视野）
-- [**印度孟买遭遇强降雨 道路严重积水至少2人死亡**](https://m.idai.ly/se/e43o4m)：（iDaily 每日环球视野）
-- [**太阳爆发X1.1级耀斑 北美无线电信号短暂中断**](https://m.idai.ly/se/7e9VQ4)：（iDaily 每日环球视野）
-- [**美国迎接建国250周年 胡佛水坝悬挂巨型国旗**](https://m.idai.ly/se/97f24O)：（iDaily 每日环球视野）
-- [**日本地价连续5年上涨 创1991年以来最大涨幅**](https://m.idai.ly/se/a90ufS)：（iDaily 每日环球视野）
+- [**欧洲和美国遭遇严重热浪 多国启动紧急措施**](https://www.zaobao.com/news/world/story20260704-9311214)：（联合早报 - 国际）
+- [**伊朗为已故最高领袖哈梅内伊举行为期六天公众告别仪式**](https://www.zaobao.com/news/world/story20260704-9311971)：（联合早报 - 国际、iDaily 每日环球视野）
+- [**普京宣布俄军已完全解放卢甘斯克 在顿涅茨克取得进展**](https://www.zaobao.com/news/world/story20260704-9311295)：（联合早报 - 国际）
+- [**俄大规模空袭基辅致30死近百伤 乌克兰誓言报复**](https://www.zaobao.com/news/world/story20260703-9308601)：（联合早报 - 国际）
+- [**西班牙旅游热点附近野火蔓延 近万人避险**](https://www.zaobao.com/news/world/story20260704-9311846)：（联合早报 - 国际）
+- [**美媒：白宫否决赫格塞斯削减驻欧美军计划**](https://www.zaobao.com/news/world/story20260704-9311604)：（联合早报 - 国际）
+- [**法国航母戴高乐号离开中东驶回法国 调整军力部署**](https://www.zaobao.com/news/world/story20260704-9311460)：（联合早报 - 国际）
+- [**格陵兰自治总理：美国持续施压但格陵兰岛绝不出售**](https://www.zaobao.com/news/world/story20260704-9311120)：（联合早报 - 国际）
+- [**秘鲁全国选举委员会宣布藤森庆子当选总统**](https://www.zaobao.com/news/world/story20260704-9311123)：（联合早报 - 国际）
+- [**印度总理莫迪将访印尼澳洲新西兰 加强与亚太地区关系**](https://www.zaobao.com/news/world/story20260703-9310514)：（联合早报 - 国际）
+- [**世界气象组织：厄尔尼诺现象增强 极端气候概率升高**](https://www.zaobao.com/news/world/story20260703-9310434)：（联合早报 - 国际）
+- [**加拿大拟推介全球国防银行 筹资千亿元强化防务**](https://www.zaobao.com/news/world/story20260703-9308127)：（联合早报 - 国际）
+- [**流行天后泰勒丝和NFL球星凯尔西结婚**](https://www.zaobao.com/news/world/story20260704-9311420)：（联合早报 - 国际）
+- [**中国外长15年首访丹麦 推动中欧关系**](https://m.idai.ly/se/f4cXwX)：（iDaily 每日环球视野）
+- [**韩国史上第2位女总理韩圣淑就任**](https://m.idai.ly/se/dceG9c)：（iDaily 每日环球视野）
 
 ## 科技
 
-- [**NASA发射探测器拯救坠落中的Swift天文台**](https://www.solidot.org/story?sid=84753)：（Solidot）
-- [**久坐不动者肌肉线粒体功能出现显著下降**](https://www.solidot.org/story?sid=84741)：（Solidot）
-- [**我们以为在和不同AI聊天，其实它们越来越像**](https://www.mittrchina.com/news/detail/16591)：（MIT 科技评论 - 本周热榜）
-- [**全球昆虫物种可能有2000万**](https://www.solidot.org/story?sid=84738)：（Solidot）
+- [**全球极端热应激现象加剧**](https://www.solidot.org/story?sid=84755)：（Solidot）
+- [**阿里巴巴禁止员工使用 Claude Code**](https://www.solidot.org/story?sid=84751)：（Solidot）
+- [**生数科技发布 Vidu S1 实时交互模型**](https://daily.juya.uk/issues/2026-07-04/#2)：（橘鸦日报）
+- [**快手可灵AI确定获190亿元融资，阿里腾讯百度参投**](https://daily.juya.uk/issues/2026-07-04/#7)：（橘鸦日报）
+- [**爆料称 OpenAI 下周或发布 GPT 5.6**](https://daily.juya.uk/issues/2026-07-04/#8)：（橘鸦日报）
+- [**来自 Google 的 Android 恶意程序**](https://www.solidot.org/story?sid=84740)：（Solidot）
+- [**越来越多的儿童使用 AI**](https://www.solidot.org/story?sid=84739)：（Solidot）
+- [**Cloudflare 推动 AI 公司为内容付费**](https://www.solidot.org/story?sid=84737)：（Solidot）
+- [**代糖会扰乱肠道健康和新陈代谢**](https://www.solidot.org/story?sid=84747)：（Solidot）
