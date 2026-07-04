@@ -124,7 +124,7 @@ async function fetchTushareIndexHistory(name, days) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        api_name: 'daily',
+        api_name: 'index_daily',
         token,
         params: {
           ts_code: tsCode,
@@ -137,7 +137,10 @@ async function fetchTushareIndexHistory(name, days) {
     });
     if (!res.ok) return null;
     const json = await res.json();
-    if (json.code !== 0) return null;
+    if (json.code !== 0) {
+      console.warn(`  ⚠ Tushare index_daily(${name}) 失败：${json.msg}`);
+      return null;
+    }
     const items = json.data?.items || [];
     const map = {};
     for (const [date, close] of items) {
