@@ -53,7 +53,7 @@ export class RssSource extends ItemSource {
     }
   }
 
-  /** parsed → NewsItem[]（含聚合拆分 + per-source 时间窗过滤） */
+  /** parsed → NewsItem[]（含聚合拆分 + per-source 时间窗过滤 + hard cap） */
   normalize(parsed) {
     const rawItems = extractItems(parsed);
     let items = rawItems
@@ -65,7 +65,10 @@ export class RssSource extends ItemSource {
       .filter((it) => {
         if (!this.windowMs || !it.date) return true;
         return it.date.getTime() >= Date.now() - this.windowMs;
-      });
+      })
+      // hard cap：每源最多保留最新 50 条，防止历史归档源（OpenAI Blog 1028 条）撑爆 ingest
+      .sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0))
+      .slice(0, 50);
 
     // 聚合 RSS 拆分（橘鸦日报等：标题是日期、摘要含多条新闻）
     items = items.flatMap((it) => splitAggregated(it));
