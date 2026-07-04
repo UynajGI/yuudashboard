@@ -117,8 +117,42 @@ function normalizeUrl(u) {
 /** 并发抓所有源，返回扁平条目数组 */
 export async function fetchAll(feeds) {
   const results = await Promise.all(feeds.map(fetchOne));
-  const items = results.flat();
+  const items = results.flat().flatMap(splitAggregated);
   const okSources = feeds.length - results.filter((r) => r.length === 0).length;
   console.log(`  抓取：${items.length} 条，${okSources}/${feeds.length} 源成功`);
   return items;
+}
+
+/**
+ * 拆分聚合型 RSS 条目。
+ * 部分源（如橘鸦日报）一条 RSS item 的摘要里塞了多条新闻，
+ * 用 "↗ N" 或 ">>N" 标记分隔。拆成独立条目后 select 才能正常精选。
+ * 非聚合条目（无分隔标记）原样返回。
+ */
+function splitAggregated(it) {
+  // 只对标题是纯日期（如 "2026-07-04"）的聚合条目拆分
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(it.title)) return [it];
+  const text = it.summary || '';
+  // 按 ↗ N 或 >>N 分割（N 是序号）。保留分隔符后的内容作为单条新闻。
+  const parts = text.split(/↗\s*\d+|>>\s*\d+/).filter((s) => s.trim().length > 4);
+  if (parts.length < 2) return [it]; // 拆不出多条就保留原样
+  return parts.map((part, i) => {
+    const clean = part.trim().replace(/\s+/g, ' ');
+    // 取第一句或前 30 字作标题
+    const firstClause = clean.split(/[，。：；!？]/)[0];
+    const title = firstClause.length > 4 && firstClause.length <= 40
+      ? firstClause
+      : clean.slice(0, 30);
+    return {
+      ...it,
+      title: title || it.title,
+      summary: clean.slice(0, 200),
+      fullSummary: clean,
+      // 拆出的条目用 原link#序号 区分，避免 urlHash 全相同
+      link: it.link ? `${it.link}#${i + 1}` : it.link,
+      urlHash: undefined, // 让 dedupe 重新算（原条目所有拆份 hash 相同会冲突）
+      titleHash: undefined,
+      id: `${it.id || ''}#${i + 1}`,
+    };
+  });
 }
