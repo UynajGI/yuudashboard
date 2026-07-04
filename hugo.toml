@@ -28,6 +28,10 @@ copyright = '© Yuunagi'
     lineNos = false
     noClasses = false
 
+[minify]
+  # chart.xkcd 内联 <script> 含 JSON 配置，Hugo 的 JS minifier 不兼容 — 关闭 JS minify
+  disableJS = true
+
 [outputs]
   home = ['html', 'rss']
 
