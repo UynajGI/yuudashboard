@@ -1,6 +1,6 @@
 # Yuunagi Dashboard
 
-个人信息聚合看板——**多源数据采集 → LLM 流水线加工 → 多模板报告生成 → 自动部署**。每日产出时事简报与金融多视角报告（市场概览、板块扫描、资产聚焦、联动观察），全部由 GitHub Actions 定时驱动。
+个人信息聚合看板——**多源数据采集 → LLM 流水线加工 → 多模板报告生成 → 自动部署**。每日产出 11 篇报告：4 个时事专栏 + 1 个时事汇总 + 5 个金融专栏 + 1 个金融汇总，全部由 GitHub Actions 定时驱动。
 
 ## 架构概览
 
@@ -59,7 +59,7 @@ class SinaQuoteSource extends MarketSource {
 
 ### 1.2 RSS 多源聚合
 
-`scripts/feeds.yml` 定义 7 个 RSS 源，按 category 分三类（国内/国际/科技），每源可配独立时间窗。
+`scripts/feeds.yml` 定义 62 个 RSS 源，按 category 分四类（国内/国际/科技/工程），每源可配独立时间窗和 `jobs` 筛选（限制哪些专栏使用此源）。
 
 | 源 | 分类 | 特殊处理 |
 |---|---|---|
@@ -68,7 +68,7 @@ class SinaQuoteSource extends MarketSource {
 | 联合早报、iDaily | 国际 | 通用 RSS |
 | 新华社、人民日报 | 国内 | 通用 RSS |
 
-**7 个源并发抓取**（`Promise.all`），单源失败不阻塞。`stripHeavyContent` 在 XML 解析前剥离 `<content:encoded>` 块（防实体扩展上限保护），8 步实体解码保证 `&lt; &gt; &amp;` 正确处理。
+**62 个源并发抓取**（`Promise.all`），单源失败不阻塞。`stripHeavyContent` 在 XML 解析前剥离 `<content:encoded>` 块（防实体扩展上限保护），8 步实体解码保证 `&lt; &gt; &amp;` 正确处理。
 
 ### 1.3 行情数据在线拉取
 
@@ -122,39 +122,38 @@ class SinaQuoteSource extends MarketSource {
 
 ### 2.2 Job 系统
 
-5 个 Job 共享 `ingest` 基础数据，差异在 `stage → agent → renderer` 组合：
+11 个 Job，按 section 分两大管线，各自"先分后总"：
 
-| Job | 数据 | Workflow | Agent | Renderer | 触发 |
-|---|---|---|---|---|---|
-| `daily-news` | 7 RSS → 3 分类 | ingest→select→summarize→tldr | — | news | cron 19:00 + 手动 |
-| `daily-market` | 行情+新闻 | ingest→select→summarize→tldr | — | finance | cron 19:15 + 手动 |
-| `sector-scan` | 行情+新闻+Tushare | ingest→select→summarize | sector-commentary | sectors | 手动 |
-| `asset-focus` | 同上 | ingest→select→summarize | focus-analysis | focus | 手动 |
-| `cross-linkage` | 同上 | ingest→select→summarize | linkage-analysis | linkage | 手动 |
+**时事（news）—— 4 专栏 + 1 汇总**
 
-只有 `daily-news` 和 `daily-market` 设了 cron；其余通过 GA `workflow_dispatch` 手动触发。
+| Job | 源 | 产出 |
+|---|---|---|
+| `daily-news-domestic` | 14 国内 RSS | 国内专栏（时政/经济/社会/军事/外交/教育）|
+| `daily-news-world` | 12 国际 RSS | 国际专栏（地缘/经贸/社会/军事/科技）|
+| `daily-news-tech` | 11 科技 RSS | 科技专栏（AI/半导体/互联网/工具/科研）|
+| `daily-news-engineering` | 25 工程博客 | 工程专栏（平台/语言框架/架构/AI工程/安全/开源）|
+| `daily-news-digest` | 读 4 专栏 | 今日要闻汇总（LLM 综合 8-12 条）|
+
+**金融（finance）—— 5 专栏 + 1 汇总**
+
+| Job | 源 | 产出 |
+|---|---|---|
+| `daily-finance-ashare` | 新浪 A 股 + Tushare（申万行业+北向资金）| A 股专栏 |
+| `daily-finance-hk` | 新浪港股 + KOSPI | 港股专栏 |
+| `daily-finance-us` | 新浪美股 + 美债 10Y | 美股专栏 |
+| `daily-finance-commodity` | 新浪黄金/原油/美元 | 商品专栏 |
+| `daily-finance-crypto` | BTC（CoinGecko→Gate.io fallback）| 加密专栏 |
+| `daily-finance-digest` | 读 5 专栏 + 全市场数据 | 金融市场汇总（LLM + 指数表 + 板块图）|
+
+每个专栏只拉自己市场的数据（`market` 字段）和新闻（`news_filter` 关键词过滤），汇总报告读专栏文件 + 数据平移（重新拉全市场行情）生成图表。
+
+加新报告：jobs.yml 加一行 + 写 renderer（+ agent profile 如需 LLM 分析）。
 
 ### 2.3 Agent 系统
 
 原生 function-calling，零框架依赖（**未上 LlamaIndex**，DeepSeek API 直接支持）。`agents/agent.js` 提供通用 `runAgent` 循环——给 LLM 一组工具定义，让它自主决定调用顺序与次数，循环到产出最终文本。
 
-**Agent 能力**：
-```
-runAgent({ llm, system, user, tools, toolHandlers })
-  │
-  ├─ 1. system + user → 首轮 chat（附带 tools 定义）
-  ├─ 2. LLM 返回 tool_calls → 逐个执行 handler → 结果塞回 messages
-  ├─ 3. 再次 chat → 可能继续调工具，或给出最终文本
-  └─ 4. maxRounds 防失控（默认 6 轮），超限强制收尾
-```
-
-**三个 Agent Profile**（`agents/*.js`），每个定义自己的 `system` 提示词、`tools` 工具集、`buildHandlers` 闭包工厂：
-
-| Profile | 工具 | 职责 |
-|---|---|---|
-| `sector-commentary` | snapshot + history + news | 全貌扫描 → 针对异常板块查历史/新闻 → 板块风格点评 |
-| `focus-analysis` | snapshot + history + news | 查单品种行情 → 查近 7 天走势 → 查驱动新闻 → 深度分析 |
-| `linkage-analysis` | find_correlations + history + news | 批量算所有品种对相关系数 → 对 top 配对查新闻解释因果 |
+当前金融专栏暂不使用 agent（数据+新闻直接渲染），汇总阶段用独立 DigestStage/FinanceDigestStage 读专栏文件 + LLM 综合。Agent profile 保留可用（sectors-commentary / focus-analysis / linkage-analysis），需要时在 job 配置 `agent` 字段即可启用。
 
 **工具**（`tools/*.js`）也是普通函数，agent 通过名字分发：
 - `get_market_snapshot`（按板块/品种名/全部查当日行情）
@@ -196,13 +195,13 @@ cd 图表通过 raw HTML/JS 内联到 markdown（Hugo `unsafe=true`），`if(!wi
 
 ### 3.3 各报告内容结构
 
-| 报告 | 核心内容 |
-|---|---|
-| **daily-news** | frontmatter(tldr 4-6条信息密集要点) + `## 国内 / 国际 / 科技` 分类条目 |
-| **daily-market** | 指数表 + Bar 图表 + 资产板块(sparkline+匹配新闻) + 金融要闻 |
-| **sector-scan** | agent 板块点评 + 板块对比 Bar 图 + A股/港股/美股/亚太/商品/加密明细 + 申万行业(如 Tushare 可用) + 北向资金 |
-| **asset-focus** | 品种价格+OHLC+sparkline + agent 深度分析 + 相关要闻 |
-| **cross-linkage** | agent 联动点评 + 强相关品种对表格 + 双线对比图 |
+**时事专栏**（4 篇）：frontmatter(tldr 4-6 条) + 按 sub 分组的条目列表
+
+**时事汇总**：LLM 综合 4 专栏 → 8-12 条今日要闻 + 跳转链接回各专栏
+
+**金融专栏**（5 篇）：该市场指数表 + Bar 图 + 新闻（按 sub 分组）。A 股专栏额外含申万行业 + 北向资金
+
+**金融汇总**：LLM 综合 5 专栏 + 全市场指数表 + 板块对比图 + 申万行业 + 北向资金 + 跳转链接
 
 ### 3.4 前端展示
 
@@ -223,29 +222,26 @@ cd 图表通过 raw HTML/JS 内联到 markdown（Hugo `unsafe=true`），`if(!wi
 ```bash
 cd scripts
 
-# 生产一份时事简报
-node v2/index.js --job=daily-news
+# 时事专栏
+node v2/index.js --job=daily-news-domestic
+node v2/index.js --job=daily-news-world
+node v2/index.js --job=daily-news-tech
+node v2/index.js --job=daily-news-engineering
+node v2/index.js --job=daily-news-digest
 
-# dry-run（不写文件、不调 LLM？—— 会调 LLM，但不写盘不更新 state）
-node v2/index.js --job=daily-news --dry-run
+# 金融专栏
+node v2/index.js --job=daily-finance-ashare
+node v2/index.js --job=daily-finance-hk
+node v2/index.js --job=daily-finance-us
+node v2/index.js --job=daily-finance-commodity
+node v2/index.js --job=daily-finance-crypto
+node v2/index.js --job=daily-finance-digest
+
+# dry-run（调 LLM 但不写盘不更新 state）
+node v2/index.js --job=daily-news-domestic --dry-run
 
 # 只看抓取结果
-node v2/index.js --job=daily-news --stop-after=ingest
-
-# 金融报告
-node v2/index.js --job=daily-market
-node v2/index.js --job=sector-scan
-node v2/index.js --job=asset-focus
-node v2/index.js --job=cross-linkage
-```
-
-或通过 npm scripts：
-```bash
-npm run daily-news
-npm run daily-market
-npm run sector-scan
-npm run asset-focus
-npm run cross-linkage
+node v2/index.js --job=daily-news-domestic --stop-after=ingest
 ```
 
 ### 4.2 GitHub Actions CI/CD
@@ -256,7 +252,7 @@ npm run cross-linkage
 |---|---|---|
 | `deploy.yml` | push + 手动 | checkout(含 submodule) → Hugo build(`--gc --minify`) → `peaceiris/actions-gh-pages` 部署 |
 | `fetch-news.yml` | cron `0 11 * * *`(北京 19:00) + 手动 | checkout → Node 22 → `npm ci` → `node v2/index.js --job=daily-news` → commit/push |
-| `fetch-finance.yml` | cron `15 11 * * *`(北京 19:15) + 手动 | 同上，但 job 通过 `inputs.job` 选择（手动可选 daily-market/sector-scan/asset-focus/cross-linkage） |
+| `fetch-finance.yml` | cron `0 11 * * *`(北京 19:00) + 手动 | 依次跑 5 金融专栏 + digest → commit/push |
 
 **push 冲突处理**：并发 push 时优雅跳过（`git push 2>/dev/null || echo "..."`），不阻塞 workflow，下次运行重试。
 

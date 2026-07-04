@@ -1,132 +1,97 @@
-# RSS → LLM → Hugo 简报管道
+# yuudashboard feeds — 信息采集管线
 
-把 RSS 信息源 → 脚本清洗 → 多阶段 LLM 工作流 → Hugo markdown 简报，自动化产出每日新闻。
+多源 RSS/API → LLM 流水线 → Hugo markdown。每日自动产出 11 篇报告（4 时事专栏 + 1 时事汇总 + 5 金融专栏 + 1 金融汇总）。
 
 ## 快速开始
 
 ```bash
 cd scripts
-cp .env.example .env        # 填入 DEEPSEEK_API_KEY
+cp .env.example .env   # 填入 DEEPSEEK_API_KEY（TUSHARE_TOKEN 可选）
 npm install
 
-# 完整跑（抓取 → LLM → 写盘）
-npm run daily
+# 时事专栏（国内/国际/科技/工程）
+npm run domestic
+npm run world
+npm run tech
 
-# 只看脚本清洗结果（0 token，调试用）
-npm run clean-only
+# 金融专栏（A股/港股/美股/商品/加密）
+npm run daily-market
+npm run sector-scan
 
-# 跑完整流程但不写盘（预览生成内容）
-npm run dry
+# dry-run（不写盘，预览生成内容）
+node v2/index.js --job=daily-finance-ashare --dry-run
 ```
 
-生成文件落在 `content/news/{date}-daily-brief.md`，会被 Hugo 正常渲染（TL;DR aside + 三类正文）。
+## 入口
+
+所有命令走 `v2/index.js`：
+
+```bash
+node v2/index.js --job=<job-name>                # 跑指定 job
+node v2/index.js --job=<job-name> --dry-run      # 预览不写盘
+node v2/index.js --job=<job-name> --stop-after=ingest  # 只看抓取结果
+```
 
 ## 架构
 
 ```
-RSS 8 源
-   │
-   ▼  Stage 0 · clean（纯脚本，0 token）
-   │  并发抓取 → HTML 剥离 → 时间窗过滤 → 三层去重 → 分组
-   ▼
-   │  Stage 1 · select（LLM，每类 1 次）
-   │  识别同事件多源报道 → 合并 → 按重要度选 top N
-   │  输出极小（只有事件 id 索引）
-   ▼
-   │  Stage 2 · summarize（LLM，每类 1 次，最贵）
-   │  只对精选出的 N 条生成中文摘要
-   │  ← 关键省 token：summarize 只读 5 条而非全部 20+ 条
-   ▼
-   │  Stage 3 · tldr（LLM，全局 1 次）
-   │  基于摘要产出 3 条总览要点
-   ▼
-render.js → content/news/{date}-daily-brief.md
+feeds.yml (62 RSS源) / API源 (新浪/Tushare/CoinGecko/Gate.io)
+        ↓
+  v2/sources/         每个源一个 Source 适配器（ItemSource/MarketSource）
+        ↓
+  v2/stages/ingest    抓取 → 去重 → 分组
+        ↓
+  v2/stages/select    LLM 精选合并 + 子分类 + 跨天语义去重
+        ↓
+  v2/stages/summarize LLM 摘要
+        ↓
+  v2/stages/tldr      LLM 总览要点
+        ↓
+  v2/stages/digest    读专栏文件 → LLM 综合汇总（news/finance 各一套）
+        ↓
+  v2/renderers/       渲染成 Hugo markdown
 ```
 
-**为什么分阶段**：脚本做免费清洗（时间窗/去重/截断），LLM 越往后看到的数据越精越少。summarize 是最贵阶段，但它只处理 select 筛出的 5 条，不是全部候选。
+## Job 系统（jobs.yml）
 
-## 配置文件（数据驱动，改配置不改代码）
+| Job | Section | 源 | 产出 |
+|-----|---------|-----|------|
+| daily-news-domestic | news | 14 国内 RSS | 国内专栏 |
+| daily-news-world | news | 12 国际 RSS | 国际专栏 |
+| daily-news-tech | news | 11 科技 RSS | 科技专栏 |
+| daily-news-engineering | news | 25 工程博客 | 工程专栏 |
+| daily-news-digest | news | 读 4 专栏 | 今日要闻汇总 |
+| daily-finance-ashare | finance | 新浪 A股 + Tushare | A股专栏（含申万行业+北向资金）|
+| daily-finance-hk | finance | 新浪港股 + KOSPI | 港股专栏 |
+| daily-finance-us | finance | 新浪美股 + 美债 | 美股专栏 |
+| daily-finance-commodity | finance | 新浪商品 | 商品专栏 |
+| daily-finance-crypto | finance | BTC (CoinGecko/Gate.io) | 加密专栏 |
+| daily-finance-digest | finance | 读 5 专栏 + 全市场数据 | 金融市场汇总 |
 
-### `feeds.yml` — 信息源
+加新报告：jobs.yml 加一行 + 写 renderer（+ agent profile 如需 LLM 分析）。
 
-```yaml
-- name: 源显示名
-  url: RSS/Atom URL
-  category: 国内 | 国际 | 科技
-```
+## 去重
 
-加源 = 加几行；删源 = 删几行；临时关源 = 加 `enabled: false`。
-
-### `jobs.yml` — 简报任务
-
-定义所有简报任务（daily / 早晚报 / 周报 等）。每个 job：
-
-```yaml
-- name: daily
-  schedule: "0 0 * * *"           # 文档用，实际触发看 GA workflow cron
-  section: news
-  window: 24h                     # 时间窗：24h / 7d / 30d
-  categories: [国内, 国际, 科技]
-  top_n_per_category: 5           # 每类精选上限
-  workflow: [clean, select, summarize, tldr]
-  prompt_prefix: daily            # prompts/daily-{stage}.md
-  output: content/news/{date}-daily-brief.md
-  tags: [时事]
-```
-
-加新简报（如周报）：复制一份 job 配置改参数即可。
-
-## 切换 LLM Provider
-
-1. 在 `src/llm/` 新建实现文件，继承 `LLMProvider`，实现 `complete()`
-2. 在 `src/llm/index.js` 的 `REGISTRY` 注册
-3. 改 `.env` 的 `LLM_PROVIDER`
-
-业务代码（workflow / render）完全不动。
-
-## 幂等与安全
-
-- **文件级**：`{date}-daily-brief.md` 同日重跑覆盖，无重复
-- **内容级**：`data/seen.json` 记录已发布 hash，跨日不重推
-- **失败隔离**：单源失败跳过；LLM 失败保留原标题；全失败不 commit
-- **State 淘汰**：seen.json 超 5000 条自动淘汰最旧
-
-## CLI 参数
-
-```bash
-node src/index.js --job=daily                    # 跑指定 job
-node src/index.js --job=daily --dry-run          # 不写盘，预览
-node src/index.js --job=daily --stop-after=clean # 只跑到 clean 阶段
-```
+三层去重，按 section 分组（news 共享、finance 共享），seen.json 保留 7 天自动清理。
 
 ## 目录结构
 
 ```
 scripts/
-├── feeds.yml                # 源列表（你维护）
-├── jobs.yml                 # 任务配置（你维护）
-├── package.json
-├── .env.example             # key 模板，复制为 .env
-├── src/
-│   ├── index.js             # 入口
-│   ├── config.js            # 加载配置 + CLI
-│   ├── fetch.js             # RSS 抓取
-│   ├── dedupe.js            # 三层去重
-│   ├── state.js             # seen.json 读写
-│   ├── prompt.js            # 提示词加载
-│   ├── render.js            # md 渲染
-│   ├── llm/
-│   │   ├── provider.js      # 抽象接口
-│   │   ├── deepseek.js      # DeepSeek 实现
-│   │   └── index.js         # 工厂
-│   └── workflow/
-│       ├── clean.js         # Stage 0
-│       ├── select.js        # Stage 1
-│       ├── summarize.js     # Stage 2
-│       ├── tldr.js          # Stage 3
-│       └── index.js         # 编排
-└── prompts/
-    ├── daily-select.md
-    ├── daily-summarize.md
-    └── daily-tldr.md
+├── v2/                    # 当前管线
+│   ├── core/              # 核心抽象（item/store/source/pipeline/util/series）
+│   ├── sources/           # 数据源适配器（每个源一个文件）
+│   ├── stages/            # pipeline 阶段（ingest/select/summarize/tldr/digest/finance-digest）
+│   ├── agents/            # agent profiles + runAgent loop
+│   ├── tools/             # agent 工具
+│   ├── renderers/         # 报告模板 + helpers
+│   ├── index.js           # CLI 入口
+│   ├── config.js          # 配置加载
+│   └── prompt.js          # Prompt 加载器
+├── src/                   # 旧管线（已停用）
+├── jobs.yml               # Job 定义（11 个）
+├── feeds.yml              # RSS 源清单（62 源）
+├── feeds-tested.md        # 459 源可用性测试结果（备查）
+├── prompts/               # Prompt 模板
+└── package.json
 ```
