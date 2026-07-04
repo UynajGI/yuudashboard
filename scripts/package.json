@@ -8,13 +8,16 @@
     "node": ">=22"
   },
   "scripts": {
-    "start": "node src/index.js",
-    "daily": "node src/index.js --job=daily",
-    "dry": "node src/index.js --job=daily --dry-run",
-    "clean-only": "node src/index.js --job=daily --stop-after=clean",
-    "finance": "node src/index.js --job=finance",
-    "finance:dry": "node src/index.js --job=finance --dry-run",
-    "finance:fetch-only": "node src/index.js --job=finance --stop-after=fetch"
+    "start": "node v2/index.js",
+    "daily": "node v2/index.js --job=daily",
+    "dry": "node v2/index.js --job=daily --dry-run",
+    "ingest-only": "node v2/index.js --job=daily --stop-after=ingest",
+    "finance": "node v2/index.js --job=finance",
+    "finance:dry": "node v2/index.js --job=finance --dry-run",
+    "finance:ingest-only": "node v2/index.js --job=finance --stop-after=ingest",
+    "sectors": "node v2/index.js --job=sectors",
+    "focus": "node v2/index.js --job=focus",
+    "linkage": "node v2/index.js --job=linkage"
   },
   "dependencies": {
     "fast-xml-parser": "^4.5.0",

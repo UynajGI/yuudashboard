@@ -37,7 +37,11 @@ export class Pipeline {
    * @param {string|null} stopAfter  调试用：跑到某 stage 后停
    */
   async run(ctx, llm, stopAfter = null) {
-    const flow = ctx.job.workflow || ['ingest', 'select', 'summarize', 'tldr'];
+    // v2 用 ingest 替代旧的 clean/fetch；兼容旧 jobs.yml 里的 clean/fetch → ingest
+    const STAGE_ALIASES = { clean: 'ingest', fetch: 'ingest' };
+    const rawFlow = ctx.job.workflow || ['ingest', 'select', 'summarize', 'tldr'];
+    const flow = rawFlow.map((s) => STAGE_ALIASES[s] || s);
+    const stopAfterResolved = stopAfter ? (STAGE_ALIASES[stopAfter] || stopAfter) : null;
     let stopped = false;
 
     for (const name of flow) {
@@ -46,8 +50,8 @@ export class Pipeline {
       if (!stage) throw new Error(`未知 stage: ${name}（已注册：${[...this.stages.keys()].join(', ')}）`);
       const llmForStage = stage.needsLLM ? llm : null;
       ctx = await stage.run(ctx, llmForStage);
-      if (stopAfter === name) {
-        console.log(`\n⏹ --stop-after=${name}，pipeline 暂停`);
+      if (stopAfterResolved === name) {
+        console.log(`\n⏹ --stop-after=${stopAfter}，pipeline 暂停`);
         stopped = true;
       }
     }
