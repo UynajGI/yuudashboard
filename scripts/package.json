@@ -1,0 +1,25 @@
+{
+  "name": "yuudashboard-feeds",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "RSS → LLM 工作流 → Hugo 每日简报 抓取管道（不参与站点构建）",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "daily": "node src/index.js --job=daily",
+    "dry": "node src/index.js --job=daily --dry-run",
+    "clean-only": "node src/index.js --job=daily --stop-after=clean",
+    "finance": "node src/index.js --job=finance",
+    "finance:dry": "node src/index.js --job=finance --dry-run",
+    "finance:fetch-only": "node src/index.js --job=finance --stop-after=fetch"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.0",
+    "iconv-lite": "^0.6.3",
+    "js-yaml": "^4.1.0",
+    "undici": "^8.6.0"
+  }
+}

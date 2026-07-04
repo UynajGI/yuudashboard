@@ -1,0 +1,84 @@
+# 简报任务定义
+# 加新简报只改这个文件，不需要动代码。
+# 例如以后加早晚报 / 周报 / 月报，复制一份 job 配置改参数即可。
+#
+# 字段：
+#   name                 任务名，CLI --job=NAME 用，也用于日志
+#   schedule             仅文档作用（实际触发由 GA workflow 的 cron 控制）
+#   section              Hugo content section，如 news
+#   slug                 生成的文件名 slug
+#   window               抓取时间窗口（24h / 7d / 30d）—— 过滤比此更早的条目
+#   categories           按哪些 category 归类出正文分节
+#   top_n_per_category   每个 category 精选条数上限（防失控天花板，非硬性目标；
+#                        LLM 按实际价值选，可多可少）
+#   workflow             处理阶段序列（见下方说明）
+#   prompt_prefix        scripts/prompts/ 下本 job 的提示词前缀
+#                        实际文件为 {prompt_prefix}-{stage}.md
+#                        默认 daily，即 daily-select.md / daily-summarize.md / daily-tldr.md
+#   output               输出路径模板，{date} 会替换成 YYYY-MM-DD（北京时间）
+#   tags                 frontmatter 的 tags 字段
+#   description          frontmatter 的 description 字段（{date} 会替换）
+#
+# workflow 字段说明：
+#   处理流水线，每个阶段是独立函数，context 在阶段间传递。
+#   clean   纯脚本：抓取/解析/去重/时间窗过滤/分组（0 token）
+#   select  LLM：识别同事件多源报道 → 合并；按重要度选 top N（只挑不写，输出极小）
+#   summarize LLM：仅对精选后的条目生成中文摘要（最贵阶段，但只处理 N 条）
+#   tldr    LLM：基于摘要生成 3-4 条总览要点
+#   默认 [clean, select, summarize, tldr]。
+#   想跳过某阶段（比如调试时只看 clean 结果），改这里即可，不动代码。
+
+jobs:
+  - name: daily
+    schedule: "0 11 * * *"       # UTC 11点 = 北京 19点（晚报）
+    section: news
+    slug: daily-brief
+    window: 24h
+    categories: [国内, 国际, 科技]
+    # 每类精选条数上限。不是硬性目标——LLM 按实际有价值的事件数决定，
+    # 多则多选、少则少选，宁可少选也不凑数。这里只是防失控的天花板。
+    top_n_per_category: 15
+    workflow: [clean, select, summarize, tldr]
+    prompt_prefix: daily
+    output: content/news/{date}-daily-brief.md
+    tags: [时事]
+    description: "每日晚报：{date}"
+
+  # ── 金融管线：新浪 API 拿市场数据 + 新闻，LLM 只做要闻精选/摘要/总览 ──
+  - name: finance
+    schedule: "0 11 * * *"       # UTC 11点 = 北京 19点（和晚报同时段）
+    section: finance
+    slug: market
+    window: 24h
+    categories: [要闻]            # 新闻只分一类；指数/商品/BTC 由 fetch 直接拿
+    top_n_per_category: 8
+    workflow: [fetch, select, summarize, tldr]
+    prompt_prefix: finance
+    output: content/finance/{date}-market.md
+    tags: [金融]
+    description: "市场概览：{date}"
+
+  # ── 以下为预留示例，需要时取消注释 / 复制改参数 ──────────────
+  # - name: morning
+  #   schedule: "0 0 * * *"       # 北京早 8
+  #   section: news
+  #   slug: morning-brief
+  #   window: 12h
+  #   categories: [国内, 国际, 科技]
+  #   top_n_per_category: 3
+  #   prompt: daily.md
+  #   output: content/news/{date}-morning-brief.md
+  #   tags: [时事, 早报]
+  #   description: "早间简报：{date}"
+  #
+  # - name: evening
+  #   schedule: "0 12 * * *"      # 北京晚 8
+  #   section: news
+  #   slug: evening-brief
+  #   window: 12h
+  #   categories: [国内, 国际, 科技]
+  #   top_n_per_category: 3
+  #   prompt: daily.md
+  #   output: content/news/{date}-evening-brief.md
+  #   tags: [时事, 晚报]
+  #   description: "晚间简报：{date}"

@@ -1,0 +1,38 @@
+# RSS 信息源清单
+# 你维护这个文件：增删改源，不需要动代码。
+# 管道会自动读取，按 category 归类后送 LLM 处理。
+#
+# 字段：
+#   name     源的显示名（会出现在简报条目的来源里）
+#   url      RSS / Atom feed URL
+#   category 归类，必须出现在 jobs.yml 某个 job 的 categories 里
+#            目前用：国内 / 国际 / 科技
+#   enabled  可选，默认 true；临时关某个源设 false
+
+- name: 橘鸦日报
+  url: https://daily.juya.uk/rss.xml
+  category: 科技
+
+- name: MIT 科技评论 - 本周热榜
+  url: https://plink.anyfeeder.com/mittrchina/hot
+  category: 科技
+
+- name: Solidot
+  url: https://www.solidot.org/index.rss
+  category: 科技
+
+- name: 联合早报 - 国际
+  url: https://plink.anyfeeder.com/zaobao/realtime/world
+  category: 国际
+
+- name: iDaily 每日环球视野
+  url: https://plink.anyfeeder.com/idaily/today
+  category: 国际
+
+- name: 新华社新闻 - 新华网
+  url: https://plink.anyfeeder.com/newscn/whxw
+  category: 国内
+
+- name: 人民日报
+  url: https://plink.anyfeeder.com/people-daily
+  category: 国内
