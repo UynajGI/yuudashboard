@@ -28,10 +28,14 @@ export function loadState(repoRoot) {
   }
 }
 
-/** 把本次发布的条目 hash 写回，并淘汰过旧条目。 */
-export function saveState(repoRoot, state, newItems) {
+/**
+ * 把本次发布的条目 hash 写回，并淘汰过旧条目。
+ * @param {string} dateStr  今天日期（YYYY-MM-DD，北京时间），与 ctx.date.str 对齐。
+ *                          不传则用 UTC 当天（旧行为，向后兼容）。
+ */
+export function saveState(repoRoot, state, newItems, dateStr) {
   const file = resolve(repoRoot, STATE_PATH);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = dateStr || new Date().toISOString().slice(0, 10);
   for (const it of newItems) {
     if (it.urlHash) state.urls[it.urlHash] = today;
     if (it.titleHash) state.titles[it.titleHash] = today;

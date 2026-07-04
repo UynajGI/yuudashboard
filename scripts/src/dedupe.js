@@ -33,13 +33,23 @@ function titleSimilarity(a, b) {
  * 多层去重 + 过滤。返回保留的条目（带 urlHash/titleHash 字段）。
  * @param {Array} items         原始条目
  * @param {number} windowMs     时间窗（毫秒），早于 now-windowMs 的丢弃
- * @param {object} seen         { urls:{}, titles:{} } 跨日已发布记录
+ * @param {object} seen         { urls:{}, titles:{} } 跨日已发布记录（value=YYYY-MM-DD）
+ * @param {string} [today]      今天日期（YYYY-MM-DD，北京时间）。seen 里 == today 的记录
+ *                              视为"今天同批次已处理"，跨报告不去重（保留）；
+ *                              < today 的才是真正跨天重复，过滤掉。
+ *                              不传则全部过滤（旧行为，向后兼容）。
  */
-export function dedupe(items, windowMs, seen) {
+export function dedupe(items, windowMs, seen, today) {
   const cutoff = Date.now() - windowMs;
   const keep = [];
   const seenUrlKeys = new Set();
   const seenTitleKeys = new Set();
+
+  /** seen 记录是否为跨天重复（< today 才过滤；== today 是同报告批次的，保留） */
+  const isStaleSeen = (dateStr) => {
+    if (!dateStr) return false;
+    return today ? dateStr < today : true;
+  };
 
   // 先按日期降序，保证多源同一事件保留最新那条
   const sorted = [...items].sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
@@ -53,13 +63,13 @@ export function dedupe(items, windowMs, seen) {
     const th = titleHash(it.title);
 
     // 第一层：URL 精确去重（跨源转载同一 URL）
-    if (uh && seen.urls?.[uh]) continue;
+    if (uh && isStaleSeen(seen.urls?.[uh])) continue;
     if (seenUrlKeys.has(uh)) continue;
     // 本批次内 URL 去重
     if (uh) seenUrlKeys.add(uh);
 
     // 第二层：标题精确 hash 去重
-    if (seen.titles?.[th]) continue;
+    if (isStaleSeen(seen.titles?.[th])) continue;
     if (seenTitleKeys.has(th)) continue;
     seenTitleKeys.add(th);
 

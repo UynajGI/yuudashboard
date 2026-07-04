@@ -5,14 +5,14 @@
 const SINA_NEWS_URL =
   'https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&num=20&page=1';
 
-/** FNV-1a hash，与 dedupe.js 一致 */
+/** FNV-1a hash，base36 编码（与 dedupe.js 的 urlHash/titleHash 一致，用于跨模块去重匹配） */
 function fnv1a(str) {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
     h = Math.imul(h, 0x01000193);
   }
-  return (h >>> 0).toString(16).padStart(8, '0');
+  return (h >>> 0).toString(36);
 }
 
 function stripHtml(s) {

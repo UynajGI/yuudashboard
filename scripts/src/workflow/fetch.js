@@ -7,6 +7,8 @@ import { fetchMarketData } from '../fetch-market.js';
 import { fetchFinanceNews } from '../fetch-finance-news.js';
 import { loadState } from '../state.js';
 import { loadHistory, saveSnapshot } from '../market-history.js';
+import { dedupe } from '../dedupe.js';
+import { windowToMs } from '../config.js';
 
 /**
  * @param {object} ctx
@@ -35,11 +37,14 @@ export async function fetch(ctx, _llm) {
     ctx.marketHistory = saveSnapshot(ctx.repoRoot, ctx.date.str, marketData);
   }
 
-  // 5. 金融新闻 → ctx.items（复刻 clean stage 的输出格式）
-  //    所有新闻归入「要闻」category
-  ctx.items = { 要闻: newsItems };
+  // 5. 金融新闻 → 去重（跨天 + 本批次）→ ctx.items
+  //    fetch-finance-news.js 的 hash 已与 dedupe.js 统一（base36），
+  //    seen.json 里昨天及更早的记录会被过滤；今天的（同批次跨报告）保留。
+  const windowMs = windowToMs(ctx.job.window || '24h');
+  const kept = dedupe(newsItems, windowMs, ctx._seen, ctx.date.str);
+  ctx.items = { 要闻: kept };
 
-  const newsCount = newsItems.length;
+  const newsCount = kept.length;
   console.log(`\n  fetch 完成：指数 ${marketData.indices.length} · 资产 ${marketData.assets.length} · 新闻 ${newsCount} 条`);
 
   return ctx;

@@ -16,7 +16,7 @@ export async function clean(ctx) {
   const seen = loadState(ctx.repoRoot);
 
   const raw = await fetchAll(ctx.feeds);
-  const kept = dedupe(raw, windowMs, seen);
+  const kept = dedupe(raw, windowMs, seen, ctx.date.str);
 
   // 按 job 配置的 categories 分组
   const grouped = {};

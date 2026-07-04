@@ -136,9 +136,9 @@ async function main() {
     console.log(`✓ 已写入 ${r.path}`);
   }
 
-  // 更新 seen state：processed 取所有 result 并集（去重）
+  // 更新 seen state：processed 取所有 result 并集（去重），日期用北京时间
   const allProcessed = results.flatMap((r) => r.processed || []);
-  saveState(ctx.repoRoot, ctx._seen, allProcessed);
+  saveState(ctx.repoRoot, ctx._seen, allProcessed, ctx.date.str);
 
   // 成本统计（workflow 各 stage + agent）
   const stageUsage = ctx._usage ? Object.values(ctx._usage).reduce(
