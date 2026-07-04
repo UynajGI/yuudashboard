@@ -25,7 +25,7 @@ export function renderSectors(ctx) {
   ];
   if (commentaryLines.length) {
     fm.push('tldr:');
-    for (const line of commentaryLines.slice(0, 4)) fm.push(`  - ${yamlStr(line)}`);
+    fm.push(`  - ${yamlStr(commentaryLines[0])}`);
   } else { fm.push('tldr: []'); }
   fm.push('---');
 

@@ -33,7 +33,8 @@ export function renderFocus(ctx) {
   ];
   if (commentaryLines.length) {
     fm.push('tldr:');
-    for (const line of commentaryLines.slice(0, 4)) fm.push(`  - ${yamlStr(line)}`);
+    // tldr 只取首行作为关键结论，正文用完整分析（避免 tldr 和正文重复）
+    fm.push(`  - ${yamlStr(commentaryLines[0])}`);
   } else { fm.push('tldr: []'); }
   fm.push('---');
 
