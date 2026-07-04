@@ -44,39 +44,74 @@ export class Store {
     writeFileSync(path, JSON.stringify(obj, null, 2) + '\n');
   }
 
-  // ── seen（去重 hash）────────────────────────────────────
+  // ── seen（去重 hash，按 section 分组，保留 7 天）─────────
 
   /**
-   * 加载 seen state。单次运行内缓存（loadSeen 和 saveSeen 共享同一对象）。
+   * 加载某 section 的 seen state。
+   * @param {string} section  'news' | 'finance'
    * @returns {{urls:{}, titles:{}}}
    */
-  loadSeen() {
-    if (this._seenCache) return this._seenCache;
-    const obj = this._readJson(this.seenPath, { urls: {}, titles: {} });
-    this._seenCache = { urls: obj.urls || {}, titles: obj.titles || {} };
-    return this._seenCache;
+  loadSeen(section = 'default') {
+    const cacheKey = `seen:${section}`;
+    if (this._seenCache?.[cacheKey]) return this._seenCache[cacheKey];
+    const obj = this._readJson(this.seenPath, { sections: {} });
+    const sec = obj.sections?.[section] || { urls: {}, titles: {} };
+    if (!this._seenCache) this._seenCache = {};
+    this._seenCache[cacheKey] = { urls: sec.urls || {}, titles: sec.titles || {} };
+    return this._seenCache[cacheKey];
   }
 
   /**
-   * 把已发布的条目 hash 写回 seen。
-   * @param {Array} items  含 urlHash/titleHash 的条目（NewsItem 或 _rawItems）
-   * @param {string} dateStr  YYYY-MM-DD（北京时间）
+   * 把已发布的条目 hash 写回 seen（按 section 分组，自动清理 >7 天）。
+   * @param {string} section  'news' | 'finance'
+   * @param {Array} items  含 urlHash/titleHash 的条目
+   * @param {string} dateStr  YYYY-MM-DD
    */
-  saveSeen(items, dateStr) {
-    const state = this.loadSeen(); // 用缓存的对象
+  saveSeen(section, items, dateStr) {
+    // 读完整文件（含所有 section）
+    const obj = this._readJson(this.seenPath, { sections: {} });
+    if (!obj.sections) obj.sections = {};
+
+    // 更新当前 section
+    const state = obj.sections[section] || { urls: {}, titles: {} };
     let count = 0;
     for (const it of items) {
       if (it.urlHash) { state.urls[it.urlHash] = dateStr; count++; }
       if (it.titleHash) { state.titles[it.titleHash] = dateStr; count++; }
     }
-    this._prune(state.urls, SEEN_MAX);
-    this._prune(state.titles, SEEN_MAX);
-    this._writeJson(this.seenPath, {
-      _meta: { desc: '已发布条目的去重记录。key=hash，value=发布日期。', updated: dateStr },
-      urls: state.urls,
-      titles: state.titles,
-    });
-    console.log(`  seen：写入 ${count} 条，urls=${Object.keys(state.urls).length} titles=${Object.keys(state.titles).length}（${this.tag}）`);
+
+    // 清理 >7 天的（所有 section 都清）
+    const SEEN_TTL_DAYS = 7;
+    const cutoff = this._shiftDate(dateStr, -SEEN_TTL_DAYS);
+    for (const sec of Object.values(obj.sections)) {
+      this._pruneByDate(sec.urls, cutoff);
+      this._pruneByDate(sec.titles, cutoff);
+    }
+
+    obj.sections[section] = state;
+    obj._meta = { desc: '去重记录，按 section 分组，保留 7 天。', updated: dateStr };
+    this._writeJson(this.seenPath, obj);
+
+    // 更新缓存
+    if (!this._seenCache) this._seenCache = {};
+    this._seenCache[`seen:${section}`] = state;
+
+    const totalUrls = Object.values(obj.sections).reduce((a, s) => a + Object.keys(s.urls).length, 0);
+    console.log(`  seen[${section}]：写入 ${count} 条，全站总 urls=${totalUrls}（${this.tag}）`);
+  }
+
+  /** 日期字符串加减天数 → YYYY-MM-DD */
+  _shiftDate(dateStr, days) {
+    const d = new Date(dateStr + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  /** 删除 value < cutoff 的条目 */
+  _pruneByDate(map, cutoff) {
+    for (const k of Object.keys(map)) {
+      if (map[k] < cutoff) delete map[k];
+    }
   }
 
   // ── market-history（行情快照）──────────────────────────

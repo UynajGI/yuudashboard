@@ -31,7 +31,7 @@ export class IngestStage extends Stage {
     const { itemSources, marketSources } = buildSources(ctx.job, ctx.feeds);
 
     // 1. 加载 seen（dedupe 用）
-    const seen = store.loadSeen();
+    const seen = store.loadSeen(ctx.job.section);
 
     // 2. 并行抓取所有 Item 源 → NewsItem[]
     console.log('  抓取新闻源...');

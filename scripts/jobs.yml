@@ -50,7 +50,7 @@ jobs:
     window: 24h
     categories: [国内]
     subs: [时政, 经济, 社会, 军事, 外交, 教育]
-    top_n_per_category: 15
+    top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
     output: content/news/{date}-domestic.md
@@ -64,7 +64,7 @@ jobs:
     window: 24h
     categories: [国际]
     subs: [地缘, 经贸, 社会, 军事安全, 科技]
-    top_n_per_category: 15
+    top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
     output: content/news/{date}-world.md
@@ -78,7 +78,7 @@ jobs:
     window: 24h
     categories: [科技]
     subs: [AI, 半导体硬件, 互联网, 工具产品, 科研学术]
-    top_n_per_category: 15
+    top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
     output: content/news/{date}-tech.md
@@ -92,7 +92,7 @@ jobs:
     slug: market
     window: 24h
     categories: [要闻]            # 新闻只分一类；指数/商品/BTC 由 fetch 直接拿
-    top_n_per_category: 8
+    top_n_per_category: 15
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     output: content/finance/{date}-market.md
@@ -107,7 +107,7 @@ jobs:
     slug: sectors
     window: 24h
     categories: [要闻]
-    top_n_per_category: 8
+    top_n_per_category: 15
     workflow: [fetch, select, summarize]   # 不走 tldr，板块点评由 agent 生成
     agent: sectors-commentary              # agent profile：自主查工具生成点评
     renderer: sectors
@@ -124,7 +124,7 @@ jobs:
     slug: focus
     window: 24h
     categories: [要闻]
-    top_n_per_category: 8
+    top_n_per_category: 15
     workflow: [fetch, select, summarize]
     agent: focus-analysis
     renderer: focus
@@ -141,7 +141,7 @@ jobs:
     slug: linkage
     window: 24h
     categories: [要闻]
-    top_n_per_category: 8
+    top_n_per_category: 15
     workflow: [fetch, select, summarize]
     agent: linkage-analysis
     renderer: linkage

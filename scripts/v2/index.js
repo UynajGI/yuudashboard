@@ -137,7 +137,7 @@ async function main() {
 
   // 5. 更新 state
   const allProcessed = results.flatMap((r) => r.processed || []);
-  ctx.store.saveSeen(allProcessed, ctx.date.str);
+  ctx.store.saveSeen(ctx.job.section, allProcessed, ctx.date.str);
 
   const publishedTitles = Object.values(ctx.summarized).flat().map((it) => it.title).filter(Boolean);
   if (publishedTitles.length) {
