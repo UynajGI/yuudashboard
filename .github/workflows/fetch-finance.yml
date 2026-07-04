@@ -1,21 +1,21 @@
-name: Generate Finance Reports
+name: Fetch Finance
 
 on:
   schedule:
-    # UTC 11:15 = 北京时间 19:15
+    # UTC 11:15 = 北京时间 19:15（晚报时段，比 fetch-news 晚 15 分钟避免并发 push 冲突）
     - cron: '15 11 * * *'
   workflow_dispatch:
     inputs:
       job:
-        description: '手动跑单个 job（留空=全跑：daily-market/sector-scan/asset-focus/cross-linkage）'
+        description: '要跑的金融类任务（jobs.yml 里定义的 name：daily-market / sector-scan / asset-focus / cross-linkage）'
         required: false
-        default: ''
+        default: 'daily-market'
 
 permissions:
   contents: write
 
 jobs:
-  generate:
+  fetch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,28 +31,13 @@ jobs:
         working-directory: scripts
         run: npm ci
 
-      - name: Run reports
+      - name: Run finance pipeline
         working-directory: scripts
         env:
           LLM_PROVIDER: deepseek
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
-        run: |
-          if [ -n "${{ inputs.job }}" ]; then
-            # 手动触发单个 job
-            echo "### 手动触发：${{ inputs.job }}"
-            node v2/index.js --job="${{ inputs.job }}"
-          else
-            # 定时/手动全跑：4 个报告依次生成，一次 commit 避免 push 冲突
-            JOBS="daily-market sector-scan asset-focus cross-linkage"
-            for job in $JOBS; do
-              echo ""
-              echo "========================================"
-              echo "### $job"
-              echo "========================================"
-              node v2/index.js --job="$job" || echo "⚠ $job 失败，继续下一个"
-            done
-          fi
+        run: node v2/index.js --job=${{ inputs.job || 'daily-market' }}
 
       - name: Commit & push
         run: |
@@ -62,9 +47,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "无改动，跳过提交"
           else
-            git commit -m "chore(finance): 自动报告 $(date -u +%Y-%m-%d)"
-            # 拉取远程最新 + rebase（如冲突则中止，不阻塞）
-            git fetch origin main 2>/dev/null
-            git rebase origin/main 2>/dev/null || { git rebase --abort 2>/dev/null; echo "⚠ rebase 冲突，直接 push 尝试"; }
-            git push 2>/dev/null || echo "⚠ push 失败（下次运行重试）"
+            git commit -m "chore(finance): 自动市场概览 $(date -u +%Y-%m-%d)"
+            git push 2>/dev/null || echo "push 冲突，下次运行重试（正常）"
           fi
