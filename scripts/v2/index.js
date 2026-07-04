@@ -88,9 +88,17 @@ async function main() {
 
   // 失败安全
   const isFinance = ctx.job.section === 'finance';
+  const isDigest = ctx.job.renderer === 'digest' || ctx.job.renderer === 'finance-digest';
   const newsCount = Object.values(ctx.summarized).flat().length;
+  const digestCount = (ctx.digestContent || []).length;
   const marketCount = isFinance ? ((ctx.marketData?.indices?.length || 0) + (ctx.marketData?.assets?.length || 0)) : 0;
-  if (newsCount === 0 && marketCount === 0) {
+  // digest job 靠 digestContent；普通 job 靠 summarized/marketData
+  if (isDigest) {
+    if (digestCount === 0) {
+      console.warn('\n⚠ digest 无内容（LLM 未返回有效要点），不写盘');
+      process.exit(1);
+    }
+  } else if (newsCount === 0 && marketCount === 0) {
     console.warn('\n⚠ 全无内容，不写盘');
     process.exit(1);
   }
