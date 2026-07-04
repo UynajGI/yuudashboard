@@ -133,10 +133,14 @@ jobs:
     needs: publish
     runs-on: ubuntu-latest
     steps:
+      # checkout 后必须 pull 最新——publish job 刚 push 了新 commit，
+      # 默认 checkout 拿的是 workflow 触发时的旧 commit
       - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
+      - name: Pull latest (publish 可能刚 push)
+        run: git pull --rebase origin main || true
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
