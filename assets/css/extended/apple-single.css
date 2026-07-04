@@ -232,11 +232,13 @@
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
+  table-layout: fixed; /* 列宽由表头决定，每行严格对齐，不随内容飘 */
 }
 .apple-content th, .apple-content td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
   text-align: left;
+  word-break: break-word; /* 长内容不撑破列宽 */
 }
 .apple-content th { font-weight: 700; background: var(--theme); }
 

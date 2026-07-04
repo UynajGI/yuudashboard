@@ -163,8 +163,8 @@
 .home-card-body h3 { font-size: 1.05rem; margin: 1.4em 0 0.4em; }
 .home-card-body ul, .home-card-body ol { padding-left: 1.5em; }
 .home-card-body li { margin: 0.3em 0; }
-.home-card-body table { display: table; width: 100%; border-collapse: collapse; margin: 1em auto; }
-.home-card-body th, .home-card-body td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: center; }
+.home-card-body table { display: table; width: 100%; border-collapse: collapse; margin: 1em auto; table-layout: fixed; }
+.home-card-body th, .home-card-body td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: center; word-break: break-word; }
 .home-card-body th { font-weight: 700; background: var(--theme); }
 .home-card-body img { display: block; max-width: 100%; margin: 1em auto; }
 
