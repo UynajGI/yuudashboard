@@ -1,13 +1,24 @@
 // Stage: ingest —— 统一替代旧的 clean + fetch。
-// 调用 Source 适配器抓取数据：
 //   ItemSource → NewsItem[] → dedupe → ctx.items（供 select）
-//   MarketSource → Quote[] → store.saveSnapshot → ctx.marketData + ctx.marketHistory
+//   MarketSource → Quote[] → 内存快照 → ctx.marketData + ctx.marketHistory
+// 行情数据在线拉取不存本地，本地库空间留给新闻去重。
 //
 // 纯脚本阶段（needsLLM=false）。
 
 import { Stage } from '../core/pipeline.js';
 import { buildSources } from '../sources/index.js';
 import { titleSimilarity, windowToMs } from '../core/util.js';
+
+/** 从 indices/assets/extra 构建当日行情快照 key=品种名 value={close,changePct}（仅内存，供 sparkline） */
+function buildDaySnapshot(indices, assets, extra) {
+  const snap = {};
+  for (const q of [...indices, ...assets, ...Object.values(extra)]) {
+    if (q && q.name != null && isFinite(q.price)) {
+      snap[q.name] = { close: q.price, changePct: q.changePct ?? 0 };
+    }
+  }
+  return snap;
+}
 
 export class IngestStage extends Stage {
   constructor() {
@@ -78,18 +89,16 @@ export class IngestStage extends Stage {
         btc: extra['BTC'] || null,
         usTreasury: extra['美债 10Y'] || null,
         kospi: extra['韩国 KOSPI'] || null,
-        tushare: tushareData,  // 新增：申万行业 + 市场宽度 + 北向资金
+        tushare: tushareData,
       };
 
-      // 持久化行情快照（dry-run 跳过写盘，只读历史）
-      if (ctx.args.dryRun) {
-        ctx.marketHistory = store.loadHistory();
-      } else {
-        ctx.marketHistory = store.saveSnapshot(ctx.date.str, {
-          indices, assets,
-          extra: Object.values(extra),
-        });
-      }
+      // 行情数据不持久化到本地库（在线拉取即可），
+      // 仅在内存构建当次 marketHistory 供 sparkline/走势图用
+      ctx.marketHistory = {
+        days: {
+          [ctx.date.str]: buildDaySnapshot(indices, assets, extra),
+        },
+      };
     }
 
     const newsCount = Object.values(ctx.items).reduce((a, b) => a + b.length, 0);
