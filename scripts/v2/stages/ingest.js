@@ -53,9 +53,16 @@ export class IngestStage extends Stage {
       const assets = [];
       const extra = {}; // btc / usTreasury / kospi
 
-      // SinaQuoteSource 返回 { indices, assets }
+      // 处理各行情源的返回
+      let tushareData = null;
+
       for (const r of marketResults) {
         if (!r) continue;
+        // Tushare 返回 { swSectors, breadth, northFlow }
+        if (r.swSectors) {
+          tushareData = r;
+          continue;
+        }
         if (r.indices) indices.push(...r.indices);
         if (r.assets) assets.push(...r.assets);
         // 单个 Quote（BTC/KOSPI/美债）按 name 归类
@@ -63,13 +70,15 @@ export class IngestStage extends Stage {
           extra[r.name] = r;
         }
       }
-      console.log(`  行情：指数 ${indices.length} · 资产 ${assets.length} · 额外 ${Object.keys(extra).length}`);
+      console.log(`  行情：指数 ${indices.length} · 资产 ${assets.length} · 额外 ${Object.keys(extra).length}` +
+        (tushareData ? ` · 申万行业 ${tushareData.swSectors.length}` : ' · Tushare 不可用'));
 
       ctx.marketData = {
         indices, assets,
         btc: extra['BTC'] || null,
         usTreasury: extra['美债 10Y'] || null,
         kospi: extra['韩国 KOSPI'] || null,
+        tushare: tushareData,  // 新增：申万行业 + 市场宽度 + 北向资金
       };
 
       // 持久化行情快照（dry-run 跳过写盘，只读历史）

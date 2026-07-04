@@ -54,19 +54,38 @@ export function renderSectors(ctx) {
 
   // 各板块明细
   body.push('## 板块明细\n');
-  for (const { name, members, avg } of sectorAvgs) {
+  for (const { name, members } of sectorAvgs) {
     const items = members.map((n) => md.indices?.find((i) => i.name === n) || md.assets?.find((a) => a.name === n) || (md.btc?.name === n ? md.btc : null) || (md.kospi?.name === n ? md.kospi : null)).filter(Boolean);
     if (!items.length) continue;
-    const avgStr = avg != null ? `${avg > 0 ? '+' : ''}${avg.toFixed(2)}%` : '—';
-    const avgCls = avg > 0 ? 'up' : avg < 0 ? 'down' : '';
-    const avgHtml = avgCls ? `<span class="${avgCls}">${avgStr}</span>` : avgStr;
-    body.push(`### ${name}  均 ${avgHtml}\n`);
+    body.push(`### ${name}\n`);
     body.push('| 品种 | 收盘 | 涨跌幅 |');
     body.push('|------|------|--------|');
     for (const it of items) {
       body.push(`| ${it.name} | ${fmtNum(it.price, 2)} | ${renderQuoteChange(it)} |`);
     }
     body.push('');
+  }
+
+  // Tushare 申万行业指数 + 北向资金
+  const ts = md.tushare;
+  if (ts) {
+    if (ts.swSectors?.length) {
+      body.push('## 申万行业\n');
+      body.push('| 行业 | 收盘价 | 涨跌幅 |');
+      body.push('|------|--------|--------|');
+      // 按涨跌幅降序排列
+      const sorted = [...ts.swSectors].sort((a, b) => (b.changePct || 0) - (a.changePct || 0));
+      for (const q of sorted) {
+        body.push(`| ${q.name} | ${fmtNum(q.price, 2)} | ${renderQuoteChange(q)} |`);
+      }
+      body.push('');
+    }
+    if (ts.northFlow) {
+      const { northMoney, southMoney } = ts.northFlow;
+      const netFlow = northMoney + southMoney; // north 为正=流入，south 为负=流出
+      const sign = netFlow > 0 ? '+' : '';
+      body.push(`**北向资金净流入**：${sign}${(netFlow / 10000).toFixed(2)} 亿元（沪股通+深股通）\n`);
+    }
   }
 
   const content = fm.join('\n') + '\n\n' + body.join('\n').trimEnd() + '\n';

@@ -10,8 +10,9 @@ import { SinaNewsSource } from './sina-news.js';
 import { BtcSource } from './btc.js';
 import { KospiSource } from './eastmoney.js';
 import { UsTreasurySource } from './yahoo.js';
+import { TushareSource } from './tushare.js';
 
-export { RssSource, SinaQuoteSource, SinaNewsSource, BtcSource, KospiSource, UsTreasurySource };
+export { RssSource, SinaQuoteSource, SinaNewsSource, BtcSource, KospiSource, UsTreasurySource, TushareSource };
 
 /**
  * 为一个 job 构建所需的源。
@@ -32,7 +33,7 @@ export function buildSources(job, feeds) {
   }
 
   if (isFinance) {
-    // finance 管线：新浪新闻（Item 源）+ 新浪行情/BTC/KOSPI/美债（Market 源）
+    // finance 管线：新浪新闻（Item 源）+ 新浪行情/BTC/KOSPI/美债/Tushare（Market 源）
     return {
       itemSources: [new SinaNewsSource()],
       marketSources: [
@@ -40,6 +41,7 @@ export function buildSources(job, feeds) {
         new BtcSource(),
         new KospiSource(),
         new UsTreasurySource(),
+        new TushareSource(),
       ],
     };
   }
