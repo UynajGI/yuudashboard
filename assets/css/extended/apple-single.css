@@ -237,7 +237,7 @@
 .apple-content th, .apple-content td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
-  text-align: left;
+  text-align: center;
   word-break: break-word; /* 长内容不撑破列宽 */
 }
 .apple-content th { font-weight: 700; background: var(--theme); }
