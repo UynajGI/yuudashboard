@@ -34,7 +34,7 @@ export function renderNews(ctx) {
     const noSub = [];
     for (const item of items) {
       const sub = item.sub || '';
-      if (sub) {
+      if (sub && sub !== '其他') {
         if (!bySub[sub]) bySub[sub] = [];
         bySub[sub].push(item);
       } else {
@@ -42,15 +42,24 @@ export function renderNews(ctx) {
       }
     }
 
-    // 有子分类的先渲染，无子分类的放在最后
+    // 按 job.subs 定义的顺序渲染；未列在 subs 里的子类按字典序补在后面；"其他"始终最后
+    const definedOrder = (job.subs || []).filter((s) => s !== '其他');
+    const seen = new Set();
+    const ordered = [];
+    for (const sub of definedOrder) {
+      if (bySub[sub]) { ordered.push(sub); seen.add(sub); }
+    }
     for (const sub of Object.keys(bySub).sort()) {
+      if (!seen.has(sub)) { ordered.push(sub); seen.add(sub); }
+    }
+
+    for (const sub of ordered) {
       body.push(`### ${cat} · ${sub}\n`);
       for (const item of bySub[sub]) body.push(renderNewsItem(item));
       body.push('');
     }
     if (noSub.length) {
-      if (Object.keys(bySub).length) body.push(`### ${cat} · 其他\n`);
-      else body.push(`## ${cat}\n`);
+      body.push(`### ${cat} · 其他\n`);
       for (const item of noSub) body.push(renderNewsItem(item));
       body.push('');
     }

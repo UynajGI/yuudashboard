@@ -92,7 +92,7 @@ export function renderFinanceColumn(ctx) {
     }
   }
 
-  // 5. 新闻（按 sub 分组，同 news renderer 逻辑）
+  // 5. 新闻（按 sub 分组，按 job.subs 定义顺序渲染）
   const cat = ctx.job.categories?.[0] || '要闻';
   const items = summarized[cat] || [];
   if (items.length) {
@@ -100,10 +100,20 @@ export function renderFinanceColumn(ctx) {
     const noSub = [];
     for (const item of items) {
       const sub = item.sub || '';
-      if (sub) { if (!bySub[sub]) bySub[sub] = []; bySub[sub].push(item); }
+      if (sub && sub !== '其他') { if (!bySub[sub]) bySub[sub] = []; bySub[sub].push(item); }
       else noSub.push(item);
     }
+    // 按 job.subs 定义顺序，未列出的补在后面，"其他"始终最后
+    const definedOrder = (job.subs || []).filter((s) => s !== '其他');
+    const seen = new Set();
+    const ordered = [];
+    for (const sub of definedOrder) {
+      if (bySub[sub]) { ordered.push(sub); seen.add(sub); }
+    }
     for (const sub of Object.keys(bySub).sort()) {
+      if (!seen.has(sub)) { ordered.push(sub); seen.add(sub); }
+    }
+    for (const sub of ordered) {
       body.push(`### ${sub}\n`);
       for (const item of bySub[sub]) body.push(renderNewsItem(item));
       body.push('');
