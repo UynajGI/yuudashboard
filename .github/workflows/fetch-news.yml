@@ -2,8 +2,8 @@ name: Fetch News
 
 on:
   schedule:
-	    # UTC 11点 = 北京时间 19点（晚报）
-	    - cron: '0 11 * * *'
+    # UTC 11点 = 北京时间 19点（晚报）
+    - cron: '0 11 * * *'
   workflow_dispatch:
     inputs:
       job:
