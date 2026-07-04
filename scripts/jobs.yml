@@ -49,7 +49,7 @@ jobs:
     slug: domestic
     window: 24h
     categories: [国内]
-    subs: [时政, 经济, 社会, 军事, 外交, 科技, 教育]
+    subs: [时政, 经济, 社会, 军事, 外交, 教育]
     top_n_per_category: 15
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
