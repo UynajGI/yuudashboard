@@ -72,7 +72,7 @@ class SinaQuoteSource extends MarketSource {
 
 ### 1.3 行情数据在线拉取
 
-行情数据**不存本地**——本地库只做新闻去重（`seen.json` + `recent-events.json`）。行情在线拉取：
+行情数据**不存本地**——本地库只做新闻去重（按 section 分文件）。行情在线拉取：
 
 | 数据 | API | 格式 |
 |---|---|---|
@@ -95,8 +95,8 @@ class SinaQuoteSource extends MarketSource {
 - **时间窗**：`dedupeWindowMs = max(job 窗口, 各 source 窗口)`，无日期的条目保守保留
 - **同日跨报告**：`seen` 值等于今天的记录标记为同批次（保留），小于今天的才是跨天重复（过滤）
 
-**语义去重**（select stage + `recent-events.json`）——LLM 判断延续报道：
-- 每次 render 后将发布的事件标题存入 `data/recent-events.json`
+**语义去重**（select stage + `recent-events-*.json`）——LLM 判断延续报道：
+- 每次 render 后将发布的事件标题存入 `data/recent-events-{section}.json`
 - 下次 select 时将近期标题注入 prompt `{recent}` 占位符
 - LLM 判断候选条是"延续报道"还是"全新事件"
 
@@ -164,11 +164,17 @@ class SinaQuoteSource extends MarketSource {
 
 ### 2.4 状态管理
 
-`core/store.js` 统管三个 state 文件（`seen.json` / `recent-events.json` / 行情不再存），CI 用 `.json` 提交 repo，本地用 `.local.json` 隔离。`isCI` 只算一次。
+`core/store.js` 按 section 分独立文件，CI 用 `.json` 提交 repo，本地用 `.local.json` 隔离（`*.local` 被 gitignore）。
 
-**seen.json**：`{ urls: {hash: YYYY-MM-DD}, titles: {hash: YYYY-MM-DD} }`，5000 条目上限，超出按日期淘汰最早。
+```
+data/
+├── seen-news.json              # news 去重（7 天 TTL）
+├── seen-finance.json           # finance 去重
+├── recent-events-news.json     # news 近期事件标题（供 LLM 跨天语义去重）
+└── recent-events-finance.json  # finance 近期事件标题
+```
 
-**recent-events.json**：`{ jobs: { jobName: { YYYY-MM-DD: [标题...] } } }`，每 job 保留最近 3 天，供 select 语义去重。
+每个 section 独立文件，news 和 finance 互不干扰。saveSeen 每次重新读磁盘再写（避免 stale）。
 
 ---
 
@@ -246,19 +252,25 @@ node v2/index.js --job=daily-news-domestic --stop-after=ingest
 
 ### 4.2 GitHub Actions CI/CD
 
-**三个 Workflow**（`.github/workflows/`）：
+**两个 Workflow**（`.github/workflows/`）：
 
 | Workflow | 触发 | 流程 |
 |---|---|---|
-| `deploy.yml` | push + 手动 | checkout(含 submodule) → Hugo build(`--gc --minify`) → `peaceiris/actions-gh-pages` 部署 |
-| `fetch-news.yml` | cron `0 11 * * *`(北京 19:00) + 手动 | checkout → Node 22 → `npm ci` → `node v2/index.js --job=daily-news` → commit/push |
-| `fetch-finance.yml` | cron `0 11 * * *`(北京 19:00) + 手动 | 依次跑 5 金融专栏 + digest → commit/push |
+| `generate.yml` | cron `0 11 * * *`(北京 19:00) + 手动 | news + finance 两个 Job 并行跑（不碰 git）→ publish Job 合并 artifact 一次 push |
+| `deploy.yml` | push + 手动 | checkout(含 submodule) → Hugo build → gh-pages 部署 |
 
-**push 冲突处理**：并发 push 时优雅跳过（`git push 2>/dev/null || echo "..."`），不阻塞 workflow，下次运行重试。
+**artifact 模式**：news 和 finance 各自跑在独立 Job 里，产出 upload-artifact；publish Job 等两者完成后 download-artifact 合并，**一次 commit + push**。零冲突。
 
 **环境变量**（GA Secrets）：
 - `DEEPSEEK_API_KEY`：LLM API key（必须）
 - `TUSHARE_TOKEN`：Tushare 数据（可选，无则跳过申万行业/北向资金）
+
+**开发阶段工具**：
+```bash
+bash scripts/dev.sh reset     # 清空报告 + 重置去重
+bash scripts/dev.sh ga        # 触发 GA 全量
+bash scripts/dev.sh status    # 查看运行状态
+```
 
 ### 4.3 Hugo 配置
 

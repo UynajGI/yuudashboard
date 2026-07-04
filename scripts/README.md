@@ -14,9 +14,14 @@ npm run domestic
 npm run world
 npm run tech
 
-# 金融专栏（A股/港股/美股/商品/加密）
+# 金融专栏（A股/港股/亚盘/美股/商品/加密）
 npm run daily-market
 npm run sector-scan
+
+# 开发工具
+bash dev.sh reset     # 清空 + 重置去重
+bash dev.sh ga        # 触发 GA 全量
+bash dev.sh status    # 查看运行状态
 
 # dry-run（不写盘，预览生成内容）
 node v2/index.js --job=daily-finance-ashare --dry-run
@@ -72,7 +77,7 @@ feeds.yml (62 RSS源) / API源 (新浪/Tushare/CoinGecko/Gate.io)
 
 ## 去重
 
-三层去重，按 section 分组（news 共享、finance 共享），seen.json 保留 7 天自动清理。
+三层去重，按 section 分独立文件（seen-news.json / seen-finance.json），7 天 TTL 自动清理。
 
 ## 目录结构
 
