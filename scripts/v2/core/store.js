@@ -49,7 +49,7 @@ export class Store {
   /** section → 文件路径 */
   _seenPath(section) {
     const suffix = this.isCI ? '' : '.local';
-    return resolve(this.seenDir, `data/seen-${section}${suffix}.json`);
+    return resolve(this.seenDir, `seen-${section}${suffix}.json`);
   }
 
   /**
@@ -152,7 +152,7 @@ export class Store {
   /** section → 文件路径 */
   _recentPath(section) {
     const suffix = this.isCI ? '' : '.local';
-    return resolve(this.seenDir, `data/recent-events-${section}${suffix}.json`);
+    return resolve(this.seenDir, `recent-events-${section}${suffix}.json`);
   }
 
   /**

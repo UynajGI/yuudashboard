@@ -130,7 +130,7 @@ jobs:
     market: ashare
     categories: [A股]
     subs: [大盘, 行业板块, 资金流向, 个股, 政策, 其他]
-    news_filter: [A股, 沪深, 上证, 深证, 创业板, 科创, 北向, 降准, LPR, 央行]
+    news_filter: [A股, 沪深, 上证, 深证, 创业板, 科创, 北向, 降准, LPR, 央行, 证监会, 交易所, 上市公司, 股市, 减持, 增持, 回购, 定增, 财报, 营收, 业绩, 涨停, 跌停, 牛市, 熊市]
     top_n_per_category: 30
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
@@ -147,7 +147,7 @@ jobs:
     market: hk
     categories: [港股]
     subs: [大盘, 科技, 金融, 地产, 其他]
-    news_filter: [港股, 恒生, 南向, 香港, 港交所]
+    news_filter: [港股, 恒生, 南向, 香港, 港交所, 恒生科技, 腾讯, 阿里, 美团, 小米, 蔚来, 理想, 港股通, 中概股]
     top_n_per_category: 30
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
@@ -164,7 +164,7 @@ jobs:
     market: asia
     categories: [亚盘]
     subs: [日本, 韩国, 东盟, 其他]
-    news_filter: [日经, 日本, 韩国, KOSPI, 东盟, 东南亚, 亚太]
+    news_filter: [日经, 日本, 韩国, KOSPI, 东盟, 东南亚, 亚太, 三星, 台积电, 香港, 新加坡, 印度, 澳洲, 亚太股市]
     top_n_per_category: 30
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
@@ -181,7 +181,7 @@ jobs:
     market: us
     categories: [美股]
     subs: [大盘, 科技, 宏观, 国债, 其他]
-    news_filter: [美股, 纳斯达克, 道琼斯, 标普, 美联储, 非农, 美债, CPI]
+    news_filter: [美股, 纳斯达克, 道琼斯, 标普, 美联储, 非农, 美债, CPI, 美国经济, 英伟达, 苹果, 特斯拉, 微软, 谷歌, 美国股市, 华尔街, PPI, 鲍威尔]
     top_n_per_category: 30
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
@@ -198,7 +198,7 @@ jobs:
     market: commodity
     categories: [商品]
     subs: [贵金属, 能源, 外汇, 其他]
-    news_filter: [黄金, 金价, 原油, 油价, 美元, OPEC, 大宗, 美债]
+    news_filter: [黄金, 金价, 原油, 油价, 美元, OPEC, 大宗, 美债, 白银, 铜, 铁矿石, 天然气, 农产品, 期货, 大宗商品, 贵金属, 矿业]
     top_n_per_category: 30
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
@@ -215,7 +215,7 @@ jobs:
     market: crypto
     categories: [加密]
     subs: [BTC, ETH, 监管, 链上, 其他]
-    news_filter: [BTC, 比特币, 以太坊, ETH, 加密, 区块链, 稳定币]
+    news_filter: [BTC, 比特币, 以太坊, ETH, 加密, 区块链, 稳定币, 币安, Coinbase, 狗狗币, 瑞波, XRP, DeFi, NFT, 挖矿, 数字货币, 代币]
     top_n_per_category: 30
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
