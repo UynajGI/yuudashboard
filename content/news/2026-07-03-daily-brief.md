@@ -11,7 +11,6 @@ tldr:
 
 ## 国内
 
-- [**示例事件标题**](https://example.com)：示例事件发生了，关键数字是X。（来源A、来源B）
 - [**丹麦国王腓特烈十世会见王毅**](http://www.news.cn/20260703/e1beaa2fcc954639aa8b6a50bf925d53/c.html)：（新华社新闻 - 新华网）
 - [**李刚任新疆维吾尔自治区党委常委**](http://www.news.cn/20260703/a68b15a6c9ec4f93b9eb5bdbda3b3b75/c.html)：（新华社新闻 - 新华网）
 - [**成都市人大常委会原副主任冷刚接受审查调查**](http://www.news.cn/20260703/b47e7c1b7c084c09a32de30c9a481b6c/c.html)：（新华社新闻 - 新华网）
