@@ -13,6 +13,8 @@ scripts/.env
 data/seen.local.json
 # 本地市场历史快照 —— CI 用 data/market-history.json，本地用 market-history.local.json
 data/market-history.local.json
+# 本地近期事件记录 —— CI 用 data/recent-events.json，本地用 recent-events.local.json
+data/recent-events.local.json
 
 # 本地测试占位数据 —— 保留在本地用于测试，但不进远程/网页
 content/news/2025-07-03-daily-brief.md

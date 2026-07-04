@@ -19,6 +19,7 @@ import * as sectorsAgent from './agents/sectors-commentary.js';
 import * as focusAgent from './agents/focus-analysis.js';
 import * as linkageAgent from './agents/linkage-analysis.js';
 import { saveState } from './state.js';
+import { saveRecentEvents } from './recent-events.js';
 
 // Renderer 注册表：jobs.yml 的 renderer 字段选择，缺省按 section 兜底。
 // 新增汇报模板：写一个 render-xxx.js + 在此注册 + jobs.yml 加 renderer: xxx 即可。
@@ -139,6 +140,15 @@ async function main() {
   // 更新 seen state：processed 取所有 result 并集（去重），日期用北京时间
   const allProcessed = results.flatMap((r) => r.processed || []);
   saveState(ctx.repoRoot, ctx._seen, allProcessed, ctx.date.str);
+
+  // 写入近期事件标题（供下次 select 跨天语义去重）
+  const publishedTitles = Object.values(ctx.summarized)
+    .flat()
+    .map((it) => it.title)
+    .filter(Boolean);
+  if (publishedTitles.length) {
+    saveRecentEvents(ctx.repoRoot, ctx.job.name, ctx.date.str, publishedTitles);
+  }
 
   // 成本统计（workflow 各 stage + agent）
   const stageUsage = ctx._usage ? Object.values(ctx._usage).reduce(

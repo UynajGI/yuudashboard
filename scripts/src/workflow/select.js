@@ -2,6 +2,7 @@
 // 输入：每类的全部候选条目（只读短摘要，省 token）
 // 输出：每类保留 N 个「事件」的 id 索引（输出极小）
 import { loadPrompt } from '../prompt.js';
+import { getRecentTitles } from '../recent-events.js';
 
 /**
  * 按源均匀采样：候选太多时，每个源按比例取，保证多样性。
@@ -59,10 +60,22 @@ export async function select(ctx, llm) {
 
     // 候选太多时按源均匀采样（避免全是同一个源，保证多样性）
     const capped = sampleBySource(items, 40);
+
+    // 近期已报道事件标题（供 LLM 跨天语义去重）
+    const recentTitles = getRecentTitles(ctx.repoRoot, ctx.job.name, 2);
+    const recentBlock = recentTitles.length
+      ? recentTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')
+      : '（无）';
+
     const prompt = tpl
       .replace(/\{category\}/g, cat)
       .replace('{top_n}', ctx.job.top_n_per_category)
-      .replace('{items}', renderItems(capped));
+      .replace('{items}', renderItems(capped))
+      .replace('{recent}', recentBlock);
+
+    if (recentTitles.length) {
+      console.log(`    ${cat}: 注入 ${recentTitles.length} 条近期已报道标题`);
+    }
 
     const { content, usage } = await llm.complete({
       system: '你是一名新闻编辑，擅长从大量条目中精选和合并同事件报道。只输出 JSON。',
