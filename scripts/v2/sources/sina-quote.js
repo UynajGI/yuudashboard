@@ -14,7 +14,7 @@ const SYMBOLS = {
   'sh000688': { name: '科创50', cat: 'indices', market: 'ashare' },
   'int_hangseng': { name: '恒生指数', cat: 'indices', market: 'hk' },
   'hkHSTECH': { name: '恒生科技', cat: 'indices', market: 'hk', fmt: 'hk' },
-  'int_nikkei': { name: '日经 225', cat: 'indices', market: 'hk' },
+  'int_nikkei': { name: '日经 225', cat: 'indices', market: 'asia' },
   'int_dji': { name: '道琼斯', cat: 'indices', market: 'us' },
   'int_nasdaq': { name: '纳斯达克', cat: 'indices', market: 'us' },
   'int_sp500': { name: '标普500', cat: 'indices', market: 'us' },

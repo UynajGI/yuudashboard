@@ -154,6 +154,23 @@ jobs:
     tags: [金融, 港股]
     description: "金融专栏 · 港股 {date}"
 
+  - name: daily-finance-asia
+    schedule: "8 11 * * *"
+    section: finance
+    slug: asia
+    window: 24h
+    market: asia
+    categories: [亚盘]
+    subs: [日本, 韩国, 东盟, 其他]
+    news_filter: [日经, 日本, 韩国, KOSPI, 东盟, 东南亚, 亚太]
+    top_n_per_category: 30
+    workflow: [fetch, select, summarize, tldr]
+    prompt_prefix: finance
+    renderer: finance-column
+    output: content/finance/{date}-asia.md
+    tags: [金融, 亚盘]
+    description: "金融专栏 · 亚盘 {date}"
+
   - name: daily-finance-us
     schedule: "10 11 * * *"
     section: finance
@@ -219,6 +236,7 @@ jobs:
     columns:
       - { name: A股, file: "content/finance/{date}-ashare.md" }
       - { name: 港股, file: "content/finance/{date}-hk.md" }
+      - { name: 亚盘, file: "content/finance/{date}-asia.md" }
       - { name: 美股, file: "content/finance/{date}-us.md" }
       - { name: 商品, file: "content/finance/{date}-commodity.md" }
       - { name: 加密, file: "content/finance/{date}-crypto.md" }

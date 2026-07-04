@@ -42,7 +42,7 @@ jobs:
             echo "### 手动触发：${{ inputs.job }}"
             node v2/index.js --job="${{ inputs.job }}"
           else
-            for job in daily-finance-ashare daily-finance-hk daily-finance-us daily-finance-commodity daily-finance-crypto; do
+            for job in daily-finance-ashare daily-finance-hk daily-finance-asia daily-finance-us daily-finance-commodity daily-finance-crypto; do
               echo "### $job"
               node v2/index.js --job="$job" || echo "⚠ $job 失败"
             done
