@@ -50,12 +50,6 @@ export class SelectStage extends Stage {
 
       const capped = sampleBySource(items, 40);
 
-      // 近期已报道事件标题（跨天语义去重）
-      const recentTitles = ctx.store.loadRecentTitles(ctx.job.name, 2);
-      const recentBlock = recentTitles.length
-        ? recentTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')
-        : '（无）';
-
       // 子分类列表（供 LLM 分配的选项）
       const subs = ctx.job.subs || [];
       const subsBlock = subs.length ? subs.map((s) => `- ${s}`).join('\n') : '（无）';
@@ -63,48 +57,39 @@ export class SelectStage extends Stage {
       const prompt = tpl
         .replace(/\{category\}/g, cat)
         .replace('{top_n}', ctx.job.top_n_per_category)
-        .replace('{items}', items.slice(0, 40).map((it) => it.toPromptText()).join('\n\n'))
-        .replace('{recent}', recentBlock)
+        .replace('{items}', capped.map((it) => it.toPromptText()).join('\n\n'))
         .replace('{subs}', subsBlock);
 
-      if (recentTitles.length) {
-        console.log(`    ${cat}: 注入 ${recentTitles.length} 条近期已报道标题`);
-      }
-
       const { content, usage } = await llm.complete({
-        system: '你是一名新闻编辑，擅长从大量条目中精选和合并同事件报道。只输出 JSON。',
+        system: '你是新闻编辑，负责把候选条目合并成事件并分类。所有候选都是 24h 内真实新闻，不要丢弃。只输出 JSON。',
         user: prompt,
         responseFormat: 'json',
       });
       totalUsage.inputTokens += usage.inputTokens;
       totalUsage.outputTokens += usage.outputTokens;
 
+      // LLM 返回的事件（用于合并 + 标注 sub）
       const byId = new Map(capped.map((it) => [it.id, it]));
-      let events = (content?.events || [])
+      const llmEvents = (content?.events || [])
         .map((ev) => ({
           items: (ev.ids || []).map((id) => byId.get(id)).filter(Boolean),
           mergedTitle: ev.title || '',
-          sub: ev.sub || '',  // LLM 分配的子分类
+          sub: ev.sub || '',
         }))
-        .filter((ev) => ev.items.length > 0)
-        .slice(0, ctx.job.top_n_per_category);
+        .filter((ev) => ev.items.length > 0);
 
-      // 保底：LLM 选太少但候选充足时，补入未选中的条目（按源轮询，保证多样性）
-      // 避免 LLM 偶尔过度保守导致整列空
-      const minKeep = Math.min(8, Math.floor(capped.length / 3));
-      if (events.length < minKeep && capped.length > events.length) {
-        const usedIds = new Set(events.flatMap((e) => e.items.map((it) => it.id)));
-        for (const it of capped) {
-          if (events.length >= minKeep) break;
-          if (usedIds.has(it.id)) continue;
-          events.push({ items: [it], mergedTitle: it.title, sub: '' });
-          usedIds.add(it.id);
-        }
-      }
+      // 不丢弃：LLM 没覆盖到的候选条目，各自独立成事件（保证 24h 内新闻全保留）
+      const coveredIds = new Set(llmEvents.flatMap((e) => e.items.map((it) => it.id)));
+      const leftover = capped.filter((it) => !coveredIds.has(it.id));
+      const leftoverEvents = leftover.map((it) => ({ items: [it], mergedTitle: it.title, sub: '' }));
+
+      const events = [...llmEvents, ...leftoverEvents].slice(0, ctx.job.top_n_per_category);
 
       selected[cat] = events;
       const srcCount = events.reduce((a, e) => a + e.items.length, 0);
-      console.log(`    ${cat}: ${items.length} 候选 → ${events.length} 事件（合并自 ${srcCount} 条）`);
+      const merged = llmEvents.length;
+      const added = leftoverEvents.length;
+      console.log(`    ${cat}: ${items.length} 候选 → ${events.length} 事件（LLM 合并 ${merged}，补入 ${added}）`);
     }
 
     ctx.selected = selected;
