@@ -12,21 +12,21 @@ import { IngestStage } from './stages/ingest.js';
 import { SelectStage } from './stages/select.js';
 import { SummarizeStage } from './stages/summarize.js';
 import { TldrStage } from './stages/tldr.js';
+import { DigestStage } from './stages/digest.js';
+import { FinanceDigestStage } from './stages/finance-digest.js';
 import { runAgent } from './agents/agent.js';
 import { renderNews } from './renderers/news.js';
-import { renderFinance } from './renderers/finance.js';
-import { renderSectors } from './renderers/sectors.js';
-import { renderFocus } from './renderers/focus.js';
-import { renderLinkage } from './renderers/linkage.js';
+import { renderFinanceColumn } from './renderers/finance-column.js';
+import { renderFinanceDigest } from './renderers/finance-digest.js';
+import { renderDigest } from './renderers/digest.js';
 import { collectProcessed } from './renderers/helpers.js';
 
 // Renderer 注册表
 const RENDERERS = {
   news: renderNews,
-  finance: renderFinance,
-  sectors: renderSectors,
-  focus: renderFocus,
-  linkage: renderLinkage,
+  'finance-column': renderFinanceColumn,
+  'finance-digest': renderFinanceDigest,
+  digest: renderDigest,
 };
 
 // Agent profile 注册表
@@ -44,7 +44,9 @@ const pipeline = new Pipeline();
 pipeline.register(new IngestStage())
   .register(new SelectStage())
   .register(new SummarizeStage())
-  .register(new TldrStage());
+  .register(new TldrStage())
+  .register(new DigestStage())
+  .register(new FinanceDigestStage());
 
 async function main() {
   const args = parseArgs(process.argv);

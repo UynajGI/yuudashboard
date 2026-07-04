@@ -6,27 +6,25 @@ import { MarketSource } from '../core/source.js';
 import { Quote } from '../core/item.js';
 
 // ── 品种定义 ──────────────────────────────────────────
+// market: ashare/hk/us/commodity/crypto/all —— 用于按市场拆分金融报告
 const SYMBOLS = {
-  // A 股指数（33 字段格式，含 OHLC）
-  'sh000001': { name: '上证综指', cat: 'indices' },
-  'sz399001': { name: '深证成指', cat: 'indices' },
-  'sz399006': { name: '创业板指', cat: 'indices' },
-  'sh000688': { name: '科创50', cat: 'indices' },
-  // 亚太指数（int_* 4字段格式 或 hk* 格式）
-  'int_hangseng': { name: '恒生指数', cat: 'indices' },
-  'hkHSTECH': { name: '恒生科技', cat: 'indices', fmt: 'hk' },
-  'int_nikkei': { name: '日经 225', cat: 'indices' },
-  // 美股三大指数（int_* 4字段格式）
-  'int_dji': { name: '道琼斯', cat: 'indices' },
-  'int_nasdaq': { name: '纳斯达克', cat: 'indices' },
-  'int_sp500': { name: '标普500', cat: 'indices' },
-  // 核心资产（期货 hf_* / 外汇 DINIW）
-  'hf_CL': { name: 'WTI 原油', cat: 'assets', unit: '$', decimals: 2 },
-  'hf_GC': { name: '黄金', cat: 'assets', unit: '$', decimals: 2, suffix: '/oz' },
-  'DINIW': { name: '美元指数', cat: 'assets', unit: '', decimals: 2 },
+  'sh000001': { name: '上证综指', cat: 'indices', market: 'ashare' },
+  'sz399001': { name: '深证成指', cat: 'indices', market: 'ashare' },
+  'sz399006': { name: '创业板指', cat: 'indices', market: 'ashare' },
+  'sh000688': { name: '科创50', cat: 'indices', market: 'ashare' },
+  'int_hangseng': { name: '恒生指数', cat: 'indices', market: 'hk' },
+  'hkHSTECH': { name: '恒生科技', cat: 'indices', market: 'hk', fmt: 'hk' },
+  'int_nikkei': { name: '日经 225', cat: 'indices', market: 'hk' },
+  'int_dji': { name: '道琼斯', cat: 'indices', market: 'us' },
+  'int_nasdaq': { name: '纳斯达克', cat: 'indices', market: 'us' },
+  'int_sp500': { name: '标普500', cat: 'indices', market: 'us' },
+  'hf_CL': { name: 'WTI 原油', cat: 'assets', market: 'commodity', unit: '$', decimals: 2 },
+  'hf_GC': { name: '黄金', cat: 'assets', market: 'commodity', unit: '$', decimals: 2, suffix: '/oz' },
+  'DINIW': { name: '美元指数', cat: 'assets', market: 'commodity', unit: '', decimals: 2 },
 };
 
-const SINA_URL = 'https://hq.sinajs.cn/list=' + Object.keys(SYMBOLS).join(',');
+// 导出 market→symbols 映射，供 sources/index.js 按市场选源
+export const MARKET_SYMBOLS = SYMBOLS;
 
 // ── 数字格式化（迁移自 fetch-market.js）──────────────────
 function fmtNum(n, decimals = 2) {
@@ -43,16 +41,23 @@ function changeClass(n) {
 }
 
 /**
- * 新浪行情批量源。一次 HTTP 请求获取所有 A股/港股/美股/亚太指数 + 商品。
- * BTC / KOSPI / 美债 是独立源（各自的 API），不在此处。
+ * 新浪行情批量源。market 参数控制只拉哪个市场的品种：
+ *   ashare/hk/us/commodity/crypto/all（缺省 all）
+ * BTC/KOSPI/美债 是独立源，不在此处。
  */
 export class SinaQuoteSource extends MarketSource {
-  constructor() {
-    super({ name: '新浪行情' });
+  constructor(market = 'all') {
+    super({ name: market === 'all' ? '新浪行情' : `新浪行情(${market})` });
+    this.market = market;
+    // 按 market 筛选 symbols
+    this.symbols = market === 'all'
+      ? Object.keys(SYMBOLS)
+      : Object.entries(SYMBOLS).filter(([, v]) => v.market === market).map(([k]) => k);
   }
 
   async fetch() {
-    const buf = await fetch(SINA_URL, {
+    const url = 'https://hq.sinajs.cn/list=' + this.symbols.join(',');
+    const buf = await fetch(url, {
       headers: { Referer: 'https://finance.sina.com.cn' },
       signal: AbortSignal.timeout(15000),
     }).then((r) => r.arrayBuffer());

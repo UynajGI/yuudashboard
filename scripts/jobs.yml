@@ -110,70 +110,118 @@ jobs:
     output: content/news/{date}-digest.md
     tags: [时事, 今日要闻]
     description: "今日要闻汇总：{date}"
+    columns:
+      - { name: 国内, file: "content/news/{date}-domestic.md" }
+      - { name: 国际, file: "content/news/{date}-world.md" }
+      - { name: 科技, file: "content/news/{date}-tech.md" }
+      - { name: 工程, file: "content/news/{date}-engineering.md" }
 
-  # ── 金融管线：新浪 API 拿市场数据 + 新闻，LLM 只做要闻精选/摘要/总览 ──
-  - name: daily-market
-    schedule: "0 11 * * *"       # UTC 11点 = 北京 19点（和晚报同时段）
+  # ═══════════════════════════════════════
+  # 金融 —— 按市场拆 5 专栏 + 1 汇总
+  # ═══════════════════════════════════════
+
+  - name: daily-finance-ashare
+    schedule: "0 11 * * *"
     section: finance
-    slug: market
+    slug: ashare
     window: 24h
-    categories: [要闻]            # 新闻只分一类；指数/商品/BTC 由 fetch 直接拿
-    top_n_per_category: 15
+    market: ashare
+    categories: [A股]
+    subs: [大盘, 行业板块, 资金流向, 个股, 政策, 其他]
+    news_filter: [A股, 沪深, 上证, 深证, 创业板, 科创, 北向, 降准, LPR, 央行]
+    top_n_per_category: 30
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
-    output: content/finance/{date}-market.md
-    tags: [金融]
-    description: "市场概览：{date}"
+    renderer: finance-column
+    output: content/finance/{date}-ashare.md
+    tags: [金融, A股]
+    description: "金融专栏 · A股 {date}"
 
-  # ── 板块扫描：按 A股/港股/美股/亚太/商品/加密 分组看，agent 生成点评 ──
-  # 与 finance（按品种平铺）互补。agent 自主查行情/历史/新闻，输出板块风格判断。
-  - name: sector-scan
-    schedule: "30 11 * * *"      # UTC 11:30 = 北京 19:30（比 finance 晚 30 分钟，避免并发）
+  - name: daily-finance-hk
+    schedule: "5 11 * * *"
     section: finance
-    slug: sectors
+    slug: hk
     window: 24h
-    categories: [要闻]
-    top_n_per_category: 15
-    workflow: [fetch, select, summarize]   # 不走 tldr，板块点评由 agent 生成
-    agent: sectors-commentary              # agent profile：自主查工具生成点评
-    renderer: sectors
-    output: content/finance/{date}-sectors.md
-    tags: [金融, 板块]
-    description: "板块扫描：{date}"
+    market: hk
+    categories: [港股]
+    subs: [大盘, 科技, 金融, 地产, 其他]
+    news_filter: [港股, 恒生, 南向, 香港, 港交所]
+    top_n_per_category: 30
+    workflow: [fetch, select, summarize, tldr]
+    prompt_prefix: finance
+    renderer: finance-column
+    output: content/finance/{date}-hk.md
+    tags: [金融, 港股]
+    description: "金融专栏 · 港股 {date}"
 
-  # ── 资产聚焦：单品种深看（B）──
-  # agent 聚焦分析一个品种：价格+走势+驱动新闻+异动判断。
-  # focus_target 指定品种名，手动触发时可改（如黄金、上证综指）。
-  - name: asset-focus
-    schedule: "45 11 * * *"      # UTC 11:45 = 北京 19:45（比 sectors 晚 15 分钟）
+  - name: daily-finance-us
+    schedule: "10 11 * * *"
     section: finance
-    slug: focus
+    slug: us
     window: 24h
-    categories: [要闻]
-    top_n_per_category: 15
-    workflow: [fetch, select, summarize]
-    agent: focus-analysis
-    renderer: focus
-    focus_target: BTC            # 聚焦品种（可改：黄金 / 美元指数 / 上证综指 / 道琼斯 等）
-    output: content/finance/{date}-focus-{target}.md
-    tags: [金融, 资产聚焦]
-    description: "资产聚焦：{target} {date}"
+    market: us
+    categories: [美股]
+    subs: [大盘, 科技, 宏观, 国债, 其他]
+    news_filter: [美股, 纳斯达克, 道琼斯, 标普, 美联储, 非农, 美债, CPI]
+    top_n_per_category: 30
+    workflow: [fetch, select, summarize, tldr]
+    prompt_prefix: finance
+    renderer: finance-column
+    output: content/finance/{date}-us.md
+    tags: [金融, 美股]
+    description: "金融专栏 · 美股 {date}"
 
-  # ── 联动观察：跨资产联动分析（D）──
-  # agent 找高相关品种对 + 用新闻解释因果。
-  - name: cross-linkage
-    schedule: "0 12 * * *"       # UTC 12:00 = 北京 20:00
+  - name: daily-finance-commodity
+    schedule: "15 11 * * *"
     section: finance
-    slug: linkage
+    slug: commodity
     window: 24h
-    categories: [要闻]
-    top_n_per_category: 15
-    workflow: [fetch, select, summarize]
-    agent: linkage-analysis
-    renderer: linkage
-    output: content/finance/{date}-linkage.md
-    tags: [金融, 联动]
-    description: "联动观察：{date}"
+    market: commodity
+    categories: [商品]
+    subs: [贵金属, 能源, 外汇, 其他]
+    news_filter: [黄金, 金价, 原油, 油价, 美元, OPEC, 大宗, 美债]
+    top_n_per_category: 30
+    workflow: [fetch, select, summarize, tldr]
+    prompt_prefix: finance
+    renderer: finance-column
+    output: content/finance/{date}-commodity.md
+    tags: [金融, 商品]
+    description: "金融专栏 · 商品 {date}"
+
+  - name: daily-finance-crypto
+    schedule: "20 11 * * *"
+    section: finance
+    slug: crypto
+    window: 24h
+    market: crypto
+    categories: [加密]
+    subs: [BTC, ETH, 监管, 链上, 其他]
+    news_filter: [BTC, 比特币, 以太坊, ETH, 加密, 区块链, 稳定币]
+    top_n_per_category: 30
+    workflow: [fetch, select, summarize, tldr]
+    prompt_prefix: finance
+    renderer: finance-column
+    output: content/finance/{date}-crypto.md
+    tags: [金融, 加密]
+    description: "金融专栏 · 加密 {date}"
+
+  - name: daily-finance-digest
+    schedule: "25 11 * * *"
+    section: finance
+    slug: digest
+    window: 24h
+    categories: []
+    workflow: [finance-digest]
+    renderer: finance-digest
+    output: content/finance/{date}-digest.md
+    tags: [金融, 汇总]
+    description: "金融市场汇总：{date}"
+    columns:
+      - { name: A股, file: "content/finance/{date}-ashare.md" }
+      - { name: 港股, file: "content/finance/{date}-hk.md" }
+      - { name: 美股, file: "content/finance/{date}-us.md" }
+      - { name: 商品, file: "content/finance/{date}-commodity.md" }
+      - { name: 加密, file: "content/finance/{date}-crypto.md" }
 
   # ── 以下为预留示例，需要时取消注释 / 复制改参数 ──────────────
   # - name: morning

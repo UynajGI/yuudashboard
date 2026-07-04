@@ -25,7 +25,6 @@ export function buildSources(job, feeds) {
   const isFinance = job.section === 'finance';
 
   if (isNews) {
-    // news 管线：RSS 源（每个 feed 一个 RssSource）
     return {
       itemSources: feeds.map((f) => new RssSource(f)),
       marketSources: [],
@@ -33,18 +32,42 @@ export function buildSources(job, feeds) {
   }
 
   if (isFinance) {
-    // finance 管线：新浪新闻（Item 源）+ 新浪行情/BTC/KOSPI/美债/Tushare（Market 源）
+    const market = job.market || 'all';
     return {
       itemSources: [new SinaNewsSource()],
-      marketSources: [
-        new SinaQuoteSource(),
-        new BtcSource(),
-        new KospiSource(),
-        new UsTreasurySource(),
-        new TushareSource(),
-      ],
+      marketSources: buildFinanceSources(market),
     };
   }
 
   return { itemSources: [], marketSources: [] };
+}
+
+/**
+ * 按市场构建金融行情源。
+ * @param {string} market  ashare/hk/us/commodity/crypto/all
+ */
+function buildFinanceSources(market) {
+  const sources = [new SinaQuoteSource(market)];
+
+  if (market === 'ashare') {
+    // A 股专栏额外加 Tushare（申万行业 + 北向资金）
+    sources.push(new TushareSource());
+  }
+  if (market === 'us') {
+    // 美股专栏加美债
+    sources.push(new UsTreasurySource());
+  }
+  if (market === 'crypto') {
+    // 加密专栏加 BTC
+    sources.push(new BtcSource());
+  }
+  if (market === 'hk') {
+    // 港股专栏加 KOSPI（亚太）
+    sources.push(new KospiSource());
+  }
+  if (market === 'all') {
+    // 汇总：全部源
+    sources.push(new BtcSource(), new KospiSource(), new UsTreasurySource(), new TushareSource());
+  }
+  return sources;
 }

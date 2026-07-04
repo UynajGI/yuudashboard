@@ -45,8 +45,19 @@ export class IngestStage extends Stage {
     const jobWindowMs = windowToMs(ctx.job.window || '24h');
     const sourceWindowMs = itemSources.filter((s) => s.windowMs).map((s) => s.windowMs);
     const dedupeWindowMs = Math.max(jobWindowMs, ...sourceWindowMs);
-    const kept = dedupe(allItems, dedupeWindowMs, seen, ctx.date.str);
+    let kept = dedupe(allItems, dedupeWindowMs, seen, ctx.date.str);
     console.log(`  去重：${allItems.length} → ${kept.length}`);
+
+    // 金融专栏：按 market 关键词过滤新闻（只保留本市场相关）
+    if (ctx.job.news_filter && ctx.job.news_filter.length) {
+      const before = kept.length;
+      const kws = ctx.job.news_filter.map((k) => k.toLowerCase());
+      kept = kept.filter((it) => {
+        const text = (it.title + ' ' + (it.summary || '')).toLowerCase();
+        return kws.some((kw) => text.includes(kw));
+      });
+      console.log(`  市场过滤(${ctx.job.market})：${before} → ${kept.length}`);
+    }
 
     // 按 category 分组
     ctx.items = {};
