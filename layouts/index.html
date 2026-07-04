@@ -1,15 +1,26 @@
 {{/*
-  首页：左侧悬浮导航 + 中间文章全文流
+  首页：左侧悬浮导航 + 中间文章无限滚动流
 */}}
 {{ define "main" }}
 {{- $allPages := where .Site.RegularPages "Section" "in" (slice "news" "finance" "research") }}
-{{- $paginator := .Paginate ($allPages.ByDate.Reverse) }}
+{{- $allSorted := $allPages.ByDate.Reverse }}
+{{- $dividerDone := false }}
+{{- $latestDate := "" }}
+{{- with index $allSorted 0 }}
+  {{- $latestDate = .Date.Format "2006-01-02" }}
+{{- end }}
+
+<script>document.documentElement.classList.add('js-infinite')</script>
 
 <div class="home-layout">
   {{ partial "sidebar.html" . }}
 
-  <section class="home-feed">
-    {{- range $paginator.Pages }}
+  <section class="home-feed" id="home-feed">
+    {{- range $allSorted }}
+    {{- if and (not $dividerDone) $latestDate (ne (.Date.Format "2006-01-02") $latestDate) }}
+      {{- $dividerDone = true }}
+    <div class="home-divider"><span class="home-divider-line"></span><span class="home-divider-label">今日 ↑ &nbsp;·&nbsp; 更早 ↓</span><span class="home-divider-line"></span></div>
+    {{- end }}
     <article class="home-card home-card-{{ .Section }}" id="post-{{ .File.UniqueID }}">
       <div class="home-card-section">
         {{- if eq .Section "news" }}📰 时事
@@ -35,18 +46,51 @@
     </article>
     {{- end }}
 
-    {{- if gt $paginator.TotalPages 1 }}
-    <nav class="apple-pagination">
-      {{- if $paginator.HasPrev }}
-      <a href="{{ $paginator.Prev.URL }}" class="apple-pagination-link">← 上一页</a>
-      {{- end }}
-      {{- if $paginator.HasNext }}
-      <a href="{{ $paginator.Next.URL }}" class="apple-pagination-link">下一页 →</a>
-      {{- end }}
-    </nav>
-    {{- end }}
+    <div class="home-scroll-sentinel" id="home-scroll-sentinel"></div>
   </section>
 </div>
+
+<script>
+(function() {
+  var BATCH = 5;
+  var cards = document.querySelectorAll('.home-feed .home-card');
+  var sentinel = document.getElementById('home-scroll-sentinel');
+  if (!cards.length) return;
+
+  // 初始化：只显示前 BATCH 张，其余标记为折叠
+  for (var i = BATCH; i < cards.length; i++) {
+    cards[i].classList.add('home-card-folded');
+  }
+  var visible = Math.min(BATCH, cards.length);
+
+  // 哨兵进入视野 → 展开下一批
+  function showNext() {
+    var target = Math.min(visible + BATCH, cards.length);
+    for (var i = visible; i < target; i++) {
+      cards[i].classList.remove('home-card-folded');
+    }
+    visible = target;
+    if (visible >= cards.length && sentinel) {
+      sentinel.style.display = 'none';
+    }
+  }
+
+  if (sentinel && 'IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting && visible < cards.length) {
+        showNext();
+      }
+    }, { rootMargin: '300px' });
+    observer.observe(sentinel);
+  } else {
+    // 不支持 IntersectionObserver → 全部展示
+    showNext();
+    for (var j = BATCH; j < cards.length; j++) {
+      cards[j].classList.remove('home-card-folded');
+    }
+  }
+})();
+</script>
 {{ end }}
 
 {{ define "toc-container" }}{{ end }}

@@ -11,8 +11,9 @@ import { BtcSource } from './btc.js';
 import { KospiSource } from './eastmoney.js';
 import { UsTreasurySource } from './yahoo.js';
 import { TushareSource } from './tushare.js';
+import { SearchSource } from './search.js';
 
-export { RssSource, SinaQuoteSource, SinaNewsSource, BtcSource, KospiSource, UsTreasurySource, TushareSource };
+export { RssSource, SinaQuoteSource, SinaNewsSource, BtcSource, KospiSource, UsTreasurySource, TushareSource, SearchSource };
 
 // 金融专用 RSS 财经源（不走 feeds.yml，直接注入金融管线）
 const FINANCE_RSS_FEEDS = [
@@ -50,8 +51,12 @@ export function buildSources(job, feeds) {
     // 金融新闻：新浪 API + 财经 RSS 源（category 设为 job 的 categories[0]）
     const cat = job.categories?.[0] || '要闻';
     const financeRss = FINANCE_RSS_FEEDS.map((f) => new RssSource({ ...f, category: cat }));
+    // ddgs 搜索源（补 RSS 盲区，job.search 配搜索词）
+    const searchSources = (job.search || []).map((q) =>
+      new SearchSource({ name: `搜索·${q.slice(0, 8)}`, query: q, category: cat, max: 10 })
+    );
     return {
-      itemSources: [new SinaNewsSource(), ...financeRss],
+      itemSources: [new SinaNewsSource(), ...financeRss, ...searchSources],
       marketSources: buildFinanceSources(market),
     };
   }

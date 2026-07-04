@@ -201,6 +201,60 @@
 .home-card-body > *:last-child { margin-bottom: 0; }
 .home-card-body > *:first-child { margin-top: 0; }
 
+/* ── 无限滚动 ── */
+/* 默认全部可见（无 JS / JS 禁用时的降级）。JS 激活后折叠超出的卡片 */
+.js-infinite .home-card-folded {
+  opacity: 0;
+  transform: translateY(24px);
+  max-height: 0;
+  overflow: hidden;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  border-width: 0 !important;
+}
+.js-infinite .home-card {
+  transition: opacity 0.45s var(--dash-ease), transform 0.45s var(--dash-ease), max-height 0.5s var(--dash-ease), padding 0.5s var(--dash-ease), margin 0.5s var(--dash-ease);
+}
+.js-infinite .home-card:not(.home-card-folded) {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 4000px;
+  overflow: visible;
+}
+.home-scroll-sentinel {
+  height: 1px;
+}
+
+/* ── 日期分割线 ── */
+.home-divider {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 12px 0 8px;
+  padding: 16px 0;
+  animation: panel-rise 0.6s var(--dash-ease) both;
+}
+.home-divider-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+}
+.home-divider-label {
+  flex: 0 0 auto;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--secondary);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  padding: 8px 20px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: var(--entry);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+
 /* ── 响应式 ── */
 @media (max-width: 860px) {
   .home-layout {
@@ -224,6 +278,14 @@
 }
 
 /* ── 暗色模式 ── */
+[data-theme="dark"] .home-divider-line {
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+}
+[data-theme="dark"] .home-divider-label {
+  border-color: var(--border);
+  background: var(--entry);
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
 [data-theme="dark"] .home-card,
 [data-theme="dark"] .apple-card,
 [data-theme="dark"] .apple-content-shell,
