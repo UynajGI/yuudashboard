@@ -6,6 +6,7 @@
 import { fetchMarketData } from '../fetch-market.js';
 import { fetchFinanceNews } from '../fetch-finance-news.js';
 import { loadState } from '../state.js';
+import { loadHistory, saveSnapshot } from '../market-history.js';
 
 /**
  * @param {object} ctx
@@ -27,7 +28,14 @@ export async function fetch(ctx, _llm) {
   // 3. 存储市场数据
   ctx.marketData = marketData;
 
-  // 4. 金融新闻 → ctx.items（复刻 clean stage 的输出格式）
+  // 4. 持久化当日快照 → market-history（供走势图用；dry-run 跳过写盘）
+  if (ctx.args.dryRun) {
+    ctx.marketHistory = loadHistory(ctx.repoRoot);
+  } else {
+    ctx.marketHistory = saveSnapshot(ctx.repoRoot, ctx.date.str, marketData);
+  }
+
+  // 5. 金融新闻 → ctx.items（复刻 clean stage 的输出格式）
   //    所有新闻归入「要闻」category
   ctx.items = { 要闻: newsItems };
 

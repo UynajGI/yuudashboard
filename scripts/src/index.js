@@ -10,7 +10,16 @@ import { createLLM } from './llm/index.js';
 import { runWorkflow } from './workflow/index.js';
 import { render } from './render.js';
 import { renderFinance } from './render-finance.js';
+import { renderWeekly } from './render-weekly.js';
 import { saveState } from './state.js';
+
+// Renderer 注册表：jobs.yml 的 renderer 字段选择，缺省按 section 兜底。
+// 新增汇报模板：写一个 render-xxx.js + 在此注册 + jobs.yml 加 renderer: xxx 即可。
+const RENDERERS = {
+  news: render,
+  finance: renderFinance,
+  weekly: renderWeekly,
+};
 
 async function main() {
   const args = parseArgs(process.argv);
@@ -63,9 +72,12 @@ async function main() {
     process.exit(1);
   }
 
-  // 金融 section 用专属 renderer（输出市场数据表格），其余用通用 renderer
-  const { path, content, processed } = isFinance ? renderFinance(ctx) : render(ctx);
-  console.log(`\n渲染：${path}`);
+  // Renderer 选择：jobs.yml 的 renderer 字段优先，缺省按 section 兜底
+  const rendererKey = ctx.job.renderer ?? (isFinance ? 'finance' : 'news');
+  const renderer = RENDERERS[rendererKey];
+  if (!renderer) throw new Error(`未知 renderer: "${rendererKey}"（RENDERERS 仅识别 ${Object.keys(RENDERERS).join('/')}）`);
+  const { path, content, processed } = renderer(ctx);
+  console.log(`\n渲染：${path}（renderer: ${rendererKey}）`);
 
   if (args.dryRun) {
     console.log('\n--- 生成内容预览 ---\n');

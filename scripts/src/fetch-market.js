@@ -14,7 +14,7 @@ if (proxyUrl) {
 
 // ── 品种定义 ──────────────────────────────────────────
 const SYMBOLS = {
-  // A 股指数（33 字段格式）
+  // A 股指数（33 字段格式，含 OHLC：fields[1]=close [3]=open [4]=high [5]=low）
   'sh000001': { name: '上证综指', cat: 'indices' },
   'sz399001': { name: '深证成指', cat: 'indices' },
   'sz399006': { name: '创业板指', cat: 'indices' },
@@ -23,6 +23,10 @@ const SYMBOLS = {
   'int_hangseng': { name: '恒生指数',  cat: 'indices' },
   'hkHSTECH':     { name: '恒生科技',  cat: 'indices', fmt: 'hk' },
   'int_nikkei':   { name: '日经 225',  cat: 'indices' },
+  // 美股三大指数（4 字段 int_* 格式：名称,价格,涨跌额,涨跌幅）
+  'int_dji':    { name: '道琼斯',   cat: 'indices' },
+  'int_nasdaq': { name: '纳斯达克', cat: 'indices' },
+  'int_sp500':  { name: '标普500',  cat: 'indices' },
   // 核心资产
   'hf_CL':  { name: 'WTI 原油', cat: 'assets', unit: '$', decimals: 2 },
   'hf_GC':  { name: '黄金',     cat: 'assets', unit: '$', decimals: 2, suffix: '/oz' },
@@ -33,14 +37,20 @@ const SINA_URL = 'https://hq.sinajs.cn/list=' + Object.keys(SYMBOLS).join(',');
 
 // ── 解析器 ────────────────────────────────────────────
 
-/** 解析 A 股指数（33 字段 var hq_str_sh000001="名称,当前,昨收,..."） */
+/**
+ * 解析 A 股指数（33 字段 var hq_str_sh000001="名称,当前,昨收,开盘,最高,最低,..."）
+ * 保留 OHLC 供日内振幅条 / 历史快照使用，零额外请求。
+ */
 function parseAIndex(fields) {
-  // fields[0]=名称, [1]=当前价, [2]=昨收
+  // fields[0]=名称, [1]=当前价, [2]=昨收, [3]=开盘, [4]=最高, [5]=最低
   const price = parseFloat(fields[1]);
   const prevClose = parseFloat(fields[2]);
+  const open = parseFloat(fields[3]);
+  const high = parseFloat(fields[4]);
+  const low = parseFloat(fields[5]);
   const change = price - prevClose;
   const changePct = prevClose ? (change / prevClose) * 100 : 0;
-  return { price, prevClose, change, changePct };
+  return { price, prevClose, open, high, low, change, changePct };
 }
 
 /** 解析全球指数（4 字段：名称,价格,涨跌额,涨跌幅） */
@@ -80,28 +90,53 @@ function changeClass(n) {
   return n > 0 ? 'up' : n < 0 ? 'down' : '';
 }
 
-// ── BTC 抓取（CoinGecko，GA runner 可通；本地被墙则返回 null）───
+// ── BTC 抓取（多源容错）──────────────────────────────
+// 主源 CoinGecko（GA runner 可通，本地被墙）→ 备源 Gate.io（国内可达）
+async function fetchBTCFromCoinGecko() {
+  const res = await fetch(
+    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
+    { signal: AbortSignal.timeout(8000) },
+  );
+  if (!res.ok) return null;
+  const btc = (await res.json()).bitcoin;
+  if (!btc) return null;
+  const price = btc.usd;
+  const changePct = btc.usd_24h_change ?? 0;
+  return { price, changePct };
+}
+
+async function fetchBTCFromGate() {
+  const res = await fetch(
+    'https://api.gateio.ws/api/v4/spot/tickers?currency_pair=BTC_USDT',
+    { signal: AbortSignal.timeout(8000) },
+  );
+  if (!res.ok) return null;
+  const arr = await res.json();
+  const t = arr?.[0];
+  if (!t) return null;
+  const price = parseFloat(t.last);
+  // change_percentage 是字符串如 "1.68"，表示百分比
+  const changePct = parseFloat(t.change_percentage) || 0;
+  return { price, changePct };
+}
+
 async function fetchBTC() {
-  try {
-    const res = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
-      { signal: AbortSignal.timeout(8000) },
-    );
-    if (!res.ok) return null;
-    const json = await res.json();
-    const btc = json.bitcoin;
-    if (!btc) return null;
-    const price = btc.usd;
-    const changePct = btc.usd_24h_change ?? 0;
-    const change = price ? (price * changePct) / (100 + changePct) : 0;
-    return { name: 'BTC', price, change, changePct,
-      priceStr: '$' + fmtNum(price, 0),
-      changeStr: fmtChange(changePct, 2),
-      changeClass: changeClass(changePct),
-    };
-  } catch {
-    return null;
+  // 依次尝试，首个成功即用
+  for (const [src, fn] of [['CoinGecko', fetchBTCFromCoinGecko], ['Gate.io', fetchBTCFromGate]]) {
+    try {
+      const r = await fn();
+      if (r && isFinite(r.price) && r.price > 0) {
+        const { price, changePct } = r;
+        const change = price ? (price * changePct) / (100 + changePct) : 0;
+        return { name: 'BTC', price, change, changePct, source: src,
+          priceStr: '$' + fmtNum(price, 0),
+          changeStr: fmtChange(changePct, 2),
+          changeClass: changeClass(changePct),
+        };
+      }
+    } catch { /* 该源失败，试下一个 */ }
   }
+  return null;
 }
 
 // ── 韩国 KOSPI（东方财富 API，GA/本地均通）───
@@ -201,7 +236,7 @@ export async function fetchMarketData() {
       } else {
         const isGlobal = symbol.startsWith('int_');
         const parsed = isGlobal ? parseGlobalIndex(fields) : parseAIndex(fields);
-        indices.push({
+        const item = {
           name: def.name,
           price: parsed.price,
           change: parsed.change,
@@ -209,13 +244,27 @@ export async function fetchMarketData() {
           priceStr: fmtNum(parsed.price, 2),
           changeStr: fmtChange(parsed.changePct, 2),
           changeClass: changeClass(parsed.changePct),
-        });
+        };
+        // A 股带 OHLC（日内振幅 / 历史快照用），int_* 全球指数无此字段
+        if (!isGlobal && parsed.open != null) {
+          item.open = parsed.open;
+          item.high = parsed.high;
+          item.low = parsed.low;
+        }
+        indices.push(item);
       }
     } else if (def.cat === 'assets') {
-      // 核心资产：期货 hf_* 用 fields[0]=价 fields[2]=昨收；外汇 DINIW 用 fields[1]=价 fields[2]=昨收
+      // 核心资产：期货 hf_* 用 fields[0]=价 fields[2]=昨收
       const isFuture = symbol.startsWith('hf_');
       const price = parseFloat(isFuture ? fields[0] : fields[1]) || 0;
-      const prevClose = parseFloat(fields[2]) || price;
+      // FIXME(美元指数 DINIW): fields[2] 与 fields[1] 同值，并非昨收 → 涨跌幅恒为 0。
+      //   探测 2026-07-04（周六+美独立日休市）样本字段：
+      //     [0]time [1]current [2]current [3]bid [4]? [5]? [6]high [7]low [8]current [9]name [10]date
+      //   待工作日（非节假日、行情有 ≥0.3% 波动）重测，对照官方 DXY 涨跌定位 prevClose 字段。
+      //   临时方案：hf_* 仍用 fields[2]；DINIW 的 prevClose 用 fields[7](low) 兜底，至少有非零波动。
+      const prevClose = isFuture
+        ? (parseFloat(fields[2]) || price)
+        : (parseFloat(fields[7]) || parseFloat(fields[2]) || price);
       const change = price - prevClose;
       const changePct = prevClose ? (change / prevClose) * 100 : 0;
       const priceStr = (def.unit || '') + fmtNum(price, def.decimals ?? 2) + (def.suffix || '');
@@ -232,14 +281,14 @@ export async function fetchMarketData() {
 
   console.log(`    指数 ${indices.length} 项 · 资产 ${assets.length} 项`);
 
-  // 海外数据：BTC + 美债 + 韩国（GA runner 可通，本地被墙则静默跳过）
+  // 海外数据：BTC（多源）/ 美债 / 韩国（GA runner 可通，本地被墙则静默跳过）
   const [btc, usTreasury, kospi] = await Promise.all([
     fetchBTC().catch(() => null),
     fetchUSTreasury().catch(() => null),
     fetchKOSPI().catch(() => null),
   ]);
-  if (btc)   console.log(`    BTC ${btc.priceStr} (CoinGecko)`);
-  else       console.log('    BTC 不可用');
+  if (btc)   console.log(`    BTC ${btc.priceStr} (${btc.source})`);
+  else       console.log('    BTC 不可用（CoinGecko + Gate.io 均失败）');
   if (usTreasury) console.log(`    美债 ${usTreasury.priceStr} (Yahoo)`);
   else            console.log('    美债 不可用');
   if (kospi)      console.log(`    KOSPI ${kospi.priceStr} (Eastmoney)`);

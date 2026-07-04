@@ -18,6 +18,10 @@
 #   output               输出路径模板，{date} 会替换成 YYYY-MM-DD（北京时间）
 #   tags                 frontmatter 的 tags 字段
 #   description          frontmatter 的 description 字段（{date} 会替换）
+#   renderer             可选，选择哪个渲染器输出。缺省按 section 兜底：
+#                        section=finance → finance，其余 → news。
+#                        可选值：news / finance / weekly。
+#                        加新汇报模板：写 scripts/src/render-xxx.js + 在 index.js 注册 + 这里填 renderer: xxx
 #
 # workflow 字段说明：
 #   处理流水线，每个阶段是独立函数，context 在阶段间传递。
@@ -57,6 +61,21 @@ jobs:
     output: content/finance/{date}-market.md
     tags: [金融]
     description: "市场概览：{date}"
+
+  # ── 周报：每周一回顾上周市场走势（依赖 market-history 累积）──
+  # 只跑 fetch（拿当日数据 + 读历史），不走 LLM 新闻处理。
+  # 周一到周五任一天手动跑都行；GA cron 建议设周一 UTC 03:00（北京 11:00）。
+  - name: weekly
+    schedule: "0 3 * * 1"         # UTC 周一 03:00 = 北京周一 11:00
+    section: finance
+    slug: weekly
+    window: 7d
+    categories: []                # 周报不处理新闻
+    workflow: [fetch]             # 只抓数据 + 读历史，无 LLM 阶段
+    renderer: weekly              # 用 render-weekly.js（走势对比 + 周收益榜）
+    output: content/finance/{date}-weekly.md
+    tags: [金融, 周报]
+    description: "周度市场回顾：{date}"
 
   # ── 以下为预留示例，需要时取消注释 / 复制改参数 ──────────────
   # - name: morning

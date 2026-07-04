@@ -52,6 +52,75 @@ function renderNewsItem(it) {
   return `- ${title}：${it.summary}${sources}`;
 }
 
+// ── chart.xkcd 图表注入（raw HTML/JS 内联进 markdown，依赖 hugo unsafe=true）──
+
+/** JSON 安全转义（供 <script> 内联） */
+function jsonSafe(v) {
+  return JSON.stringify(v).replace(/</g, '\\u003c');
+}
+
+/**
+ * 指数涨跌幅柱状图：所有指数一字排开，正负柱区分涨跌。
+ * @param {Array} indices  [{ name, changePct }, ...]
+ * @param {string} dateStr 用于生成唯一 svg id
+ * @returns {string} markdown 行（svg + script，空数组返回 ''）
+ */
+function renderIndexBarChart(indices, dateStr) {
+  const valid = indices.filter((ix) => isFinite(ix.changePct));
+  if (valid.length < 2) return ''; // 太少不画
+  const id = `idx-bar-${dateStr}`;
+  const labels = valid.map((ix) => ix.name);
+  const data = valid.map((ix) => Number((ix.changePct || 0).toFixed(2)));
+  const cfg = {
+    title: '当日涨跌幅 (%)',
+    data: { labels, datasets: [{ data }] },
+    options: { yTickCount: 5, dataColors: data.map((d) => (d >= 0 ? '#20bf6b' : '#eb3b5a')) },
+  };
+  return [
+    `<svg class="xkcd-chart" id="${id}" style="width:100%;max-width:680px;display:block;margin:8px auto 4px"></svg>`,
+    '<script>',
+    `(function(){var c=document.getElementById("${id}");if(!c||!window.chartXkcd)return;`,
+    `new chartXkcd.Bar(c,${jsonSafe(cfg)});})();`,
+    '</script>',
+  ].join('');
+}
+
+/**
+ * 资产走势 sparkline：取该品种在 market-history 最近 N 天的 close 序列画折线。
+ * @param {object} history   ctx.marketHistory（{ days: {...} }）
+ * @param {string} name      品种名（与 history 里的 key 对齐，如 "黄金"）
+ * @param {string} idKey     用于 svg id 的安全标识（如 "gold"，避免中文）
+ * @param {string} dateStr   用于生成唯一 svg id
+ * @returns {string} markdown 行（点 < 3 返回 ''）
+ */
+function renderAssetSparkline(history, name, idKey, dateStr) {
+  if (!history?.days) return '';
+  const dates = Object.keys(history.days).sort();
+  if (dates.length < 3) return ''; // 冷启动期不画
+  const recent = dates.slice(-7);
+  const points = [];
+  for (const d of recent) {
+    const item = history.days[d]?.[name];
+    if (item && isFinite(item.close)) points.push(item.close);
+  }
+  if (points.length < 3) return ''; // 有效点不足
+  const id = `spark-${idKey}-${dateStr}`;
+  const cfg = {
+    data: {
+      labels: recent.map((d) => d.slice(5)), // MM-DD
+      datasets: [{ label: name, data: points }],
+    },
+    options: { yTickCount: 3, dotSize: 0.6, showLine: true, dataColors: ['#4facfe'] },
+  };
+  return [
+    `<svg class="xkcd-chart xkcd-spark" id="${id}" style="width:100%;max-width:480px;display:block;margin:4px auto"></svg>`,
+    '<script>',
+    `(function(){var c=document.getElementById("${id}");if(!c||!window.chartXkcd)return;`,
+    `new chartXkcd.Line(c,${jsonSafe(cfg)});})();`,
+    '</script>',
+  ].join('');
+}
+
 /** 紧凑指数表格：一行多列 */
 function renderIndexRow(ix) {
   const ch = renderChangeHtml(ix);
@@ -65,7 +134,7 @@ function renderIndexRow(ix) {
  * @returns {{ path: string, content: string, processed: Array }}
  */
 export function renderFinance(ctx) {
-  const { job, date, marketData, summarized, tldr } = ctx;
+  const { job, date, marketData, summarized, tldr, marketHistory } = ctx;
   const path = job.output.replace('{date}', date.str);
   const md = marketData || { indices: [], assets: [], btc: null, usTreasury: null, kospi: null };
 
@@ -114,7 +183,7 @@ export function renderFinance(ctx) {
   // ── 正文 ──
   const body = [];
 
-  // 1. 指数（纯数据 + LLM 判断 + chart.xkcd 柱状图，不要新闻）
+  // 1. 指数（表格 + chart.xkcd 当日涨跌幅柱状图，不要新闻）
   if (indices.length) {
     body.push('## 指数\n');
     const marketLine = tldr.find((t) => t.startsWith('市场：')) || tldr[0] || '';
@@ -123,6 +192,11 @@ export function renderFinance(ctx) {
     body.push('|------|------|--------|');
     for (const ix of indices) body.push(renderIndexRow(ix));
     body.push('');
+    const barChart = renderIndexBarChart(indices, date.str);
+    if (barChart) {
+      body.push(barChart);
+      body.push('');
+    }
   }
 
   // 2. 核心资产：价格 + 匹配新闻
@@ -146,6 +220,15 @@ export function renderFinance(ctx) {
       body.push(`## ${label}  —`);
     }
     body.push('');
+
+    // 走势 sparkline（依赖 market-history 累积 ≥3 天）
+    if (data) {
+      const spark = renderAssetSparkline(marketHistory, name, key, date.str);
+      if (spark) {
+        body.push(spark);
+        body.push('');
+      }
+    }
 
     for (const item of news.slice(0, 3)) body.push(renderNewsItem(item));
     if (news.length > 3) body.push(`- *…共 ${news.length} 条相关要闻*`);
