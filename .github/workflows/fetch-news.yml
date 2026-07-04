@@ -41,10 +41,12 @@ jobs:
             echo "### 手动触发：${{ inputs.job }}"
             node v2/index.js --job="${{ inputs.job }}"
           else
-            for job in daily-news-domestic daily-news-world daily-news-tech; do
+            for job in daily-news-domestic daily-news-world daily-news-tech daily-news-engineering; do
               echo "### $job"
               node v2/index.js --job="$job" || echo "⚠ $job 失败"
             done
+            echo "### daily-news-digest"
+            node v2/index.js --job=daily-news-digest || echo "⚠ digest 失败"
           fi
 
       - name: Commit & push
