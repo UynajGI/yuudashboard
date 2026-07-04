@@ -17,10 +17,9 @@ function loadYaml(rel) {
 }
 
 export function parseArgs(argv) {
-  const args = { job: 'daily', dryRun: false, stopAfter: null, allFinance: false };
+  const args = { job: 'daily', dryRun: false, stopAfter: null };
   for (const a of argv.slice(2)) {
     if (a === '--dry-run') args.dryRun = true;
-    else if (a === '--all-finance') args.allFinance = true;
     else if (a.startsWith('--stop-after=')) args.stopAfter = a.slice('--stop-after='.length);
     else if (a.startsWith('--job=')) args.job = a.slice('--job='.length);
   }

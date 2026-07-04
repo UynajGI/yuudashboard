@@ -39,12 +39,19 @@ jobs:
           TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
         run: |
           if [ -n "${{ inputs.job }}" ]; then
-            # 手动触发单个 job 测试
+            # 手动触发单个 job
             echo "### 手动触发：${{ inputs.job }}"
             node v2/index.js --job="${{ inputs.job }}"
           else
-            # 自动全跑：v2/index.js 读 jobs.yml 自动找所有 section:finance 的 job
-            node v2/index.js --all-finance
+            # 定时/手动全跑：4 个报告依次生成，一次 commit 避免 push 冲突
+            JOBS="daily-market sector-scan asset-focus cross-linkage"
+            for job in $JOBS; do
+              echo ""
+              echo "========================================"
+              echo "### $job"
+              echo "========================================"
+              node v2/index.js --job="$job" || echo "⚠ $job 失败，继续下一个"
+            done
           fi
 
       - name: Commit & push

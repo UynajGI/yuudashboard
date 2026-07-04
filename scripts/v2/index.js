@@ -1,14 +1,11 @@
 // v2 主入口：CLI → buildContext → Pipeline → agent → render → 写文件 → store 更新。
-// 用法：
-//   node v2/index.js --job=daily-news
-//   node v2/index.js --job=daily-news --dry-run
-//   node v2/index.js --all-finance        # 自动跑 jobs.yml 里所有 section:finance 的 job
-//   node v2/index.js --all-finance --dry-run
+// 用法（与旧 src/index.js 兼容）：
+//   node v2/index.js --job=daily
+//   node v2/index.js --job=daily --dry-run
+//   node v2/index.js --job=finance --stop-after=ingest
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { readFileSync } from 'node:fs';
-import yaml from 'js-yaml';
-import { buildContext, parseArgs, SCRIPTS_DIR } from './config.js';
+import { buildContext, parseArgs } from './config.js';
 import { createLLM } from '../src/llm/index.js'; // 复用旧 LLM provider（无架构依赖）
 import { Pipeline } from './core/pipeline.js';
 import { IngestStage } from './stages/ingest.js';
@@ -51,31 +48,6 @@ pipeline.register(new IngestStage())
 
 async function main() {
   const args = parseArgs(process.argv);
-
-  // --all-finance：读 jobs.yml 所有 section:finance 的 job，依次执行
-  if (args.allFinance) {
-    const jobsYaml = yaml.load(readFileSync(resolve(SCRIPTS_DIR, 'jobs.yml'), 'utf8'));
-    const financeJobs = (jobsYaml.jobs || []).filter((j) => j.section === 'finance');
-    if (!financeJobs.length) { console.log('无 finance job'); return; }
-
-    console.log(`\n════════════════════════════════════════`);
-    console.log(`  v2 · all-finance（${financeJobs.length} 个 job）${args.dryRun ? ' (dry-run)' : ''}`);
-    console.log(`════════════════════════════════════════\n`);
-
-    for (const jobDef of financeJobs) {
-      const jobArgs = { ...args, job: jobDef.name };
-      console.log(`── ${jobDef.name} ──`);
-      await runOneJob(jobArgs, pipeline);
-    }
-    console.log(`\n✓ v2 all-finance 完成\n`);
-    return;
-  }
-
-  // 单 job 模式
-  await runOneJob(args, pipeline);
-}
-
-async function runOneJob(args, pipeline) {
   console.log(`\n════════════════════════════════════════`);
   console.log(`  v2 · job: ${args.job}  ${args.dryRun ? '(dry-run)' : ''}  ${args.stopAfter ? `(stop-after: ${args.stopAfter})` : ''}`);
   console.log(`════════════════════════════════════════\n`);
