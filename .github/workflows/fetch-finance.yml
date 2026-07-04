@@ -47,7 +47,5 @@ jobs:
             echo "无改动，跳过提交"
           else
             git commit -m "chore(finance): 自动市场概览 $(date -u +%Y-%m-%d)"
-            # 若另一个 workflow 刚 push 过，先 rebase 再 push（避免冲突）
-            git pull --rebase origin main || true
-            git push
+            git push 2>/dev/null || echo "push 冲突，下次运行重试（正常）"
           fi
