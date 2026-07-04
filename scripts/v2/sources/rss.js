@@ -59,7 +59,7 @@ export class RssSource extends ItemSource {
     let items = rawItems
       .map((raw) => {
         const { title, link, summary, date } = normalizeItem(raw);
-        return new NewsItem({ title, link, summary, fullSummary: summary, source: this.name, category: this.category, date });
+        return new NewsItem({ title, link, summary, fullSummary: summary, source: this.name, category: this.category, sub: this.config.sub, date });
       })
       // per-source 时间窗过滤（无 window 或无 date 的保留）
       .filter((it) => {
@@ -149,14 +149,15 @@ function splitAggregated(item) {
     const firstClause = clean.split(/[，。：；!？]/)[0];
     const title = firstClause.length > 4 && firstClause.length <= 40 ? firstClause : clean.slice(0, 30);
     // 拆出的条目用 原link#序号 区分 urlHash
-    return new NewsItem({
-      title: title || item.title,
-      link: item.link ? `${item.link}#${i + 1}` : '',
-      summary: clean.slice(0, 200),
-      fullSummary: clean,
-      source: item.source,
-      category: item.category,
-      date: item.date,
+	    return new NewsItem({
+	      title: title || item.title,
+	      link: item.link ? `${item.link}#${i + 1}` : '',
+	      summary: clean.slice(0, 200),
+	      fullSummary: clean,
+	      source: item.source,
+	      category: item.category,
+	      sub: item.sub,
+	      date: item.date,
     });
   });
 }

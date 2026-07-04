@@ -28,9 +28,34 @@ export function renderNews(ctx) {
   for (const cat of job.categories) {
     const items = summarized[cat] || [];
     if (!items.length) continue;
-    body.push(`## ${cat}\n`);
-    for (const item of items) body.push(renderNewsItem(item));
-    body.push('');
+
+    // 按 sub 分组（sub 由 feeds.yml 人工分配，renderer 据此组织条目）
+    const bySub = {};
+    const noSub = [];
+    for (const item of items) {
+      // summarized 的 item 结构：{ title, summary, sources, link, _rawItems }
+      // _rawItems[0] 是原始 NewsItem，带 sub 字段
+      const sub = item._rawItems?.[0]?.sub || '';
+      if (sub && sub !== '???') {
+        if (!bySub[sub]) bySub[sub] = [];
+        bySub[sub].push(item);
+      } else {
+        noSub.push(item);
+      }
+    }
+
+    // 有子分类的先渲染，无子分类的放在最后
+    for (const sub of Object.keys(bySub).sort()) {
+      body.push(`### ${cat} · ${sub}\n`);
+      for (const item of bySub[sub]) body.push(renderNewsItem(item));
+      body.push('');
+    }
+    if (noSub.length) {
+      if (Object.keys(bySub).length) body.push(`### ${cat} · 其他\n`);
+      else body.push(`## ${cat}\n`);
+      for (const item of noSub) body.push(renderNewsItem(item));
+      body.push('');
+    }
   }
 
   const content = fm.join('\n') + '\n\n' + body.join('\n').trimEnd() + '\n';

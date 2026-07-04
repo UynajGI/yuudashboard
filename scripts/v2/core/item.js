@@ -26,14 +26,15 @@ export const titleHash = (title) =>
  * 这是唯一会进入 dedupe / seen.json / select / summarize 的数据类型。
  */
 export class NewsItem {
-  constructor({ title, link = '', summary = '', fullSummary, source, category, date = null }) {
+  constructor({ title, link = '', summary = '', fullSummary, source, category, sub, date = null }) {
     this.title = String(title || '');
     this.link = String(link || '');
     this.summary = String(summary || '');
-    this.fullSummary = fullSummary ?? this.summary; // 缺省用 summary
+    this.fullSummary = fullSummary ?? this.summary;
     this.source = source || '';
     this.category = category || '';
-    this.date = date; // Date | null（无日期的保留，dedupe 保守不过滤）
+    this.sub = sub || '';  // 子分类（时政/经济/军事...），由 feeds.yml 人工分配
+    this.date = date;
 
     // hash 唯一计算点
     this.urlHash = this.link ? urlHash(this.link) : '';
