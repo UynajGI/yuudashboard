@@ -151,8 +151,31 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
+
+/* ── TL;DR 摘要 ── */
+.home-card-tldr {
+  margin: 0 0 14px;
+  padding: 10px 16px;
+  background: var(--theme);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent-blue);
+}
+.home-card-tldr-list {
+  margin: 0;
+  padding: 0 0 0 16px;
+  list-style: disc;
+  font-size: 0.90rem;
+  line-height: 1.65;
+  color: var(--secondary);
+}
+.home-card-tldr-list li {
+  margin: 2px 0;
+}
+.home-card-news .home-card-tldr { border-left-color: var(--accent-news); }
+.home-card-finance .home-card-tldr { border-left-color: var(--accent-finance); }
+.home-card-research .home-card-tldr { border-left-color: var(--accent-research); }
 
 .home-card-body {
   font-size: 1.02rem;

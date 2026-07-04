@@ -39,7 +39,7 @@
 #   想跳过某阶段（比如调试时只看 clean 结果），改这里即可，不动代码。
 
 jobs:
-  - name: daily
+  - name: daily-news
     schedule: "0 11 * * *"       # UTC 11点 = 北京 19点（晚报）
     section: news
     slug: daily-brief
@@ -55,7 +55,7 @@ jobs:
     description: "每日晚报：{date}"
 
   # ── 金融管线：新浪 API 拿市场数据 + 新闻，LLM 只做要闻精选/摘要/总览 ──
-  - name: finance
+  - name: daily-market
     schedule: "0 11 * * *"       # UTC 11点 = 北京 19点（和晚报同时段）
     section: finance
     slug: market
@@ -70,7 +70,7 @@ jobs:
 
   # ── 板块扫描：按 A股/港股/美股/亚太/商品/加密 分组看，agent 生成点评 ──
   # 与 finance（按品种平铺）互补。agent 自主查行情/历史/新闻，输出板块风格判断。
-  - name: sectors
+  - name: sector-scan
     schedule: "30 11 * * *"      # UTC 11:30 = 北京 19:30（比 finance 晚 30 分钟，避免并发）
     section: finance
     slug: sectors
@@ -87,7 +87,7 @@ jobs:
   # ── 资产聚焦：单品种深看（B）──
   # agent 聚焦分析一个品种：价格+走势+驱动新闻+异动判断。
   # focus_target 指定品种名，手动触发时可改（如黄金、上证综指）。
-  - name: focus
+  - name: asset-focus
     schedule: "45 11 * * *"      # UTC 11:45 = 北京 19:45（比 sectors 晚 15 分钟）
     section: finance
     slug: focus
@@ -104,7 +104,7 @@ jobs:
 
   # ── 联动观察：跨资产联动分析（D）──
   # agent 找高相关品种对 + 用新闻解释因果。
-  - name: linkage
+  - name: cross-linkage
     schedule: "0 12 * * *"       # UTC 12:00 = 北京 20:00
     section: finance
     slug: linkage

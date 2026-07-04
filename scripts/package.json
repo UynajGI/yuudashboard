@@ -9,15 +9,15 @@
   },
   "scripts": {
     "start": "node v2/index.js",
-    "daily": "node v2/index.js --job=daily",
-    "dry": "node v2/index.js --job=daily --dry-run",
-    "ingest-only": "node v2/index.js --job=daily --stop-after=ingest",
-    "finance": "node v2/index.js --job=finance",
-    "finance:dry": "node v2/index.js --job=finance --dry-run",
-    "finance:ingest-only": "node v2/index.js --job=finance --stop-after=ingest",
-    "sectors": "node v2/index.js --job=sectors",
-    "focus": "node v2/index.js --job=focus",
-    "linkage": "node v2/index.js --job=linkage"
+    "daily-news": "node v2/index.js --job=daily-news",
+    "daily-news:dry": "node v2/index.js --job=daily-news --dry-run",
+    "daily-news:ingest-only": "node v2/index.js --job=daily-news --stop-after=ingest",
+    "daily-market": "node v2/index.js --job=daily-market",
+    "daily-market:dry": "node v2/index.js --job=daily-market --dry-run",
+    "daily-market:ingest-only": "node v2/index.js --job=daily-market --stop-after=ingest",
+    "sector-scan": "node v2/index.js --job=sector-scan",
+    "asset-focus": "node v2/index.js --job=asset-focus",
+    "cross-linkage": "node v2/index.js --job=cross-linkage"
   },
   "dependencies": {
     "fast-xml-parser": "^4.5.0",
