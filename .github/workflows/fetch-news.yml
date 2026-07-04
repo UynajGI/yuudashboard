@@ -47,6 +47,9 @@ jobs:
             echo "无改动，跳过提交"
           else
             git commit -m "chore(news): 自动简报 $(date -u +%Y-%m-%d)"
-            # push 可能因并发冲突失败（另一个 workflow 同时写了），失败就跳过
-            git push 2>/dev/null || echo "push 冲突，下次运行重试（正常）"
+            git push origin main 2>/dev/null && exit 0
+            echo "push 冲突，尝试 pull + rebase..."
+            git fetch origin main
+            git rebase origin/main 2>/dev/null || { git rebase --abort 2>/dev/null; echo "rebase 跳过"; }
+            git push origin main 2>/dev/null || echo "push 仍失败，下次运行重试"
           fi
