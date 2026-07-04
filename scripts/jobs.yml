@@ -20,8 +20,12 @@
 #   description          frontmatter 的 description 字段（{date} 会替换）
 #   renderer             可选，选择哪个渲染器输出。缺省按 section 兜底：
 #                        section=finance → finance，其余 → news。
-#                        可选值：news / finance / weekly。
+#                        可选值：news / finance / weekly / sectors。
 #                        加新汇报模板：写 scripts/src/render-xxx.js + 在 index.js 注册 + 这里填 renderer: xxx
+#   agent                可选，LLM agent profile 名。在 workflow 后、render 前执行，
+#                        agent 自主调用工具（查行情/查历史/查新闻）完成任务，结果挂到 ctx.agentResult。
+#                        可选值：sectors-commentary。
+#                        加新 agent：写 scripts/src/agents/xxx.js + 在 index.js AGENTS 注册 + 这里填 agent: xxx
 #
 # workflow 字段说明：
 #   处理流水线，每个阶段是独立函数，context 在阶段间传递。
@@ -61,6 +65,22 @@ jobs:
     output: content/finance/{date}-market.md
     tags: [金融]
     description: "市场概览：{date}"
+
+  # ── 板块扫描：按 A股/港股/美股/亚太/商品/加密 分组看，agent 生成点评 ──
+  # 与 finance（按品种平铺）互补。agent 自主查行情/历史/新闻，输出板块风格判断。
+  - name: sectors
+    schedule: "30 11 * * *"      # UTC 11:30 = 北京 19:30（比 finance 晚 30 分钟，避免并发）
+    section: finance
+    slug: sectors
+    window: 24h
+    categories: [要闻]
+    top_n_per_category: 8
+    workflow: [fetch, select, summarize]   # 不走 tldr，板块点评由 agent 生成
+    agent: sectors-commentary              # agent profile：自主查工具生成点评
+    renderer: sectors
+    output: content/finance/{date}-sectors.md
+    tags: [金融, 板块]
+    description: "板块扫描：{date}"
 
   # ── 周报：每周一回顾上周市场走势（依赖 market-history 累积）──
   # 只跑 fetch（拿当日数据 + 读历史），不走 LLM 新闻处理。

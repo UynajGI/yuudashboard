@@ -3,7 +3,7 @@
 // 市场数据来自 ctx.marketData（fetch stage），新闻来自 ctx.summarized（summarize stage）。
 
 /** YAML 安全字符串 */
-function yamlStr(s) {
+export function yamlStr(s) {
   s = String(s);
   if (/[:#\[\]{}&!*|>'"%@`,"\n]/.test(s) || /^\s|\s$/.test(s)) {
     return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
@@ -41,23 +41,23 @@ function classifyNews(item) {
 
 // ── 渲染辅助 ──────────────────────────────────────────
 
-function renderChangeHtml(it) {
+export function renderChangeHtml(it) {
   if (!it.changeClass) return it.changeStr;
   return `<span class="${it.changeClass}">${it.changeStr}</span>`;
 }
 
-function renderNewsItem(it) {
+export function renderNewsItem(it) {
   const sources = it.sources?.length ? `（${it.sources.join('、')}）` : '';
   const title = it.link ? `[**${it.title}**](${it.link})` : `**${it.title}**`;
   return `- ${title}：${it.summary}${sources}`;
 }
 
-// ── chart.xkcd 图表注入（raw HTML/JS 内联进 markdown，依赖 hugo unsafe=true）──
-
-/** JSON 安全转义（供 <script> 内联） */
-function jsonSafe(v) {
+/** JSON 安全转义（供 <script> 内联）—— 供其他 renderer 复用 */
+export function jsonSafe(v) {
   return JSON.stringify(v).replace(/</g, '\\u003c');
 }
+
+// ── chart.xkcd 图表注入（raw HTML/JS 内联进 markdown，依赖 hugo unsafe=true）──
 
 /**
  * 指数涨跌幅柱状图：所有指数一字排开，正负柱区分涨跌。
