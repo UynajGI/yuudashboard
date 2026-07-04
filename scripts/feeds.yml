@@ -8,10 +8,13 @@
 #   category 归类，必须出现在 jobs.yml 某个 job 的 categories 里
 #            目前用：国内 / 国际 / 科技
 #   enabled  可选，默认 true；临时关某个源设 false
+#   window   可选，源级时间窗（如 48h / 7d）。缺省用 job 的 window。
+#            日更聚合源（如橘鸦日报当天含昨日内容）可放宽。
 
 - name: 橘鸦日报
   url: https://daily.juya.uk/rss.xml
   category: 科技
+  window: 48h              # 橘鸦是日更聚合，当天 RSS 含昨日内容，放宽到 48h
 
 - name: MIT 科技评论 - 本周热榜
   url: https://plink.anyfeeder.com/mittrchina/hot

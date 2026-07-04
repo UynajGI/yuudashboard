@@ -1,6 +1,7 @@
 // RSS 抓取：并发拉所有源，单源失败不阻塞，HTML 清洗。
 import { Agent, setGlobalDispatcher } from 'undici';
 import { XMLParser } from 'fast-xml-parser';
+import { windowToMs } from './config.js';
 
 // 关键：强制 IPv4。很多环境 DNS 返回 IPv6 优先（Cloudflare 双栈），
 // 但本机/CI 的 IPv6 出口不通 → Node fetch 优先用 IPv6 → ETIMEDOUT。
@@ -36,11 +37,14 @@ async function fetchOne(feed) {
     const text = stripHeavyContent(await res.text());
     const parsed = xml.parse(text);
     const items = extractItems(parsed);
-    return items.map((it) => ({
-      ...normalizeItem(it),
-      source: feed.name,
-      category: feed.category,
-    }));
+    // 按源的 window 过滤（缺省用 job 级 window，由 dedupe 统一处理；这里只过滤源自定义 window）
+    const feedWindowMs = feed.window ? windowToMs(feed.window) : null;
+    return items
+      .map((it) => ({ ...normalizeItem(it), source: feed.name, category: feed.category }))
+      .filter((it) => {
+        if (!feedWindowMs || !it.date) return true;
+        return it.date.getTime() >= Date.now() - feedWindowMs;
+      });
   } catch (e) {
     console.warn(`  ⚠ 源「${feed.name}」抓取失败：${e.message}`);
     return [];

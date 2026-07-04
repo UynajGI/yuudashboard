@@ -12,7 +12,14 @@ import { windowToMs } from '../config.js';
 export async function clean(ctx) {
   console.log('[1/4] clean · 脚本清洗');
 
-  const windowMs = windowToMs(ctx.job.window);
+  // dedupe 的 windowMs 取 job window 和各 feed 自定义 window 的最大值，
+  // 这样有 per-feed window 的源（如橘鸦 48h）不会被 job window（24h）卡掉。
+  // per-feed 的时间窗过滤已在 fetchOne 里做，这里只放宽 dedupe 的上限避免重复丢弃。
+  const jobWindowMs = windowToMs(ctx.job.window);
+  const feedWindowMs = ctx.feeds
+    .filter((f) => f.window)
+    .map((f) => windowToMs(f.window));
+  const windowMs = Math.max(jobWindowMs, ...feedWindowMs);
   const seen = loadState(ctx.repoRoot);
 
   const raw = await fetchAll(ctx.feeds);
