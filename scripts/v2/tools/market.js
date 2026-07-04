@@ -70,7 +70,7 @@ export const getHistorySeriesDef = {
   type: 'function',
   function: {
     name: 'get_history_series',
-    description: '查某品种最近 N 天的历史收盘价序列（用于判断趋势）。数据来自每日累积的本地快照。',
+    description: '查某品种最近 N 天的历史收盘价序列（用于判断趋势）。优先读本地快照，不足时回拉 API（BTC: CoinGecko / A股: Tushare）。',
     parameters: {
       type: 'object',
       properties: {
@@ -82,13 +82,111 @@ export const getHistorySeriesDef = {
   },
 };
 
+// ── API 历史回拉（本地不足时用）─────────────────────────
+
+/** CoinGecko BTC 近 N 天收盘价 */
+async function fetchBtcHistory(days) {
+  try {
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`,
+      { signal: AbortSignal.timeout(8000) },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.prices) return null;
+    // prices: [[timestamp_ms, price], ...] → 取每日收盘（UTC 0 点附近）
+    const map = {};
+    for (const [ts, price] of data.prices) {
+      const d = new Date(ts).toISOString().slice(0, 10);
+      map[d] = price; // 最后一条覆盖
+    }
+    return map;
+  } catch { return null; }
+}
+
+/** Tushare A 股指数日线（上证/深证/创业板/科创50） */
+const TUSHARE_INDEX_CODES = {
+  '上证综指': '000001.SH',
+  '深证成指': '399001.SZ',
+  '创业板指': '399006.SZ',
+  '科创50': '000688.SH',
+};
+
+async function fetchTushareIndexHistory(name, days) {
+  const tsCode = TUSHARE_INDEX_CODES[name];
+  if (!tsCode) return null;
+  const token = process.env.TUSHARE_TOKEN;
+  if (!token) return null;
+  try {
+    const end = new Date();
+    const start = new Date(end.getTime() - (days + 5) * 86400000);
+    const res = await fetch('https://api.tushare.pro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_name: 'daily',
+        token,
+        params: {
+          ts_code: tsCode,
+          start_date: start.toISOString().slice(0, 10).replace(/-/g, ''),
+          end_date: end.toISOString().slice(0, 10).replace(/-/g, ''),
+        },
+        fields: 'trade_date,close',
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.code !== 0) return null;
+    const items = json.data?.items || [];
+    const map = {};
+    for (const [date, close] of items) {
+      const d = `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
+      map[d] = parseFloat(close);
+    }
+    return map;
+  } catch { return null; }
+}
+
 export function makeGetHistorySeries(ctx) {
-  return ({ name, days = 5 }) => {
+  return async ({ name, days = 5 }) => {
     const history = ctx.marketHistory || { days: {} };
     const series = getSeries(history, name, days);
     const validCloses = series.closes.filter((c) => c != null);
+
+    // 本地数据不足 → 试 API 回拉
+    if (validCloses.length < Math.min(3, days)) {
+      let apiData = null;
+      if (name === 'BTC') {
+        apiData = await fetchBtcHistory(days);
+      } else if (TUSHARE_INDEX_CODES[name]) {
+        apiData = await fetchTushareIndexHistory(name, days);
+      }
+
+      if (apiData) {
+        // 合并 API 数据到本地 history（补充 missing dates）
+        for (const [d, price] of Object.entries(apiData)) {
+          if (!history.days[d]) history.days[d] = {};
+          if (!history.days[d][name]) history.days[d][name] = { close: price, changePct: 0 };
+        }
+        const merged = getSeries(history, name, days);
+        const mergedValid = merged.closes.filter((c) => c != null);
+        if (mergedValid.length > validCloses.length) {
+          const first = mergedValid[0];
+          const last = mergedValid[mergedValid.length - 1];
+          const periodReturn = ((last - first) / first) * 100;
+          return {
+            name, days, source: 'api-merged',
+            dates: merged.dates, closes: mergedValid.map((c) => Number(c.toFixed(2))),
+            periodReturnPct: Number(periodReturn.toFixed(2)),
+            trend: periodReturn > 2 ? '上行' : periodReturn < -2 ? '下行' : '震荡',
+          };
+        }
+      }
+    }
+
     if (validCloses.length < 2) {
-      return { name, days, note: `历史不足（仅 ${validCloses.length} 天）`, dates: series.dates, closes: series.closes };
+      return { name, days, note: `历史不足（仅 ${validCloses.length} 天，API 也未获取到）`, dates: series.dates, closes: series.closes };
     }
     const first = validCloses[0];
     const last = validCloses[validCloses.length - 1];
