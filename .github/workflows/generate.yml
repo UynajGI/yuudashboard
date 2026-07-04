@@ -1,0 +1,124 @@
+name: Generate Reports
+
+on:
+  schedule:
+    - cron: '0 11 * * *'   # UTC 11:00 = 北京 19:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Job 1: 时事（4 专栏 + digest）──
+  news:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install deps
+        working-directory: scripts
+        run: npm ci
+
+      - name: Run news reports
+        working-directory: scripts
+        env:
+          LLM_PROVIDER: deepseek
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          for job in daily-news-domestic daily-news-world daily-news-tech daily-news-engineering; do
+            echo "### $job"
+            node v2/index.js --job="$job" || echo "⚠ $job 失败"
+          done
+          echo "### daily-news-digest"
+          node v2/index.js --job=daily-news-digest || echo "⚠ digest 失败"
+
+      - name: Upload news artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-output
+          path: |
+            content/news/
+            data/seen-news.json
+            data/recent-events-news.json
+
+  # ── Job 2: 金融（6 专栏 + digest）──
+  finance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install deps
+        working-directory: scripts
+        run: npm ci
+
+      - name: Run finance reports
+        working-directory: scripts
+        env:
+          LLM_PROVIDER: deepseek
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+        run: |
+          for job in daily-finance-ashare daily-finance-hk daily-finance-asia daily-finance-us daily-finance-commodity daily-finance-crypto; do
+            echo "### $job"
+            node v2/index.js --job="$job" || echo "⚠ $job 失败"
+          done
+          echo "### daily-finance-digest"
+          node v2/index.js --job=daily-finance-digest || echo "⚠ digest 失败"
+
+      - name: Upload finance artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: finance-output
+          path: |
+            content/finance/
+            data/seen-finance.json
+            data/recent-events-finance.json
+
+  # ── Job 3: 合并 + push（等 news 和 finance 都完成）──
+  publish:
+    needs: [news, finance]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download news
+        uses: actions/download-artifact@v4
+        with:
+          name: news-output
+
+      - name: Download finance
+        uses: actions/download-artifact@v4
+        with:
+          name: finance-output
+
+      - name: Place artifacts
+        run: |
+          # news-output 含 content/news/ + data/seen-news.json + data/recent-events-news.json
+          # finance-output 含 content/finance/ + data/seen-finance.json + data/recent-events-finance.json
+          # download-artifact 默认下载到当前目录（$GITHUB_WORKSPACE），保留相对路径
+          # 只需确认文件在正确位置
+          ls -la content/news/ content/finance/ data/ 2>/dev/null || true
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/ data/
+          if git diff --cached --quiet; then
+            echo "无改动，跳过提交"
+          else
+            git commit -m "chore: 自动报告 $(date -u +%Y-%m-%d)"
+            git push origin main
+          fi

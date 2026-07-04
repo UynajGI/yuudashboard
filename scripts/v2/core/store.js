@@ -17,10 +17,10 @@ export class Store {
     this.repoRoot = repoRoot;
     this.isCI = !!process.env.CI || !!process.env.GITHUB_ACTIONS;
     const suffix = this.isCI ? '' : '.local';
-    this.seenPath = resolve(repoRoot, `data/seen${suffix}.json`);
-    this.historyPath = resolve(repoRoot, `data/market-history${suffix}.json`);
-    this.recentPath = resolve(repoRoot, `data/recent-events${suffix}.json`);
-    this._seenCache = null; // 单次运行内 seen 缓存（loadState → saveState 共享同一对象）
+    this.seenDir = resolve(repoRoot, 'data');
+    this.recentDir = resolve(repoRoot, 'data');
+    this.isCI = !!process.env.CI || !!process.env.GITHUB_ACTIONS;
+    this._seenCache = {};  // {section: state} 缓存
   }
 
   get tag() {
@@ -44,60 +44,54 @@ export class Store {
     writeFileSync(path, JSON.stringify(obj, null, 2) + '\n');
   }
 
-  // ── seen（去重 hash，按 section 分组，保留 7 天）─────────
+  // ── seen（去重 hash，按 section 独立文件，保留 7 天）────
 
-  /**
-   * 加载某 section 的 seen state。
-   * @param {string} section  'news' | 'finance'
-   * @returns {{urls:{}, titles:{}}}
-   */
-  loadSeen(section = 'default') {
-    const cacheKey = `seen:${section}`;
-    if (this._seenCache?.[cacheKey]) return this._seenCache[cacheKey];
-    const obj = this._readJson(this.seenPath, { sections: {} });
-    const sec = obj.sections?.[section] || { urls: {}, titles: {} };
-    if (!this._seenCache) this._seenCache = {};
-    this._seenCache[cacheKey] = { urls: sec.urls || {}, titles: sec.titles || {} };
-    return this._seenCache[cacheKey];
+  /** section → 文件路径 */
+  _seenPath(section) {
+    const suffix = this.isCI ? '' : '.local';
+    return resolve(this.seenDir, `data/seen-${section}${suffix}.json`);
   }
 
   /**
-   * 把已发布的条目 hash 写回 seen（按 section 分组，自动清理 >7 天）。
-   * @param {string} section  'news' | 'finance'
-   * @param {Array} items  含 urlHash/titleHash 的条目
-   * @param {string} dateStr  YYYY-MM-DD
+   * 加载某 section 的 seen state（独立文件，互不干扰）。
+   * @returns {{urls:{}, titles:{}}}
+   */
+  loadSeen(section) {
+    if (this._seenCache[section]) return this._seenCache[section];
+    const path = this._seenPath(section);
+    const obj = this._readJson(path, { urls: {}, titles: {} });
+    const state = { urls: obj.urls || {}, titles: obj.titles || {} };
+    this._seenCache[section] = state;
+    return state;
+  }
+
+  /**
+   * 把已发布的条目 hash 写回 seen（只写本 section 的独立文件）。
    */
   saveSeen(section, items, dateStr) {
-    // 读完整文件（含所有 section）
-    const obj = this._readJson(this.seenPath, { sections: {} });
-    if (!obj.sections) obj.sections = {};
+    const path = this._seenPath(section);
+    // 每次保存前重新读磁盘（避免 stale）
+    const obj = this._readJson(path, { urls: {}, titles: {} });
+    if (!obj.urls) obj.urls = {};
+    if (!obj.titles) obj.titles = {};
 
-    // 更新当前 section
-    const state = obj.sections[section] || { urls: {}, titles: {} };
     let count = 0;
     for (const it of items) {
-      if (it.urlHash) { state.urls[it.urlHash] = dateStr; count++; }
-      if (it.titleHash) { state.titles[it.titleHash] = dateStr; count++; }
+      if (it.urlHash) { obj.urls[it.urlHash] = dateStr; count++; }
+      if (it.titleHash) { obj.titles[it.titleHash] = dateStr; count++; }
     }
 
-    // 清理 >7 天的（所有 section 都清）
+    // 清理 >7 天
     const SEEN_TTL_DAYS = 7;
     const cutoff = this._shiftDate(dateStr, -SEEN_TTL_DAYS);
-    for (const sec of Object.values(obj.sections)) {
-      this._pruneByDate(sec.urls, cutoff);
-      this._pruneByDate(sec.titles, cutoff);
-    }
+    this._pruneByDate(obj.urls, cutoff);
+    this._pruneByDate(obj.titles, cutoff);
 
-    obj.sections[section] = state;
-    obj._meta = { desc: '去重记录，按 section 分组，保留 7 天。', updated: dateStr };
-    this._writeJson(this.seenPath, obj);
+    obj._meta = { desc: `去重记录 [${section}]，保留 7 天`, updated: dateStr };
+    this._writeJson(path, obj);
 
-    // 更新缓存
-    if (!this._seenCache) this._seenCache = {};
-    this._seenCache[`seen:${section}`] = state;
-
-    const totalUrls = Object.values(obj.sections).reduce((a, s) => a + Object.keys(s.urls).length, 0);
-    console.log(`  seen[${section}]：写入 ${count} 条，全站总 urls=${totalUrls}（${this.tag}）`);
+    this._seenCache[section] = { urls: obj.urls, titles: obj.titles };
+    console.log(`  seen[${section}]：写入 ${count} 条，urls=${Object.keys(obj.urls).length} titles=${Object.keys(obj.titles).length}（${this.tag}）`);
   }
 
   /** 日期字符串加减天数 → YYYY-MM-DD */
@@ -153,14 +147,24 @@ export class Store {
     return history;
   }
 
-  // ── recent-events（近期事件标题，供 select 语义去重）────
+  // ── recent-events（按 section 独立文件，供 select 语义去重）────
+
+  /** section → 文件路径 */
+  _recentPath(section) {
+    const suffix = this.isCI ? '' : '.local';
+    return resolve(this.seenDir, `data/recent-events-${section}${suffix}.json`);
+  }
 
   /**
-   * 取某 job 最近 N 天（不含今天）已发布的事件标题。
+   * 取某 job 最近 N 天已发布的事件标题。
+   * 文件按 section 分，jobName 在 section 内部区分。
    * @returns {string[]}
    */
   loadRecentTitles(jobName, days = 2) {
-    const data = this._readJson(this.recentPath, { jobs: {} });
+    // 从 jobName 推断 section（daily-news-* → news, daily-finance-* → finance）
+    const section = jobName.startsWith('daily-news') ? 'news' : jobName.startsWith('daily-finance') ? 'finance' : 'default';
+    const path = this._recentPath(section);
+    const data = this._readJson(path, { jobs: {} });
     const jobEntries = data.jobs?.[jobName] || {};
     const dates = Object.keys(jobEntries).sort().reverse();
     const titles = [];
@@ -172,7 +176,10 @@ export class Store {
    * 写入今日发布的事件标题（render 后调用）。
    */
   saveRecentTitles(jobName, dateStr, titles) {
-    const data = this._readJson(this.recentPath, { jobs: {} });
+    const section = jobName.startsWith('daily-news') ? 'news' : jobName.startsWith('daily-finance') ? 'finance' : 'default';
+    const path = this._recentPath(section);
+    // 重新读磁盘（避免 stale）
+    const data = this._readJson(path, { jobs: {} });
     if (!data.jobs) data.jobs = {};
     if (!data.jobs[jobName]) data.jobs[jobName] = {};
     data.jobs[jobName][dateStr] = titles;
@@ -181,11 +188,9 @@ export class Store {
       const ds = Object.keys(data.jobs[jn]).sort().reverse();
       for (const d of ds.slice(RECENT_MAX_DAYS)) delete data.jobs[jn][d];
     }
-    this._writeJson(this.recentPath, {
-      _meta: { desc: '近期发布的事件标题（供 select 跨天语义去重）。', updated: dateStr },
-      jobs: data.jobs,
-    });
-    console.log(`  recent：写入 ${jobName}/${dateStr}（${titles.length} 标题）（${this.tag}）`);
+    data._meta = { desc: `近期事件标题 [${section}]，供 select 跨天语义去重`, updated: dateStr };
+    this._writeJson(path, data);
+    console.log(`  recent[${section}/${jobName}]：写入 ${titles.length} 标题（${this.tag}）`);
   }
 
   // ── 内部辅助 ────────────────────────────────────────────
