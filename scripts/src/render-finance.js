@@ -93,7 +93,7 @@ function renderIndexBarChart(indices, dateStr) {
  * @param {string} dateStr   用于生成唯一 svg id
  * @returns {string} markdown 行（点 < 3 返回 ''）
  */
-function renderAssetSparkline(history, name, idKey, dateStr) {
+export function renderAssetSparkline(history, name, idKey, dateStr) {
   if (!history?.days) return '';
   const dates = Object.keys(history.days).sort();
   if (dates.length < 3) return ''; // 冷启动期不画

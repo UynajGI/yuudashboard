@@ -20,8 +20,10 @@
 #   description          frontmatter 的 description 字段（{date} 会替换）
 #   renderer             可选，选择哪个渲染器输出。缺省按 section 兜底：
 #                        section=finance → finance，其余 → news。
-#                        可选值：news / finance / weekly / sectors。
+#                        可选值：news / finance / sectors / focus / linkage / weekly。
 #                        加新汇报模板：写 scripts/src/render-xxx.js + 在 index.js 注册 + 这里填 renderer: xxx
+#   focus_target         仅 focus renderer 用：聚焦品种名（如 BTC / 黄金 / 上证综指）。
+#                        手动触发时可在 GA inputs 改（见 fetch-finance.yml）。
 #   agent                可选，LLM agent profile 名。在 workflow 后、render 前执行，
 #                        agent 自主调用工具（查行情/查历史/查新闻）完成任务，结果挂到 ctx.agentResult。
 #                        可选值：sectors-commentary。
@@ -82,20 +84,39 @@ jobs:
     tags: [金融, 板块]
     description: "板块扫描：{date}"
 
-  # ── 周报：每周一回顾上周市场走势（依赖 market-history 累积）──
-  # 只跑 fetch（拿当日数据 + 读历史），不走 LLM 新闻处理。
-  # 周一到周五任一天手动跑都行；GA cron 建议设周一 UTC 03:00（北京 11:00）。
-  - name: weekly
-    schedule: "0 3 * * 1"         # UTC 周一 03:00 = 北京周一 11:00
+  # ── 资产聚焦：单品种深看（B）──
+  # agent 聚焦分析一个品种：价格+走势+驱动新闻+异动判断。
+  # focus_target 指定品种名，手动触发时可改（如黄金、上证综指）。
+  - name: focus
+    schedule: "45 11 * * *"      # UTC 11:45 = 北京 19:45（比 sectors 晚 15 分钟）
     section: finance
-    slug: weekly
-    window: 7d
-    categories: []                # 周报不处理新闻
-    workflow: [fetch]             # 只抓数据 + 读历史，无 LLM 阶段
-    renderer: weekly              # 用 render-weekly.js（走势对比 + 周收益榜）
-    output: content/finance/{date}-weekly.md
-    tags: [金融, 周报]
-    description: "周度市场回顾：{date}"
+    slug: focus
+    window: 24h
+    categories: [要闻]
+    top_n_per_category: 8
+    workflow: [fetch, select, summarize]
+    agent: focus-analysis
+    renderer: focus
+    focus_target: BTC            # 聚焦品种（可改：黄金 / 美元指数 / 上证综指 / 道琼斯 等）
+    output: content/finance/{date}-focus-{target}.md
+    tags: [金融, 资产聚焦]
+    description: "资产聚焦：{target} {date}"
+
+  # ── 联动观察：跨资产联动分析（D）──
+  # agent 找高相关品种对 + 用新闻解释因果。
+  - name: linkage
+    schedule: "0 12 * * *"       # UTC 12:00 = 北京 20:00
+    section: finance
+    slug: linkage
+    window: 24h
+    categories: [要闻]
+    top_n_per_category: 8
+    workflow: [fetch, select, summarize]
+    agent: linkage-analysis
+    renderer: linkage
+    output: content/finance/{date}-linkage.md
+    tags: [金融, 联动]
+    description: "联动观察：{date}"
 
   # ── 以下为预留示例，需要时取消注释 / 复制改参数 ──────────────
   # - name: morning

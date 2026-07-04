@@ -59,3 +59,61 @@ function pearson(x, y) {
   const den = Math.sqrt(dx * dy);
   return den === 0 ? 0 : num / den;
 }
+
+// ── 工具 3：find_correlations（批量算所有品种对）─────────
+
+export const findCorrelationsDef = {
+  type: 'function',
+  function: {
+    name: 'find_correlations',
+    description: '批量计算所有品种对的近期相关系数，返回最强正/负相关的 top K 对。用于发现联动品种（如美元↔黄金通常强负相关）。',
+    parameters: {
+      type: 'object',
+      properties: {
+        days: { type: 'integer', description: '取最近几天计算（默认 7）', default: 7 },
+        topK: { type: 'integer', description: '正/负相关各返回前几对（默认 5）', default: 5 },
+      },
+    },
+  },
+};
+
+export function makeFindCorrelations(ctx) {
+  return ({ days = 7, topK = 5 }) => {
+    const history = ctx.marketHistory || { days: {} };
+    // 收集所有品种名（取最新一天快照的 key 集）
+    const dates = Object.keys(history.days).sort();
+    const latest = dates[dates.length - 1];
+    if (!latest) return { pairs: [], note: '无历史数据' };
+    const names = Object.keys(history.days[latest]);
+
+    // 算所有配对
+    const pairs = [];
+    for (let i = 0; i < names.length; i++) {
+      for (let j = i + 1; j < names.length; j++) {
+        const sa = getSeries(history, names[i], days);
+        const sb = getSeries(history, names[j], days);
+        // 对齐日期交集
+        const xs = [], ys = [];
+        for (let k = 0; k < sa.dates.length; k++) {
+          if (sa.closes[k] != null && sb.closes[k] != null) {
+            xs.push(sa.closes[k]);
+            ys.push(sb.closes[k]);
+          }
+        }
+        if (xs.length < 3) continue;
+        const r = pearson(xs, ys);
+        if (isFinite(r)) pairs.push({ a: names[i], b: names[j], r: Number(r.toFixed(3)), overlap: xs.length });
+      }
+    }
+
+    pairs.sort((x, y) => y.r - x.r);
+    const strongestPositive = pairs.slice(0, topK);
+    const strongestNegative = pairs.slice(-topK).reverse();
+    return {
+      days,
+      totalPairs: pairs.length,
+      strongestPositive,
+      strongestNegative,
+    };
+  };
+}

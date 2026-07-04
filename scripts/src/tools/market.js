@@ -42,14 +42,13 @@ export const getMarketSnapshotDef = {
   type: 'function',
   function: {
     name: 'get_market_snapshot',
-    description: '查询当日市场行情快照。可按板块查（A股/港股/美股/亚太/商品/加密），或查全部。',
+    description: '查询当日市场行情快照。三种用法：①板块名（A股/港股/美股/亚太/商品/加密）查整板块；②"all"查全部；③具体品种名（如"BTC""黄金""上证综指""道琼斯"）查单品种。',
     parameters: {
       type: 'object',
       properties: {
         sector: {
           type: 'string',
-          enum: ['A股', '港股', '美股', '亚太', '商品', '加密', 'all'],
-          description: '板块名（查全部用 all）',
+          description: '板块名（A股/港股/美股/亚太/商品/加密）、"all"、或具体品种名',
         },
       },
       required: ['sector'],
@@ -60,9 +59,23 @@ export const getMarketSnapshotDef = {
 export function makeGetMarketSnapshot(ctx) {
   return ({ sector }) => {
     const md = ctx.marketData || {};
-    const targetNames = sector === 'all'
-      ? Object.values(SECTORS).flat()
-      : (SECTORS[sector] || []);
+    // 按板块 / 全部 / 品种名 三种解析
+    let targetNames;
+    if (sector === 'all') {
+      targetNames = Object.values(SECTORS).flat();
+    } else if (SECTORS[sector]) {
+      targetNames = SECTORS[sector];
+    } else {
+      // 当品种名查（sector 不是已知板块名时，尝试匹配品种）
+      const x = findByName(md, sector);
+      return {
+        sector,
+        queryType: 'single-asset',
+        count: x ? 1 : 0,
+        avgChangePct: x ? Number((x.changePct || 0).toFixed(2)) : null,
+        items: x ? [{ name: x.name, price: x.priceStr, changePct: Number((x.changePct || 0).toFixed(2)), open: x.open, high: x.high, low: x.low }] : [],
+      };
+    }
     const items = targetNames
       .map((n) => {
         const x = findByName(md, n);
@@ -72,6 +85,7 @@ export function makeGetMarketSnapshot(ctx) {
     const avg = targetNames.length ? sectorAvg(md, targetNames) : null;
     return {
       sector,
+      queryType: SECTORS[sector] ? 'sector' : 'all',
       count: items.length,
       avgChangePct: avg != null ? Number(avg.toFixed(2)) : null,
       items,

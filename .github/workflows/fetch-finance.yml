@@ -5,6 +5,11 @@ on:
     # UTC 11:15 = 北京时间 19:15（晚报时段，比 fetch-news 晚 15 分钟避免并发 push 冲突）
     - cron: '15 11 * * *'
   workflow_dispatch:
+    inputs:
+      job:
+        description: '要跑的金融类任务（jobs.yml 里定义的 name：finance/sectors/focus/linkage）'
+        required: false
+        default: 'finance'
 
 permissions:
   contents: write
@@ -31,7 +36,7 @@ jobs:
         env:
           LLM_PROVIDER: deepseek
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: node src/index.js --job=finance
+        run: node src/index.js --job=${{ inputs.job || 'finance' }}
 
       - name: Commit & push
         run: |

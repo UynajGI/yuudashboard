@@ -12,8 +12,12 @@ import { render } from './render.js';
 import { renderFinance } from './render-finance.js';
 import { renderWeekly } from './render-weekly.js';
 import { renderSectors } from './render-sectors.js';
+import { renderFocus } from './render-focus.js';
+import { renderLinkage } from './render-linkage.js';
 import { runAgent } from './agent.js';
 import * as sectorsAgent from './agents/sectors-commentary.js';
+import * as focusAgent from './agents/focus-analysis.js';
+import * as linkageAgent from './agents/linkage-analysis.js';
 import { saveState } from './state.js';
 
 // Renderer 注册表：jobs.yml 的 renderer 字段选择，缺省按 section 兜底。
@@ -23,6 +27,8 @@ const RENDERERS = {
   finance: renderFinance,
   weekly: renderWeekly,
   sectors: renderSectors,
+  focus: renderFocus,
+  linkage: renderLinkage,
 };
 
 // Agent profile 注册表：jobs.yml 的 agent 字段选择。
@@ -30,6 +36,8 @@ const RENDERERS = {
 // 新增 agent：写一个 agents/xxx.js + 在此注册 + jobs.yml 加 agent: xxx。
 const AGENTS = {
   'sectors-commentary': sectorsAgent,
+  'focus-analysis': focusAgent,
+  'linkage-analysis': linkageAgent,
 };
 
 async function main() {
