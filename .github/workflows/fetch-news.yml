@@ -58,16 +58,11 @@ jobs:
             echo "无改动，跳过提交"
           else
             git commit -m "chore(news): 自动简报 $(date -u +%Y-%m-%d)"
-            # push 失败 → fetch + rebase，state 文件冲突自动用远程版本
+            # push 失败 → fetch + merge -X ours（本地 content 优先，state 合并）
             if ! git push origin main 2>/dev/null; then
-              echo "push 冲突，fetch + rebase..."
+              echo "push 冲突，fetch + merge..."
               git fetch origin main
-              if ! git rebase origin/main 2>/dev/null; then
-                # state 文件冲突 → 用远程版本（content/ 必须保留本地）
-                git checkout --theirs data/seen.json data/recent-events.json 2>/dev/null
-                git add data/seen.json data/recent-events.json
-                git rebase --continue 2>/dev/null || { git rebase --abort 2>/dev/null; }
-              fi
+              git merge origin/main --no-edit -X ours 2>/dev/null
               git push origin main 2>/dev/null || echo "push 仍失败，下次运行重试"
             fi
           fi

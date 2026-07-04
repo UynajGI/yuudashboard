@@ -60,13 +60,9 @@ jobs:
           else
             git commit -m "chore(finance): 自动报告 $(date -u +%Y-%m-%d)"
             if ! git push origin main 2>/dev/null; then
-              echo "push 冲突，fetch + rebase..."
+              echo "push 冲突，fetch + merge..."
               git fetch origin main
-              if ! git rebase origin/main 2>/dev/null; then
-                git checkout --theirs data/seen.json data/recent-events.json 2>/dev/null
-                git add data/seen.json data/recent-events.json
-                git rebase --continue 2>/dev/null || { git rebase --abort 2>/dev/null; }
-              fi
+              git merge origin/main --no-edit -X ours 2>/dev/null
               git push origin main 2>/dev/null || echo "push 仍失败，下次运行重试"
             fi
           fi
