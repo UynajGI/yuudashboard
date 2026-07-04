@@ -3,12 +3,12 @@
 // 对 A 股额外渲染申万行业 + 北向资金。
 
 import {
-  yamlStr, fmtNum, renderQuoteChange, renderBarChart,
+  yamlStr, fmtNum, renderQuoteChange, renderBarChart, renderSparkline,
   renderNewsItem, collectProcessed, outputPath,
 } from './helpers.js';
 
 export function renderFinanceColumn(ctx) {
-  const { job, date, marketData, summarized, tldr } = ctx;
+  const { job, date, marketData, summarized, tldr, marketHistory } = ctx;
   const path = outputPath(job, date);
   const md = marketData || { indices: [], assets: [] };
   const tags = job.tags || ['金融'];
@@ -46,6 +46,18 @@ export function renderFinanceColumn(ctx) {
       date.str, `col-${job.slug}`, '当日涨跌幅 (%)',
     );
     if (bar) { body.push(bar); body.push(''); }
+
+    // 各指数近 7 天 sparkline（仅有历史数据的品种会画出）
+    const sparklines = [];
+    for (const ix of indices) {
+      const sp = renderSparkline(marketHistory, ix.name, `${job.slug}-${ix.name}`, date.str);
+      if (sp) sparklines.push(sp);
+    }
+    if (sparklines.length) {
+      body.push('### 近 7 日走势\n');
+      body.push(sparklines.join('\n'));
+      body.push('');
+    }
   }
 
   // 2. 资产（商品专栏用）

@@ -194,3 +194,36 @@ export function makeGetHistorySeries(ctx) {
     return { name, days, dates: series.dates, closes: validCloses.map((c) => Number(c.toFixed(2))), periodReturnPct: Number(periodReturn.toFixed(2)), trend: periodReturn > 1 ? '上行' : periodReturn < -1 ? '下行' : '震荡' };
   };
 }
+
+/**
+ * 批量拉取历史行情（供 ingest 预填 marketHistory，让 sparkline 有数据可画）。
+ * 覆盖：BTC（CoinGecko）、A 股指数（Tushare）。其他品种无免费历史 API，跳过。
+ * @param {string[]} names  需要拉历史的品种名（如 ['BTC','上证综指']）
+ * @param {number} days     天数
+ * @returns {Promise<Object>}  { days: { 'YYYY-MM-DD': { name: { close, changePct } } } }
+ */
+export async function fetchHistoryBatch(names, days = 7) {
+  const result = { days: {} };
+  const tasks = [];
+  for (const name of names) {
+    if (name === 'BTC') {
+      tasks.push(fetchBtcHistory(days).then((m) => ({ name, map: m })));
+    } else if (TUSHARE_INDEX_CODES[name]) {
+      tasks.push(fetchTushareIndexHistory(name, days).then((m) => ({ name, map: m })));
+    }
+  }
+  const settled = await Promise.all(tasks);
+  for (const { name, map } of settled) {
+    if (!map) continue;
+    const dates = Object.keys(map).sort();
+    let prev = null;
+    for (const d of dates) {
+      const close = map[d];
+      const changePct = prev ? ((close - prev) / prev) * 100 : 0;
+      if (!result.days[d]) result.days[d] = {};
+      result.days[d][name] = { close, changePct: Number(changePct.toFixed(4)) };
+      prev = close;
+    }
+  }
+  return result;
+}

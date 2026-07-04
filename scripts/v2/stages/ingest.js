@@ -105,11 +105,32 @@ export class IngestStage extends Stage {
 
       // 行情数据不持久化到本地库（在线拉取即可），
       // 仅在内存构建当次 marketHistory 供 sparkline/走势图用
-      ctx.marketHistory = {
+      // 当日快照 + API 预拉历史（BTC/A股指数），让 sparkline 有 ≥3 天数据
+      const todaySnapshot = {
         days: {
           [ctx.date.str]: buildDaySnapshot(indices, assets, extra),
         },
       };
+
+      // 预拉 7 天历史（只拉有免费 API 的：BTC、A 股指数）
+      const historyNames = [];
+      for (const ix of indices) if (ix?.name) historyNames.push(ix.name);
+      if (extra['BTC']) historyNames.push('BTC');
+      let apiHistory = { days: {} };
+      if (historyNames.length) {
+        try {
+          const { fetchHistoryBatch } = await import('../tools/market.js');
+          console.log('  拉历史行情（sparkline 用）...');
+          apiHistory = await fetchHistoryBatch(historyNames, 7);
+          const histDays = Object.keys(apiHistory.days || {}).length;
+          console.log(`  历史：${histDays} 天（${historyNames.length} 品种）`);
+        } catch (e) {
+          console.warn(`  ⚠ 历史行情拉取失败：${e.message}`);
+        }
+      }
+
+      // 合并：API 历史 + 今日快照（今日覆盖 API 当天的数据）
+      ctx.marketHistory = { days: { ...apiHistory.days, ...todaySnapshot.days } };
     }
 
     const newsCount = Object.values(ctx.items).reduce((a, b) => a + b.length, 0);

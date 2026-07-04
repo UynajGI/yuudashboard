@@ -1,362 +1,339 @@
 # Yuunagi Dashboard
 
-个人信息聚合看板——**多源数据采集 → LLM 流水线加工 → 多模板报告生成 → 自动部署**。每日产出 11 篇报告：4 个时事专栏 + 1 个时事汇总 + 5 个金融专栏 + 1 个金融汇总，全部由 GitHub Actions 定时驱动。
+个人信息聚合看板 —— **多源数据采集 → LLM 流水线加工 → 多模板报告生成 → 自动部署**。
 
-## 架构概览
+每日全自动产出 11 篇 AI 日报（4 时事专栏 + 1 时事汇总 + 5 金融专栏 + 1 金融汇总），覆盖 62 个 RSS 源和全球 6 大金融市场。
 
-项目分四个子系统，从上到下依次是：
+**[Demo →](https://uynajgi.github.io/yuudashboard/)** | **[源码 →](https://github.com/UynajGI/yuudashboard)**
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    信息搜集层 (Sources)                   │
-│  RSS (7源) │ 新浪行情 (10指数+3资产) │ 新浪财经新闻      │
-│  BTC (CoinGecko→Gate.io) │ KOSPI │ 美债10Y │ Tushare    │
-│  每个源封装为一个 Source 适配器，统一接口，插拔式注册       │
-└──────────────────────────┬──────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                    编排层 (Pipeline + Agent)              │
-│  ingest(抓取+去重) → select(精选合并) → summarize(摘要)   │
-│  → tldr(总览) → [agent(自主推理)] → render(模板渲染)      │
-│  每步独立 Stage，按 jobs.yml 灵活组合                     │
-└──────────────────────────┬──────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                    模板构造层 (Renderers)                │
-│  6 种报告模板：时事/市场概览/板块扫描/资产聚焦/联动观察    │
-│  共享 helpers：yamlStr、chart.xkcd、sparkline、表格       │
-│  每个模板独立文件，新增报告不改现有代码                     │
-└──────────────────────────┬──────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                    结果输出层 (CI/CD)                     │
-│  Hugo markdown → GitHub Actions commit/push → Deploy     │
-│  GitHub Pages 部署，定时 cron + 手动 workflow_dispatch     │
-└─────────────────────────────────────────────────────────┘
-```
+## 项目简介
 
-## 一、信息搜集层
+Yuunagi Dashboard 是一套全自动的多源信息聚合与 AI 日报生成系统。系统每日从 62 个 RSS 新闻源和 6 个金融行情 API（新浪财经、CoinGecko、Gate.io、东方财富、Yahoo Finance、Tushare）抓取数据，经 LLM 流水线（DeepSeek API）进行事件合并、中文摘要、要闻提炼，最终生成 11 篇结构化 Markdown 日报，通过 GitHub Actions 自动构建 Hugo 静态站点并部署到 GitHub Pages——全程无人值守。
 
-### 1.1 Source 抽象
+一句话概括：**把互联网上分散的新闻和行情数据，变成每日一份结构化的 AI 日报。**
 
-所有数据源统一实现 `ItemSource`（产出新闻条目）或 `MarketSource`（产出行情报价）。
+## 解决的问题
 
-```js
-// 新闻源：产出可去重的 NewsItem
-class RssSource extends ItemSource {
-  async fetch()  { /* HTTP → XML parse → stripContent */ }
-  normalize(raw) { /* → NewsItem[]，含 splitAggregated 拆分 */ }
-}
+- **信息过载**：62 个 RSS 源日产 800+ 条标题，人工筛选不可行。系统通过 LLM 精选合并后压缩为 50-80 条带摘要的结构化条目，5 分钟即可掌握当日全貌
+- **同质化报道**：同一事件被数十家媒体重复报道。LLM 在 select 阶段自动识别同事件多源报道并合并，读者看到的是一条事件而非 N 条重复新闻
+- **金融信息碎片化**：A 股/港股/美股/加密/商品的行情和新闻分散在不同平台，缺乏统一视图。系统每日产出 5 个单市场专栏 + 1 个跨市场汇总，包含指数表、涨跌图、板块轮动、北向资金
+- **每日复盘耗时**：手动整理当日要闻需 1-2 小时。系统全流程自动化，每日 19:00 定时运行
 
-// 行情源：产出不上重的 Quote
-class SinaQuoteSource extends MarketSource {
-  async fetch()  { /* GBK 批量请求 Sina hq API */ }
-  normalize(lines) { /* 多格式解析 → Quote[] */ }
-}
-```
+## 核心功能
 
-**加新源只需写一个文件**，在 `sources/index.js` 注册即可。不改 pipeline、不改 stage。
+### 多源数据采集
 
-### 1.2 RSS 多源聚合
+所有数据源统一实现 `ItemSource`（新闻）或 `MarketSource`（行情）接口，插件式注册：
 
-`scripts/feeds.yml` 定义 62 个 RSS 源，按 category 分四类（国内/国际/科技/工程），每源可配独立时间窗和 `jobs` 筛选（限制哪些专栏使用此源）。
+| 类别 | 来源 | 数量 |
+|------|------|------|
+| RSS 新闻 | 新华社、人民日报、联合早报、iDaily、MIT 科技评论、Solidot、橘鸦日报、工程博客等 | 62 源 |
+| A 股/港股/美股行情 | 新浪财经 HQ API | 10+ 指数 + 3 类资产 |
+| 加密货币 | CoinGecko → Gate.io fallback | BTC |
+| 韩国 KOSPI | 东方财富 API | 1 指数 |
+| 美债 10Y | Yahoo Finance | 1 指标 |
+| 申万行业 + 北向资金 | Tushare | 行业指数 + 资金流向 |
 
-| 源 | 分类 | 特殊处理 |
-|---|---|---|
-| 橘鸦日报 | 科技 | `window: 48h`（日更聚合，当天含昨日内容）；**splitAggregated** 拆分（摘要里用 `↗ N` 标记分隔多条新闻，自动拆成独立条目） |
-| MIT 科技评论、Solidot | 科技 | 通用 RSS（8 步 HTML 实体解码 + 多字段 fallback） |
-| 联合早报、iDaily | 国际 | 通用 RSS |
-| 新华社、人民日报 | 国内 | 通用 RSS |
+62 源并发抓取（`Promise.all`），单源失败不阻塞。行情数据在线拉取不存本地。
 
-**62 个源并发抓取**（`Promise.all`），单源失败不阻塞。`stripHeavyContent` 在 XML 解析前剥离 `<content:encoded>` 块（防实体扩展上限保护），8 步实体解码保证 `&lt; &gt; &amp;` 正确处理。
+### 三层去重 + LLM 语义去重
 
-### 1.3 行情数据在线拉取
+- **第一层**：URL 精确 hash（FNV-1a），拦截跨源转载同一 URL
+- **第二层**：标题精确 hash（归一化后），拦截同标题复制
+- **第三层**：标题 bigram Jaccard 相似度 > 0.7，拦截同事件不同措辞
+- **第四层**：LLM 跨天语义去重，判断新条目是"延续报道"还是"全新事件"
 
-行情数据**不存本地**——本地库只做新闻去重（按 section 分文件）。行情在线拉取：
+### LLM 流水线加工
 
-| 数据 | API | 格式 |
-|---|---|---|
-| A 股/港股/美股/亚太指数 + 商品 | 新浪 HQ API | 批量 `list=` 请求，GBK 解码，按前缀区分 33/4/HK 三种字段格式 |
-| BTC | CoinGecko → Gate.io fallback | 多源容错，首成功即用 |
-| 韩国 KOSPI | Eastmoney | 独立请求 |
-| 美债 10Y | Yahoo Finance `^TNX` | 收益率为 bp 单位 |
-| 申万行业指数 + 北向资金 | Tushare | `sw_daily` + `moneyflow_hsgt` |
+每个 Job 按 `jobs.yml` 配置的 workflow 顺序执行：
 
-**汇率 `DINIW` 已知问题**：字段布局与假定不符（`fields[2]` 等于 `fields[1]` 而非前收盘价），当前用 `fields[7]`(low) 兜底。待工作日有真实波动时精确定位前收盘价字段。
+| 阶段 | LLM | 职责 |
+|------|:---:|------|
+| ingest | - | 并发抓取所有数据源 → 三层去重 → 按类别分组 |
+| select | ✓ | LLM 识别同事件多源报道并合并；分配子分类；跨天语义去重 |
+| summarize | ✓ | LLM 为每个事件生成 1-2 句中文摘要（≤60 字，信息密集） |
+| tldr | ✓ | LLM 基于摘要生成 4-6 条高层要闻（含具体数字和影响判断） |
+| digest | ✓ | LLM 综合各专栏日报，生成 8-12 条跨领域要闻汇总 |
+| agent | ✓ | LLM 自主调用工具（查行情/查历史/算相关性）完成分析任务 |
 
-**历史数据回拉**：`get_history_series` 工具在本地历史不足时，自动在线拉取（BTC → CoinGecko market_chart / A 股 → Tushare daily），拉取结果合并到当次运行的 marketHistory 中供 sparkline 使用。
+每个阶段输出严格 JSON，由下游 renderer 消费。提示词约 10,000 字，经多次迭代精炼。
 
-### 1.4 三条去重线
+### 11 篇日报
 
-**机械去重**（`ingest.js` 内联 dedupe）——纯脚本，处理 URL/标题重复：
-- **第一层**：URL 精确 hash（FNV-1a base36，跨源转载同一 URL）
-- **第二层**：标题精确 hash（归一化后计算）
-- **第三层**：标题 bigram Jaccard 相似度 > 0.7（同事件不同措辞）
-- **时间窗**：`dedupeWindowMs = max(job 窗口, 各 source 窗口)`，无日期的条目保守保留
-- **同日跨报告**：`seen` 值等于今天的记录标记为同批次（保留），小于今天的才是跨天重复（过滤）
+**时事线（5 篇）**：国内专栏 / 国际专栏 / 科技专栏 / 工程专栏 / 今日要闻汇总
 
-**语义去重**（select stage + `recent-events-*.json`）——LLM 判断延续报道：
-- 每次 render 后将发布的事件标题存入 `data/recent-events-{section}.json`
-- 下次 select 时将近期标题注入 prompt `{recent}` 占位符
-- LLM 判断候选条是"延续报道"还是"全新事件"
+**金融线（7 篇，含亚盘）**：A 股专栏 / 港股专栏 / 亚盘专栏 / 美股专栏 / 商品专栏 / 加密专栏 / 金融市场汇总
 
-**hash 统一**：`NewsItem` 构造时自动计算 `urlHash`/`titleHash`（`core/item.js` 唯一定义），全系统共享——不再散落在 dedupe/fetch-finance-news 中重复实现。
+每篇金融专栏含：指数表 + chart.xkcd 涨跌柱状图 + sparkline 走势图 + 分类新闻。A 股专栏额外含申万行业指数和北向资金。汇总报告含全市场指数对比、板块对比图、LLM 跨市场综合点评。
 
----
+### chart.xkcd 图表
 
-## 二、编排层
+手绘风格金融图表，三种类型内联到 Markdown：
+- **Bar**：各指数/板块当日涨跌幅对比（涨绿跌红）
+- **Line sparkline**：资产近 7 天走势折线
+- **Line 双线**：两品种归一化对比（联动分析用）
 
-### 2.1 Pipeline 阶段注册
+`if(!window.chartXkcd)return` 守卫，CDN 不可用时静默降级。
 
-阶段定义为 `Stage` 子类，各有一个 `run(ctx, llm) => ctx` 签名：
+### 前端展示
 
-| Stage | needsLLM | 职责 |
-|---|---|---|
-| `ingest` | ✗ | 调所有 Source 抓取 → 去重 → ctx.items + ctx.marketData |
-| `select` | ✓ | LLM 精选合并同事件报道 + 跨天语义去重（注入 recent-events） |
-| `summarize` | ✓ | LLM 为每个事件生成中文摘要（最贵阶段，但只处理 select 筛选后的 N 条） |
-| `tldr` | ✓ | LLM 基于摘要生成 4-6 条总览要点 |
-| agent（可选） | ✓ | LLM 自主调工具完成分析任务（function calling 多轮循环） |
+Hugo 静态站 + PaperMod 主题。首页左侧悬浮导航 + 文章卡片瀑布流（含 TL;DR 摘要预览）。暗色模式自适应。KaTeX 公式渲染、Lenis 平滑滚动、Turbo 瞬时页面切换。
 
-`Pipeline.run()` 按 `jobs.yml` 的 `workflow` 字段顺序执行，并支持 `clean/fetch → ingest` 别名向后兼容。
+## AI 使用方式与技术方案
 
-### 2.2 Job 系统
+### 模型
 
-11 个 Job，按 section 分两大管线，各自"先分后总"：
+**DeepSeek V4 Flash**（通过 DeepSeek API 调用，兼容 OpenAI SDK 格式）。选型理由：中文 NLP 性价比最高，摘要和分类任务表现与更大模型差距极小但成本约 1/5。
 
-**时事（news）—— 4 专栏 + 1 汇总**
+### AI 在作品中的核心作用
 
-| Job | 源 | 产出 |
-|---|---|---|
-| `daily-news-domestic` | 14 国内 RSS | 国内专栏（时政/经济/社会/军事/外交/教育）|
-| `daily-news-world` | 12 国际 RSS | 国际专栏（地缘/经贸/社会/军事/科技）|
-| `daily-news-tech` | 11 科技 RSS | 科技专栏（AI/半导体/互联网/工具/科研）|
-| `daily-news-engineering` | 25 工程博客 | 工程专栏（平台/语言框架/架构/AI工程/安全/开源）|
-| `daily-news-digest` | 读 4 专栏 | 今日要闻汇总（LLM 综合 8-12 条）|
+AI 是系统的**核心加工环节**，承担不可替代的认知任务：
 
-**金融（finance）—— 5 专栏 + 1 汇总**
+1. **事件合并**：识别不同措辞但指向同一事件的标题，合并为一条。这需要语义理解（"央行降准 50bp" = "存款准备金率下调 0.5 个百分点"），纯规则不可能做到
+2. **中文摘要**：从多个来源的长篇摘要中提炼 1-2 句核心事实，生成式摘要（abstractive summarization）是 NLP 经典难题
+3. **要闻提炼**：在摘要基础上再提升抽象层次，点出"事件 + 关键数字/影响/趋势"，而非简单复述标题
+4. **跨天语义去重**：判断当前条目是已有事件的"延续报道"还是"全新事件"，避免跨天重复
+5. **跨专栏汇总**：阅读 4-6 篇专栏的 TL;DR 和标题，综合生成跨领域要闻
+6. **Agent 自主分析**：LLM 通过 Function Calling 自主决定调用哪些工具、以什么顺序、调用几次，完成分析任务
 
-| Job | 源 | 产出 |
-|---|---|---|
-| `daily-finance-ashare` | 新浪 A 股 + Tushare（申万行业+北向资金）| A 股专栏 |
-| `daily-finance-hk` | 新浪港股 + KOSPI | 港股专栏 |
-| `daily-finance-us` | 新浪美股 + 美债 10Y | 美股专栏 |
-| `daily-finance-commodity` | 新浪黄金/原油/美元 | 商品专栏 |
-| `daily-finance-crypto` | BTC（CoinGecko→Gate.io fallback）| 加密专栏 |
-| `daily-finance-digest` | 读 5 专栏 + 全市场数据 | 金融市场汇总（LLM + 指数表 + 板块图）|
+系统提供 5 个 Agent 工具：`get_market_snapshot`（查当日行情）、`get_history_series`（查历史走势，不足时自动回拉 API）、`get_finance_news`（查金融新闻）、`compute_correlation`（两品种 Pearson 相关系数）、`find_correlations`（批量计算所有配对相关性）。
 
-每个专栏只拉自己市场的数据（`market` 字段）和新闻（`news_filter` 关键词过滤），汇总报告读专栏文件 + 数据平移（重新拉全市场行情）生成图表。
+3 个 Agent Profile：板块点评 / 资产聚焦分析 / 联动观察分析。Agent 循环约 110 行，零框架依赖（不用 LangChain/LlamaIndex），直接基于 DeepSeek API 原生 function calling。
 
-加新报告：jobs.yml 加一行 + 写 renderer（+ agent profile 如需 LLM 分析）。
+### AI 定位
 
-### 2.3 Agent 系统
+**核心功能，非辅助**。去掉 LLM 流水线后，系统退化为纯 RSS 聚合器，丧失合并、摘要、去重、汇总等全部高价值能力。
 
-原生 function-calling，零框架依赖（**未上 LlamaIndex**，DeepSeek API 直接支持）。`agents/agent.js` 提供通用 `runAgent` 循环——给 LLM 一组工具定义，让它自主决定调用顺序与次数，循环到产出最终文本。
-
-当前金融专栏暂不使用 agent（数据+新闻直接渲染），汇总阶段用独立 DigestStage/FinanceDigestStage 读专栏文件 + LLM 综合。Agent profile 保留可用（sectors-commentary / focus-analysis / linkage-analysis），需要时在 job 配置 `agent` 字段即可启用。
-
-**工具**（`tools/*.js`）也是普通函数，agent 通过名字分发：
-- `get_market_snapshot`（按板块/品种名/全部查当日行情）
-- `get_history_series`（查近 N 天收盘价序列，不足时回拉 API）
-- `get_finance_news`（按关键词/全部查当日金融要闻）
-- `compute_correlation`（单对 Pearson 相关系数）
-- `find_correlations`（批量算所有配对，返回 top 强正/强负相关）
-
-### 2.4 状态管理
-
-`core/store.js` 按 section 分独立文件，CI 用 `.json` 提交 repo，本地用 `.local.json` 隔离（`*.local` 被 gitignore）。
+### 技术架构
 
 ```
-data/
-├── seen-news.json              # news 去重（7 天 TTL）
-├── seen-finance.json           # finance 去重
-├── recent-events-news.json     # news 近期事件标题（供 LLM 跨天语义去重）
-└── recent-events-finance.json  # finance 近期事件标题
+多源数据采集（纯脚本，并发抓取）
+       ↓
+LLM 流水线加工（DeepSeek API，5-6 阶段）
+  ├── select：合并+分类
+  ├── summarize：中文摘要
+  ├── tldr：要闻提炼
+  ├── digest：跨专栏汇总
+  └── agent：自主工具调用
+       ↓
+模板渲染（纯脚本 + chart.xkcd 图表内联）
+       ↓
+Hugo 静态站生成 → GitHub Pages 部署
 ```
 
-每个 section 独立文件，news 和 finance 互不干扰。saveSeen 每次重新读磁盘再写（避免 stale）。
+技术栈：Node.js 22 (ESM) · undici (HTTP) · fast-xml-parser (RSS) · iconv-lite (GBK) · js-yaml (配置) · DeepSeek API · Hugo 0.163 · chart.xkcd · KaTeX · Lenis · Turbo · GitHub Actions
 
----
+## 数据来源与处理
 
-## 三、模板构造层
+### 数据来源
 
-### 3.1 Renderer 系统
+所有数据均为**公开可访问的 RSS Feed 或 API 接口**，不包含个人信息、敏感信息或非公开数据。
 
-6 个 Renderer，每个产出 `{ path, content, processed }`。共享函数集中在 `renderers/helpers.js`：
+| 类型 | 来源 | 获取方式 |
+|------|------|---------|
+| 新闻 RSS | 62 个公开 RSS 源（新华社、人民日报、联合早报、MIT 科技评论等） | HTTP GET + XML 解析 |
+| A 股/港股/美股行情 | 新浪财经 HQ API | HTTP GET，GBK 编码 |
+| 加密货币 | CoinGecko API + Gate.io API（后备） | HTTP GET |
+| 韩国 KOSPI | 东方财富 API | HTTP GET |
+| 美债 10Y | Yahoo Finance | HTTP GET |
+| 申万行业 + 北向资金 | Tushare | HTTP POST |
 
-- `yamlStr` / `jsonSafe`：YAML frontmatter 安全输出 / chart 内联 JSON 转义
-- `renderChangeHtml` / `renderQuoteChange`：涨跌 `<span class="up/down">` 渲染
-- `renderNewsItem`：新闻条目渲染
-- `renderBarChart` / `renderSparkline` / `renderPairChart`：chart.xkcd 图表注入
-- `collectProcessed` / `findQuote` / `sectorAvg`：数据提取
+### 数据处理
 
-### 3.2 chart.xkcd 图表
+- **RSS**：XML 解析 → 8 步 HTML 实体解码（`&lt;`/`&gt;`/`&amp;` 等，顺序严格）→ 标签剥离 → 聚合型 RSS 拆分（橘鸦日报）
+- **行情**：GBK 解码 → 按字段数量自动区分 A 股（32 字段）/港股（6 字段）/美股（4 字段）三种格式 → 统一 Quote 模型
+- **去重**：URL hash → 标题 hash → bigram Jaccard → LLM 语义去重
+- **状态管理**：去重记录按 section 分文件（7 天 TTL），CI 写 `.json`（入库），本地写 `.local.json`（gitignore）
+- **输出**：Hugo Markdown（YAML frontmatter + 正文含内联 HTML 图表）
 
-cd 图表通过 raw HTML/JS 内联到 markdown（Hugo `unsafe=true`），`if(!window.chartXkcd)return` 守卫防止 CDN 不可用时页面崩溃。
+### 数据合规性声明
 
-**图表类型**：
-- **柱状图（Bar）**：各指数/板块当日涨跌幅对比，正绿负红
-- **sparkline（Line）**：资产近 7 天走势折线，历史不足 3 天自动跳过
-- **双线对比（Line）**：两品种归一化折线，用于联动观察
+所有数据来源均为公开渠道；不包含个人信息、内幕信息或非公开数据；RSS 摘要保留原始链接指向源站；参赛者确认对相关数据拥有合法使用权；行情数据仅供参考，不构成投资建议。
 
-### 3.3 各报告内容结构
+## 作品展示材料
 
-**时事专栏**（4 篇）：frontmatter(tldr 4-6 条) + 按 sub 分组的条目列表
+### 公网 Demo
 
-**时事汇总**：LLM 综合 4 专栏 → 8-12 条今日要闻 + 跳转链接回各专栏
+**Demo 链接**：https://uynajgi.github.io/yuudashboard/
 
-**金融专栏**（5 篇）：该市场指数表 + Bar 图 + 新闻（按 sub 分组）。A 股专栏额外含申万行业 + 北向资金
+### 测试账号
 
-**金融汇总**：LLM 综合 5 专栏 + 全市场指数表 + 板块对比图 + 申万行业 + 北向资金 + 跳转链接
+**无需登录**。站点为完全公开的静态网站，无账号体系，直接访问即可浏览所有内容。
 
-### 3.4 前端展示
+### 核心功能体验路径
 
-**首页**（`layouts/index.html`）：左侧悬浮导航 + 文章卡片瀑布流。每张卡片依次显示：分类标签 → 标题 → 时间 → **TL;DR 摘要**（`.Params.tldr` 渲染为列表，左边框强调） → 正文。
+评审期间建议按以下路径体验核心功能（预计 5-8 分钟）：
 
-**文章页**（`layouts/single.html`）：大标题 hero + TL;DR 侧边栏 + 正文（含图表）。
+**第一步：首页浏览（1 分钟）**
+1. 打开 https://uynajgi.github.io/yuudashboard/
+2. 首页展示文章卡片瀑布流，最新日报排在最前面
+3. 每张卡片依次显示：分类标签 → 标题 → 日期时间 → **TL;DR 今日要点**（蓝色左边框强调） → 正文预览
+4. 左侧为悬浮分类导航栏，可快速跳转到时事/金融分类
 
-**暗色模式**：`[data-theme="dark"]` 下的卡片阴影增强，边框弱化。
+**第二步：时事专栏体验（2 分钟）**
+1. 点击任意时事专栏卡片（如"国内"或"科技"），进入文章详情页
+2. 页面顶部：大标题 + 发布日期
+3. 右侧 TL;DR 侧边栏：该专栏的 4-6 条今日要闻（**这是 LLM summarize + tldr 两阶段加工的核心产出**）
+4. 正文：按子类（时政/经济/社会/军事/外交/教育等）分组的新闻列表，每条含：
+   - 加粗标题（可点击跳转到原文）
+   - 1-2 句 LLM 生成的中文摘要
+   - 括号标注的新闻来源
 
-**外部库**：chart.xkcd（图表）、gridjs（表格，已加载未用）、KaTeX（数学公式）、Lenis（平滑滚动）、Turbo（瞬时页面切换）。
+**第三步：金融市场专栏体验（2 分钟）**
+1. 点击"金融"分类标签或"A 股"专栏卡片
+2. 页面包含：
+   - **Markdown 指数表**：上证综指/深证成指/创业板指/科创50 的收盘价和涨跌幅（涨绿跌红）
+   - **chart.xkcd 手绘柱状图**：各指数涨跌幅可视化（AI 产出层下面的图表层）
+   - **申万行业指数表**：31 个行业按涨跌幅排序
+   - **北向资金净流向**
+   - **分类新闻**：按大盘/行业板块/资金流向/个股/政策分组
 
----
+**第四步：汇总报告体验（2 分钟）**
+1. 点击"今日要闻汇总" → LLM 综合四专栏生成的 8-12 条最重要的跨领域新闻
+2. 点击"金融市场汇总" → 包含：
+   - LLM 综合点评（8-12 条跨市场要闻）
+   - 全市场指数对比表（A 股/港股/美股/日经/KOSPI 一行对比）
+   - chart.xkcd 全市场涨跌柱状图
+   - 核心资产价格表（黄金/原油/美元/BTC/美债）
+   - 申万行业涨幅前 10
+   - 各专栏详细分析的跳转链接
 
-## 四、结果输出层
+**AI 能力体现的核心观察点**：
+- **事件合并**：同一条摘要末尾会出现"（新华社、人民日报、央视新闻）"等多来源标注，说明 LLM 识别并合并了同一事件的多家报道
+- **子类分配**：每条新闻归属到具体的子分类（时政/经济/AI/安全等），由 LLM 在 select 阶段自动判断
+- **摘要质量**：摘要为 1-2 句信息密集的中文，而非 RSS 原文的简单截断
+- **TL;DR 提炼**：TL;DR 要闻比正文标题高一层次，含具体数字和影响判断，不是标题复读
 
-### 4.1 本地运行
+### 使用步骤
+
+1. 浏览器访问 https://uynajgi.github.io/yuudashboard/
+2. 无需登录、无需注册、无需安装任何软件
+3. 建议使用桌面浏览器（移动端可浏览但体验稍差）
+4. 首次加载约 500ms（含 chart.xkcd JS），后续页面切换为瞬时（Turbo）
+
+### 注意事项
+
+- **Demo 链接在评审期间保持可访问**：站点部署于 GitHub Pages 全球 CDN，HTTPS 加密，7×24 小时可用
+- **站点内容每日更新**：系统在每日北京时间 19:00 自动运行，新日报通常在 19:05 左右上线
+- **如遇无法访问**：可能是 GitHub Pages 区域性 DNS 问题（极少发生），可尝试刷新或通过 HTTPS 直接访问
+- **图表可能不显示**：chart.xkcd 库从 CDN 加载，如遇 CDN 不可用，页面会自动降级为纯表格展示（不影响阅读）
+- **历史日报**：首页可向下滚动浏览历史日报，或通过左侧导航栏按分类筛选
+
+## 产品运行方式
+
+### 本地运行
 
 ```bash
-cd scripts
+# 1. 克隆（含主题 submodule）
+git clone --recurse-submodules git@github.com:UynajGI/yuudashboard.git
+cd yuudashboard/scripts
+npm ci
 
-# 时事专栏
-node v2/index.js --job=daily-news-domestic
-node v2/index.js --job=daily-news-world
-node v2/index.js --job=daily-news-tech
-node v2/index.js --job=daily-news-engineering
-node v2/index.js --job=daily-news-digest
+# 2. 配置 API Key
+cp .env.example .env
+# 编辑 .env：填入 DEEPSEEK_API_KEY（必须）和 TUSHARE_TOKEN（可选）
 
-# 金融专栏
-node v2/index.js --job=daily-finance-ashare
-node v2/index.js --job=daily-finance-hk
-node v2/index.js --job=daily-finance-us
-node v2/index.js --job=daily-finance-commodity
-node v2/index.js --job=daily-finance-crypto
-node v2/index.js --job=daily-finance-digest
-
-# dry-run（调 LLM 但不写盘不更新 state）
-node v2/index.js --job=daily-news-domestic --dry-run
-
-# 只看抓取结果
-node v2/index.js --job=daily-news-domestic --stop-after=ingest
+# 3. 运行
+node v2/index.js --job=daily-news-domestic          # 国内专栏
+node v2/index.js --job=daily-finance-ashare         # A股专栏
+node v2/index.js --job=daily-news-domestic --dry-run  # 调试模式（不写盘）
+node v2/index.js --job=daily-news-domestic --stop-after=ingest  # 只看抓取结果
 ```
 
-### 4.2 GitHub Actions CI/CD
+### 部署到自己仓库
 
-**两个 Workflow**（`.github/workflows/`）：
+1. **Fork 仓库** → 修改 `hugo.toml` 中的 `baseURL` 为自己的 GitHub Pages 地址
+2. **配置 Secrets**：Settings → Secrets → Actions，添加 `DEEPSEEK_API_KEY`（必须）+ `TUSHARE_TOKEN`（可选）
+3. **启用 Actions**：Settings → Actions → General → Allow all actions + Read and write permissions
+4. **启用 Pages**：Settings → Pages → Source 选 `gh-pages` 分支
+5. **首次触发**：Actions → Generate Reports → Run workflow
 
-| Workflow | 触发 | 流程 |
-|---|---|---|
-| `generate.yml` | cron `0 11 * * *`(北京 19:00) + 手动 | news + finance 两个 Job 并行跑（不碰 git）→ publish Job 合并 artifact 一次 push |
-| `deploy.yml` | push + 手动 | checkout(含 submodule) → Hugo build → gh-pages 部署 |
+系统按 `0 11 * * *`（UTC，即北京时间 19:00）每日自动运行，News 和 Finance 两个 Job 并行跑，publish Job 合并产物后一次 git push，deploy Job 完成 Hugo build + GitHub Pages 部署。
 
-**artifact 模式**：news 和 finance 各自跑在独立 Job 里，产出 upload-artifact；publish Job 等两者完成后 download-artifact 合并，**一次 commit + push**。零冲突。
+## 项目创新点
 
-**环境变量**（GA Secrets）：
-- `DEEPSEEK_API_KEY`：LLM API key（必须）
-- `TUSHARE_TOKEN`：Tushare 数据（可选，无则跳过申万行业/北向资金）
+1. **LLM 驱动的多阶段信息精炼流水线**：不是一次性端到端总结，而是按认知层级分阶段加工——合并（select）→ 提取（summarize）→ 提炼（tldr）→ 综合（digest），每个阶段独立优化，对应人类编辑处理新闻的完整流程
+2. **三层机械去重 + LLM 语义去重**：99% 的重复在机械层拦截（零 token），仅 1% 的边界情况（跨天延续 vs 全新事件）交给 LLM，极致成本效率
+3. **"先分后总"的报告体系**：各专栏独立生成（窄领域低噪音），汇总报告整合已提炼信息（高层次跨领域），专栏独立失败不互相影响
+4. **原生 Function Calling Agent，零框架依赖**：110 行代码实现完整 Agent 循环，5 个可插拔工具，3 个 Agent Profile，不依赖 LangChain/LlamaIndex
+5. **chart.xkcd 手绘风格金融图表**："数据严谨 + 视觉轻松"的反差，CDN fallback 静默降级
+6. **全流程 CI/CD 无人值守**：cron 定时 → 并行管线 → artifact 合并 → 一次 push → 自动部署，零人工介入
+7. **插件式架构**：加新数据源 = 写一个文件 + 注册一行；加新报告 = jobs.yml 加一行配置；加新工具 = 写一个文件 + 在 Agent Profile 里 import
 
-**开发阶段工具**：
-```bash
-bash scripts/dev.sh reset     # 清空报告 + 重置去重
-bash scripts/dev.sh ga        # 触发 GA 全量
-bash scripts/dev.sh status    # 查看运行状态
-```
+## 当前完成度
 
-### 4.3 Hugo 配置
+**已完成**：62 RSS 源聚合 · 6 金融 API 适配 · 5 阶段 LLM 流水线 · 11 篇日报生成 · 4 种报告模板 · chart.xkcd 图表系统 · Agent 系统（5 工具 + 3 Profile） · Hugo 前端 · GitHub Actions CI/CD · GitHub Pages 部署持续运行
 
-- `baseURL`: `https://uynajgi.github.io/yuudashboard/`
-- 主题：PaperMod（submodule，HTTPS 地址，`submodules: true`）
-- `uglyurls: true`（URL 以 `.html` 结尾，非目录）
-- `unsafe: true`（允许 markdown 中 raw HTML，chart 图表 / 内联 script 依赖此选项）
-- `[minify] disableJS: true`（Hugo 的 JS minifier 不兼容 chart.xkcd 内联 script）
-- KaTeX 数学公式（`$$…$$` / `$…$` 自动渲染）
-- 日文支持（`defaultContentLanguage = zh`）
+**待完善**：周报/月报模板 · 多 LLM 后端支持 · 新闻情感分析 · 全文分析 · 通知推送 · 移动端适配
 
-### 4.4 部署流程（完整链路）
+## 风险提示与局限性
 
-```
-定时 cron / 手动 workflow_dispatch
-  ↓
-GA: checkout → setup Node 22 → npm ci → run pipeline
-  ↓
-生成 content/{section}/{date}-*.md (Hugo markdown)
-  ↓
-git commit + push (冲突时优雅跳过)
-  ↓
-push 触发 deploy.yml
-  ↓
-Hugo build → gh-pages 部署
-  ↓
-https://uynajgi.github.io/yuudashboard/ 上线
-```
+- **LLM API 依赖**：核心加工依赖 DeepSeek API，不可用时日报生成中断。已通过 GA 错误处理确保单次失败不阻塞次日重试
+- **数据源稳定性**：RSS 源和 API 均为第三方服务，可能变更或限流。已实现单源容错（单源失败不影响整体）
+- **LLM 输出质量波动**：摘要和要闻质量受模型能力影响。所有条目保留原文链接，读者可验证
+- **仅支持中文**：prompt 和输出均为中文
+- **仅支持 DeepSeek**：尚未适配其他 LLM 后端
+- **单用户场景**：不支持多用户和个性化订阅
 
----
+## 开发指南
 
-## 五、开发指南
+### 加新数据源
 
-### 5.1 加新数据源
+1. 写 `scripts/v2/sources/xxx.js`，继承 `ItemSource` 或 `MarketSource`，实现 `fetch()` + `normalize()`
+2. 在 `scripts/v2/sources/index.js` import 并注册到 `buildSources()`
 
-1. 写 `v2/sources/xxx.js`，继承 `ItemSource` 或 `MarketSource`，实现 `fetch()` + `normalize()`
-2. 在 `v2/sources/index.js` import 并注册到 `buildSources()`
-3. 如果是行情源，`ingest.js` 的 marketResults 循环会自动处理
-4. 需要 per-source config 字段的，在 `feeds.yml` 加，构造时从 `config` 读
+### 加新报告模板
 
-### 5.2 加新报告模板
+1. 写 `scripts/v2/renderers/xxx.js`（导入 `helpers.js`，实现 `render(ctx)`）
+2. 在 `scripts/v2/index.js` 的 `RENDERERS` 字典注册
+3. `scripts/jobs.yml` 加一行 job 配置（workflow / renderer / output）
 
-1. 如需 agent 分析：写 `v2/agents/xxx.js`（定义 system / tools / buildHandlers）
-2. 写 `v2/renderers/xxx.js`（导入 `helpers.js`，实现 `renderXxx(ctx)`）
-3. 在 `v2/index.js` 注册 RENDERERS/AGENTS
-4. `jobs.yml` 加一行 job 配置（workflow / renderer / agent / output）
-5. 手动触发即用
+### 加新 Agent 工具
 
-### 5.3 加新 Agent 工具
+1. 在 `scripts/v2/tools/` 下写工具文件（导出 `xxxDef` + `makeXxx(ctx)`）
+2. 在需要的 Agent Profile 里 import 并注册到 tools / buildHandlers
 
-1. 在 `v2/tools/` 下写工具文件（导出 `xxxDef` + `makeXxx(ctx)`）
-2. 在需要的 agent profile 里 import 并注册到 tools / buildHandlers
-
-### 5.4 项目结构
+### 项目结构
 
 ```
 scripts/
 ├── v2/                        # 当前活跃管线
 │   ├── core/                  # 核心抽象
 │   │   ├── item.js            # NewsItem + Quote + hash
-│   │   ├── source.js          # ItemSource + MarketSource + FallbackMarketSource
-│   │   ├── store.js           # 统一 Store（seen + recent-events）
+│   │   ├── source.js          # ItemSource / MarketSource / FallbackMarketSource
+│   │   ├── store.js           # 统一 Store（seen + recent-events + market-history）
 │   │   ├── pipeline.js        # Pipeline 编排器
-│   │   ├── util.js            # 纯函数（windowToMs / similarity / pearson）
+│   │   ├── util.js            # windowToMs / titleSimilarity / pearson
 │   │   └── series.js          # 历史序列查询
-│   ├── sources/               # 数据源适配器（每个源一个文件）
-│   ├── stages/                # Pipeline 阶段（ingest / select / summarize / tldr）
+│   ├── sources/               # 数据源适配器（rss / sina-quote / sina-news / btc / eastmoney / yahoo / tushare）
+│   ├── stages/                # Pipeline 阶段（ingest / select / summarize / tldr / digest / finance-digest）
 │   ├── agents/                # Agent profiles + runAgent loop
-│   ├── tools/                 # Agent 工具
-│   ├── renderers/             # 报告模板 + helpers
-│   ├── index.js               # CLI 入口
+│   ├── tools/                 # Agent 工具（market / news / stats）
+│   ├── renderers/             # 报告模板 + helpers（news / finance-column / digest / finance-digest）
+│   ├── index.js               # CLI 入口 + Renderer/Agent 注册表
 │   ├── config.js              # 配置加载（jobs.yml / feeds.yml → ctx）
-│   └── prompt.js              # Prompt 加载器
-├── src/                       # 旧管线（已停用，保留备查）
-├── jobs.yml                   # Job 定义
-├── feeds.yml                  # RSS 源清单
-├── prompts/                   # Prompt 模板（daily- / finance-）
+│   └── prompt.js              # Prompt 加载器（文件缓存）
+├── prompts/                   # Prompt 模板（daily-* / finance-*，约 10,000 字）
+├── feeds.yml                  # 62 个 RSS 源定义
+├── jobs.yml                   # 11 个 Job 定义
 └── package.json
 ```
 
-### 5.5 技术栈
+## 开源与第三方材料说明
 
-| 层 | 技术 |
-|---|---|
-| 管线 | Node 22, ESM, undici(HTTP+IPv4), fast-xml-parser(RSS), iconv-lite(GBK), js-yaml |
-| LLM | DeepSeek API (deepseek-v4-flash), function calling |
-| 静态站 | Hugo 0.163 + PaperMod 主题 |
-| 前端 | chart.xkcd, KaTeX, Lenis, Turbo |
-| 部署 | GitHub Pages + GitHub Actions |
+本项目基于以下开源/第三方组件构建，所有核心业务逻辑为原创：
+
+| 组件 | 用途 | 本项目新增 |
+|------|------|-----------|
+| Hugo | 静态站点生成 | 自定义 layouts、多模板报告渲染、chart.xkcd 图表注入 |
+| PaperMod | Hugo 主题 | 卡片瀑布流首页、TL;DR 摘要侧边栏、金融报告布局 |
+| chart.xkcd | SVG 图表 | Bar/Line sparkline/Line 双线三种类型、CDN fallback、数据裁剪 |
+| DeepSeek API | LLM 推理 | 5 阶段提示词体系（~10,000 字）、Agent function calling 工具集 |
+| fast-xml-parser | RSS/XML 解析 | 8 步实体解码、content:encoded 剥离、聚合 RSS 拆分 |
+| undici | HTTP 客户端 | 全局 IPv4 强制、超时控制 |
+| iconv-lite | 字符编码 | GBK 新浪行情解码 |
+| GitHub Actions | CI/CD | 双 Job 并行 + artifact 合并 + 自动部署 |
+
+**核心原创**：源抽象层（ItemSource/MarketSource/FallbackMarketSource）、NewsItem/Quote 数据模型与 hash、三层去重+LLM 语义去重、Pipeline 编排器、6 个 Stage 全部实现、6 个 Prompt 模板（~10,000 字）、Agent 循环（110 行，零框架）、5 个 Agent 工具、3 个 Agent Profile、4 个 Renderer + chart.xkcd 图表系统、CI/CD Workflow（generate.yml + deploy.yml）、Hugo 自定义 layouts。
+
+**代码仓库**：https://github.com/UynajGI/yuudashboard
