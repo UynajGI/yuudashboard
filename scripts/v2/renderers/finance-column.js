@@ -70,6 +70,17 @@ export function renderFinanceColumn(ctx) {
       body.push(`| ${a.name} | ${fmtNum(a.price, 2)} | ${renderQuoteChange(a)} |`);
     }
     body.push('');
+    // 资产 sparkline（仅有历史数据的品种画出，如 BTC）
+    const assetSparks = [];
+    for (const a of assets) {
+      const sp = renderSparkline(marketHistory, a.name, `${job.slug}-${a.name}`, date.str);
+      if (sp) assetSparks.push(sp);
+    }
+    if (assetSparks.length) {
+      body.push('### 近 7 日走势\n');
+      body.push(assetSparks.join('\n'));
+      body.push('');
+    }
   }
 
   // 3. 额外品种（BTC/美债）
@@ -84,6 +95,17 @@ export function renderFinanceColumn(ctx) {
       body.push(`| ${q.name} | ${fmtNum(q.price, q.name === 'BTC' ? 0 : 2)} | ${renderQuoteChange(q)} |`);
     }
     body.push('');
+    // BTC/美债 sparkline
+    const extraSparks = [];
+    for (const q of extra) {
+      const sp = renderSparkline(marketHistory, q.name, `${job.slug}-${q.name}`, date.str);
+      if (sp) extraSparks.push(sp);
+    }
+    if (extraSparks.length) {
+      body.push('### 近 7 日走势\n');
+      body.push(extraSparks.join('\n'));
+      body.push('');
+    }
   }
 
   // 4. A 股专栏：申万行业 + 北向资金

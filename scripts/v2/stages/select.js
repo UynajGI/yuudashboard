@@ -80,7 +80,9 @@ export class SelectStage extends Stage {
 
       // 不丢弃：LLM 没覆盖到的候选条目，各自独立成事件（保证 24h 内新闻全保留）
       const coveredIds = new Set(llmEvents.flatMap((e) => e.items.map((it) => it.id)));
-      const leftover = capped.filter((it) => !coveredIds.has(it.id));
+      // 补入 LLM 未覆盖的条目（不丢弃），但搜索来源的不补——
+      // 搜索结果含 SEO 垃圾，LLM 没选就当噪音丢弃；RSS 都是真实新闻，必须保留
+      const leftover = capped.filter((it) => !coveredIds.has(it.id) && !(it.source || '').startsWith('搜索·'));
       const leftoverEvents = leftover.map((it) => ({ items: [it], mergedTitle: it.title, sub: '' }));
 
       const events = [...llmEvents, ...leftoverEvents].slice(0, ctx.job.top_n_per_category);
