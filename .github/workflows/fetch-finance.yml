@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: '要跑的金融类任务（jobs.yml 里定义的 name：daily-market / sector-scan / asset-focus / cross-linkage）'
+        description: '手动跑单个 job（留空=全跑6专栏+汇总）'
         required: false
-        default: 'daily-market'
+        default: ''
 
 permissions:
   contents: write
