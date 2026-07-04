@@ -139,12 +139,24 @@ function dedupe(items, windowMs, seen, today) {
     return today ? dateStr < today : true;
   };
 
+  // 硬拦截：从 URL 里提取日期（/2026/06/19/ 或 2026-06-19），
+  // 防止 RSS 把"收录时间"当 pubDate 导致旧文混入（HN/聚合源常见）
+  const urlDateStale = (url) => {
+    if (!url) return false;
+    const m = url.match(/20\d{2}[/-](0?[1-9]|1[0-2])[/-]([0-2]?[0-9]|3[01])/);
+    if (!m) return false;
+    const d = new Date(m[0].replace(/\//g, '-'));
+    if (isNaN(d.getTime())) return false;
+    return d.getTime() < cutoff;
+  };
+
   // 按日期降序（最新在前，保证多源同事件保留最新）
   const sorted = [...items].sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
 
   for (const it of sorted) {
-    // 时间窗过滤：无日期保留（保守），有日期过旧丢弃
+    // 时间窗过滤：有日期过旧丢弃；URL 含旧日期也丢弃（防 RSS 日期造假）
     if (it.date && it.date.getTime() < cutoff) continue;
+    if (urlDateStale(it.link)) continue;
     if (!it.title || it.title.length < 4) continue;
 
     const { urlHash: uh, titleHash: th } = it;
