@@ -11,3 +11,8 @@ scripts/.env
 
 # 本地去重 state —— CI 用 data/seen.json（提交进 repo），本地用 seen.local.json（互不污染）
 data/seen.local.json
+
+# 本地测试占位数据 —— 保留在本地用于测试，但不进远程/网页
+content/news/2025-07-03-daily-brief.md
+content/finance/2025-07-03-market.md
+content/research/2025-07-03-arxiv.md
