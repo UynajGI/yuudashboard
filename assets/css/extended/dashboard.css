@@ -178,23 +178,28 @@
 .home-card-research .home-card-tldr { border-left-color: var(--accent-research); }
 
 .home-card-body {
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.92rem;
+  line-height: 1.55;
   color: var(--primary);
 }
-.home-card-body h2 { font-size: 1.1rem; margin: 1em 0 0.4em; }
-.home-card-body h3 { font-size: 0.95rem; margin: 0.8em 0 0.3em; }
-.home-card-body ul, .home-card-body ol { padding-left: 1.5em; }
-.home-card-body li { margin: 0.2em 0; }
-.home-card-body table { display: table; width: 100%; border-collapse: collapse; margin: 0.5em auto; table-layout: fixed; }
-.home-card-body th, .home-card-body td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: center; word-break: break-word; }
+/* 覆盖 apple-single.css 泄漏的大间距（line-height 1.85 / h2 margin 2.5em） */
+.home-card-body h2 { font-size: 1.05rem; margin: 0.8em 0 0.35em !important; line-height: 1.3; }
+.home-card-body h3 { font-size: 0.92rem; margin: 0.6em 0 0.3em !important; line-height: 1.3; }
+.home-card-body p { margin: 0.3em 0; line-height: 1.55; }
+.home-card-body ul, .home-card-body ol { padding-left: 1.5em; margin: 0.3em 0; }
+.home-card-body li { margin: 0.15em 0; line-height: 1.5; }
+.home-card-body table { display: table; width: 100%; border-collapse: collapse; margin: 0.4em auto; table-layout: fixed; }
+.home-card-body th, .home-card-body td { padding: 3px 8px; border-bottom: 1px solid var(--border); text-align: center; word-break: break-word; font-size: 0.88rem; }
 .home-card-body th { font-weight: 700; background: var(--theme); }
 .home-card-body img { display: block; max-width: 100%; margin: 0.5em auto; }
-.home-card-body svg { max-height: 200px; }
-.home-card-body script + br, .home-card-body br { display: none; }
-/* 首页卡片隐藏图表（留给详情页），避免大间距 */
-.home-card-body .xkcd-chart { display: none; }
-.home-card-body script { display: none; }
+/* 首页卡片隐藏图表（留给详情页），避免 SVG 撑出大空白 */
+.home-card-body .xkcd-chart,
+.home-card-body svg,
+.home-card-body script { display: none !important; }
+.home-card-body script + br,
+.home-card-body br { display: none; }
+.home-card-body > *:last-child { margin-bottom: 0; }
+.home-card-body > *:first-child { margin-top: 0; }
 
 /* ── 响应式 ── */
 @media (max-width: 860px) {
