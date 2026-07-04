@@ -178,18 +178,20 @@
 .home-card-research .home-card-tldr { border-left-color: var(--accent-research); }
 
 .home-card-body {
-  font-size: 1.02rem;
-  line-height: 1.8;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: var(--primary);
 }
-.home-card-body h2 { font-size: 1.25rem; margin: 1.8em 0 0.5em; }
-.home-card-body h3 { font-size: 1.05rem; margin: 1.4em 0 0.4em; }
+.home-card-body h2 { font-size: 1.1rem; margin: 1em 0 0.4em; }
+.home-card-body h3 { font-size: 0.95rem; margin: 0.8em 0 0.3em; }
 .home-card-body ul, .home-card-body ol { padding-left: 1.5em; }
-.home-card-body li { margin: 0.3em 0; }
-.home-card-body table { display: table; width: 100%; border-collapse: collapse; margin: 1em auto; table-layout: fixed; }
-.home-card-body th, .home-card-body td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: center; word-break: break-word; }
+.home-card-body li { margin: 0.2em 0; }
+.home-card-body table { display: table; width: 100%; border-collapse: collapse; margin: 0.5em auto; table-layout: fixed; }
+.home-card-body th, .home-card-body td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: center; word-break: break-word; }
 .home-card-body th { font-weight: 700; background: var(--theme); }
-.home-card-body img { display: block; max-width: 100%; margin: 1em auto; }
+.home-card-body img { display: block; max-width: 100%; margin: 0.5em auto; }
+.home-card-body svg { max-height: 200px; }
+.home-card-body script + br, .home-card-body br { display: none; }
 
 /* ── 响应式 ── */
 @media (max-width: 860px) {
