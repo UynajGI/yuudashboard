@@ -49,7 +49,7 @@ jobs:
     slug: domestic
     window: 24h
     categories: [国内]
-    subs: [时政, 经济, 社会, 军事, 外交, 教育]
+    subs: [时政, 经济, 社会, 军事, 外交, 教育, 其他]
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
@@ -63,7 +63,7 @@ jobs:
     slug: world
     window: 24h
     categories: [国际]
-    subs: [地缘, 经贸, 社会, 军事安全, 科技]
+    subs: [地缘, 经贸, 社会, 军事, 科技, 其他]
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
@@ -77,13 +77,39 @@ jobs:
     slug: tech
     window: 24h
     categories: [科技]
-    subs: [AI, 半导体硬件, 互联网, 工具产品, 科研学术]
+    subs: [AI, 半导体硬件, 互联网, 工具产品, 科研学术, 其他]
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
     output: content/news/{date}-tech.md
     tags: [时事, 科技]
     description: "时事专栏 · 科技 {date}"
+
+  - name: daily-news-engineering
+    schedule: "15 11 * * *"
+    section: news
+    slug: engineering
+    window: 24h
+    categories: [工程]
+    subs: [平台动态, 语言框架, 架构设计, AI工程, 安全, 开源项目, 其他]
+    top_n_per_category: 30
+    workflow: [clean, select, summarize, tldr]
+    prompt_prefix: daily
+    output: content/news/{date}-engineering.md
+    tags: [时事, 工程]
+    description: "时事专栏 · 工程 {date}"
+
+  - name: daily-news-digest
+    schedule: "20 11 * * *"
+    section: news
+    slug: digest
+    window: 24h
+    categories: []
+    workflow: [digest]
+    renderer: digest
+    output: content/news/{date}-digest.md
+    tags: [时事, 今日要闻]
+    description: "今日要闻汇总：{date}"
 
   # ── 金融管线：新浪 API 拿市场数据 + 新闻，LLM 只做要闻精选/摘要/总览 ──
   - name: daily-market
