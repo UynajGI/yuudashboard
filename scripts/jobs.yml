@@ -44,11 +44,12 @@ jobs:
   # ═══════════════════════════════════════
 
   - name: daily-news-domestic
-    schedule: "0 11 * * *"        # UTC 11:00 = 北京 19:00
+    schedule: "0 11 * * *"
     section: news
     slug: domestic
     window: 24h
     categories: [国内]
+    subs: [时政, 经济, 社会, 军事, 外交, 科技, 教育]
     top_n_per_category: 15
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
@@ -57,11 +58,12 @@ jobs:
     description: "时事专栏 · 国内 {date}"
 
   - name: daily-news-world
-    schedule: "5 11 * * *"        # 比国内晚 5 分钟，避免并发
+    schedule: "5 11 * * *"
     section: news
     slug: world
     window: 24h
     categories: [国际]
+    subs: [地缘, 经贸, 社会, 军事安全, 科技]
     top_n_per_category: 15
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
@@ -70,11 +72,12 @@ jobs:
     description: "时事专栏 · 国际 {date}"
 
   - name: daily-news-tech
-    schedule: "10 11 * * *"       # 比国内晚 10 分钟
+    schedule: "10 11 * * *"
     section: news
     slug: tech
     window: 24h
     categories: [科技]
+    subs: [AI, 半导体硬件, 互联网, 工具产品, 科研学术]
     top_n_per_category: 15
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily

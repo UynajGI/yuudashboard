@@ -56,11 +56,16 @@ export class SelectStage extends Stage {
         ? recentTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')
         : '（无）';
 
+      // 子分类列表（供 LLM 分配的选项）
+      const subs = ctx.job.subs || [];
+      const subsBlock = subs.length ? subs.map((s) => `- ${s}`).join('\n') : '（无）';
+
       const prompt = tpl
         .replace(/\{category\}/g, cat)
         .replace('{top_n}', ctx.job.top_n_per_category)
         .replace('{items}', items.slice(0, 40).map((it) => it.toPromptText()).join('\n\n'))
-        .replace('{recent}', recentBlock);
+        .replace('{recent}', recentBlock)
+        .replace('{subs}', subsBlock);
 
       if (recentTitles.length) {
         console.log(`    ${cat}: 注入 ${recentTitles.length} 条近期已报道标题`);
@@ -79,6 +84,7 @@ export class SelectStage extends Stage {
         .map((ev) => ({
           items: (ev.ids || []).map((id) => byId.get(id)).filter(Boolean),
           mergedTitle: ev.title || '',
+          sub: ev.sub || '',  // LLM 分配的子分类
         }))
         .filter((ev) => ev.items.length > 0)
         .slice(0, ctx.job.top_n_per_category);

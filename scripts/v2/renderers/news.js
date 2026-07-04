@@ -29,14 +29,12 @@ export function renderNews(ctx) {
     const items = summarized[cat] || [];
     if (!items.length) continue;
 
-    // 按 sub 分组（sub 由 feeds.yml 人工分配，renderer 据此组织条目）
+    // 按 sub 分组（sub 由 LLM 在 select 阶段分配）
     const bySub = {};
     const noSub = [];
     for (const item of items) {
-      // summarized 的 item 结构：{ title, summary, sources, link, _rawItems }
-      // _rawItems[0] 是原始 NewsItem，带 sub 字段
-      const sub = item._rawItems?.[0]?.sub || '';
-      if (sub && sub !== '???') {
+      const sub = item.sub || '';
+      if (sub) {
         if (!bySub[sub]) bySub[sub] = [];
         bySub[sub].push(item);
       } else {

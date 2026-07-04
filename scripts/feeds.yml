@@ -2,112 +2,92 @@
 # 字段：
 #   name     源的显示名
 #   url      RSS / Atom feed URL
-#   category 归类（国内/国际/科技/财经/AI）—— 你的分类
-#   sub      子分类（时政/社会/经济/军事/外交/AI/半导体/创业...）—— 你手动分
-#   jobs     可选，限制哪些 job 使用此源。缺省=所有 news job
-#   window   可选，源级时间窗。缺省用 job 的 window
+#   category 归类（国内/国际/科技）—— 仅大类，子分类由 LLM 逐条判断
+#   jobs     可选，限制哪些 job 使用此源
+#   window   可选，源级时间窗
 #   enabled  可选，默认 true
 
-# ═══════════════════════════════════════
-# 国内
-# ═══════════════════════════════════════
+# ═══ 国内 ═══
 
 - name: 新华社新闻 - 新华网
   url: https://plink.anyfeeder.com/newscn/whxw
   category: 国内
-  sub: ???
   jobs:
   - daily-news-domestic
 
 - name: 人民日报
   url: https://plink.anyfeeder.com/people-daily
   category: 国内
-  sub: ???
   jobs:
   - daily-news-domestic
 
 - name: 中国日报 - 时政
   url: https://plink.anyfeeder.com/chinadaily/china
   category: 国内
-  sub: ???
   jobs:
   - daily-news-domestic
 
 - name: 中国日报 - 资讯
   url: https://plink.anyfeeder.com/chinadaily/world
   category: 国内
-  sub: ???
   jobs:
   - daily-news-domestic
 
 - name: 参考消息
   url: https://plink.anyfeeder.com/weixin/ckxxwx
   category: 国内
-  sub: ???
   jobs:
   - daily-news-domestic
 
 - name: 央视新闻
   url: https://plink.anyfeeder.com/weixin/cctvnewscenter
   category: 国内
-  sub: ???
   jobs:
   - daily-news-domestic
 
-# ═══════════════════════════════════════
-# 国际
-# ═══════════════════════════════════════
+# ═══ 国际 ═══
 
 - name: 联合早报 - 国际
   url: https://plink.anyfeeder.com/zaobao/realtime/world
   category: 国际
-  sub: ???
   jobs:
   - daily-news-world
 
 - name: 联合早报 - 中港台
   url: https://plink.anyfeeder.com/zaobao/realtime/china
   category: 国际
-  sub: ???
   jobs:
   - daily-news-world
 
 - name: iDaily 每日环球视野
   url: https://plink.anyfeeder.com/idaily/today
   category: 国际
-  sub: ???
   jobs:
   - daily-news-world
 
 - name: BBC 中文
   url: https://plink.anyfeeder.com/bbc/cn
   category: 国际
-  sub: ???
   jobs:
   - daily-news-world
 
 - name: 纽约时报中文
   url: https://plink.anyfeeder.com/nytimes/cn
   category: 国际
-  sub: ???
   jobs:
   - daily-news-world
 
 - name: 经济学人 - 双语
   url: https://plink.anyfeeder.com/weixin/Economist_fans
   category: 国际
-  sub: ???
   jobs:
   - daily-news-world
 
-# ═══════════════════════════════════════
-# 科技
-# ═══════════════════════════════════════
+# ═══ 科技 ═══
 
 - name: 橘鸦日报
   url: https://daily.juya.uk/rss.xml
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
   window: 48h
@@ -115,49 +95,42 @@
 - name: MIT 科技评论 - 本周热榜
   url: https://plink.anyfeeder.com/mittrchina/hot
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
 
 - name: Solidot
   url: https://www.solidot.org/index.rss
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
 
 - name: 36氪
   url: https://plink.anyfeeder.com/36kr
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
 
 - name: 少数派
   url: https://sspai.com/feed
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
 
 - name: 阮一峰的网络日志
   url: https://www.ruanyifeng.com/blog/atom.xml
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
 
 - name: 机器之心
   url: https://www.jiqizhixin.com/rss
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
 
 - name: OpenAI Blog
   url: https://openai.com/news/rss.xml
   category: 科技
-  sub: ???
   jobs:
   - daily-news-tech
 

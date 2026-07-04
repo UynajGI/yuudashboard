@@ -54,7 +54,8 @@ export class SummarizeStage extends Stage {
             ? s.sources
             : [...new Set(ev.items.map((it) => it.source))],
           link: s.link || ev.items[0]?.link || '',
-          _rawItems: ev.items, // 保留所有源条目，供 state 写 hash
+          sub: ev.sub || '',  // LLM 分配的子分类
+          _rawItems: ev.items,
         };
       });
 
