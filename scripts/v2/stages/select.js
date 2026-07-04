@@ -80,7 +80,7 @@ export class SelectStage extends Stage {
       totalUsage.outputTokens += usage.outputTokens;
 
       const byId = new Map(capped.map((it) => [it.id, it]));
-      const events = (content?.events || [])
+      let events = (content?.events || [])
         .map((ev) => ({
           items: (ev.ids || []).map((id) => byId.get(id)).filter(Boolean),
           mergedTitle: ev.title || '',
@@ -88,6 +88,19 @@ export class SelectStage extends Stage {
         }))
         .filter((ev) => ev.items.length > 0)
         .slice(0, ctx.job.top_n_per_category);
+
+      // 保底：LLM 选太少但候选充足时，补入未选中的条目（按源轮询，保证多样性）
+      // 避免 LLM 偶尔过度保守导致整列空
+      const minKeep = Math.min(8, Math.floor(capped.length / 3));
+      if (events.length < minKeep && capped.length > events.length) {
+        const usedIds = new Set(events.flatMap((e) => e.items.map((it) => it.id)));
+        for (const it of capped) {
+          if (events.length >= minKeep) break;
+          if (usedIds.has(it.id)) continue;
+          events.push({ items: [it], mergedTitle: it.title, sub: '' });
+          usedIds.add(it.id);
+        }
+      }
 
       selected[cat] = events;
       const srcCount = events.reduce((a, e) => a + e.items.length, 0);
