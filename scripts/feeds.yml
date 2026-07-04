@@ -1,41 +1,121 @@
 # RSS 信息源清单
-# 你维护这个文件：增删改源，不需要动代码。
-# 管道会自动读取，按 category 归类后送 LLM 处理。
-#
 # 字段：
-#   name     源的显示名（会出现在简报条目的来源里）
+#   name     源的显示名
 #   url      RSS / Atom feed URL
-#   category 归类，必须出现在 jobs.yml 某个 job 的 categories 里
-#            目前用：国内 / 国际 / 科技
-#   enabled  可选，默认 true；临时关某个源设 false
-#   window   可选，源级时间窗（如 48h / 7d）。缺省用 job 的 window。
-#            日更聚合源（如橘鸦日报当天含昨日内容）可放宽。
+#   category 归类（国内/国际/科技）
+#   jobs     可选，限制哪些 job 使用此源。缺省=所有 news job 使用
+#   window   可选，源级时间窗。缺省用 job 的 window
+#   enabled  可选，默认 true
 
-- name: 橘鸦日报
-  url: https://daily.juya.uk/rss.xml
-  category: 科技
-  window: 48h              # 橘鸦是日更聚合，当天 RSS 含昨日内容，放宽到 48h
-
-- name: MIT 科技评论 - 本周热榜
-  url: https://plink.anyfeeder.com/mittrchina/hot
-  category: 科技
-
-- name: Solidot
-  url: https://www.solidot.org/index.rss
-  category: 科技
-
-- name: 联合早报 - 国际
-  url: https://plink.anyfeeder.com/zaobao/realtime/world
-  category: 国际
-
-- name: iDaily 每日环球视野
-  url: https://plink.anyfeeder.com/idaily/today
-  category: 国际
+# ═══════════════════════════════════════
+# 国内
+# ═══════════════════════════════════════
 
 - name: 新华社新闻 - 新华网
   url: https://plink.anyfeeder.com/newscn/whxw
   category: 国内
+  jobs: [daily-news-domestic]
 
 - name: 人民日报
   url: https://plink.anyfeeder.com/people-daily
   category: 国内
+  jobs: [daily-news-domestic]
+
+- name: 中国日报 - 时政
+  url: https://plink.anyfeeder.com/chinadaily/china
+  category: 国内
+  jobs: [daily-news-domestic]
+
+- name: 中国日报 - 资讯
+  url: https://plink.anyfeeder.com/chinadaily/world
+  category: 国内
+  jobs: [daily-news-domestic]
+
+- name: 参考消息
+  url: https://plink.anyfeeder.com/weixin/ckxxwx
+  category: 国内
+  jobs: [daily-news-domestic]
+
+- name: 央视新闻
+  url: https://plink.anyfeeder.com/weixin/cctvnewscenter
+  category: 国内
+  jobs: [daily-news-domestic]
+
+# ═══════════════════════════════════════
+# 国际
+# ═══════════════════════════════════════
+
+- name: 联合早报 - 国际
+  url: https://plink.anyfeeder.com/zaobao/realtime/world
+  category: 国际
+  jobs: [daily-news-world]
+
+- name: 联合早报 - 中港台
+  url: https://plink.anyfeeder.com/zaobao/realtime/china
+  category: 国际
+  jobs: [daily-news-world]
+
+- name: iDaily 每日环球视野
+  url: https://plink.anyfeeder.com/idaily/today
+  category: 国际
+  jobs: [daily-news-world]
+
+- name: BBC 中文
+  url: https://plink.anyfeeder.com/bbc/cn
+  category: 国际
+  jobs: [daily-news-world]
+
+- name: 纽约时报中文
+  url: https://plink.anyfeeder.com/nytimes/cn
+  category: 国际
+  jobs: [daily-news-world]
+
+- name: 经济学人 - 双语
+  url: https://plink.anyfeeder.com/weixin/Economist_fans
+  category: 国际
+  jobs: [daily-news-world]
+
+# ═══════════════════════════════════════
+# 科技
+# ═══════════════════════════════════════
+
+- name: 橘鸦日报
+  url: https://daily.juya.uk/rss.xml
+  category: 科技
+  window: 48h
+  jobs: [daily-news-tech]
+
+- name: MIT 科技评论 - 本周热榜
+  url: https://plink.anyfeeder.com/mittrchina/hot
+  category: 科技
+  jobs: [daily-news-tech]
+
+- name: Solidot
+  url: https://www.solidot.org/index.rss
+  category: 科技
+  jobs: [daily-news-tech]
+
+- name: 36氪
+  url: https://plink.anyfeeder.com/36kr
+  category: 科技
+  jobs: [daily-news-tech]
+
+- name: 少数派
+  url: https://sspai.com/feed
+  category: 科技
+  jobs: [daily-news-tech]
+
+- name: 阮一峰的网络日志
+  url: https://www.ruanyifeng.com/blog/atom.xml
+  category: 科技
+  jobs: [daily-news-tech]
+
+- name: 机器之心
+  url: https://www.jiqizhixin.com/rss
+  category: 科技
+  jobs: [daily-news-tech]
+
+- name: OpenAI Blog
+  url: https://openai.com/news/rss.xml
+  category: 科技
+  jobs: [daily-news-tech]

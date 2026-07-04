@@ -39,20 +39,48 @@
 #   想跳过某阶段（比如调试时只看 clean 结果），改这里即可，不动代码。
 
 jobs:
-  - name: daily-news
-    schedule: "0 11 * * *"       # UTC 11点 = 北京 19点（晚报）
+  # ═══════════════════════════════════════
+  # 时事 —— 按专栏拆分为三个独立报告
+  # ═══════════════════════════════════════
+
+  - name: daily-news-domestic
+    schedule: "0 11 * * *"        # UTC 11:00 = 北京 19:00
     section: news
-    slug: daily-brief
+    slug: domestic
     window: 24h
-    categories: [国内, 国际, 科技]
-    # 每类精选条数上限。不是硬性目标——LLM 按实际有价值的事件数决定，
-    # 多则多选、少则少选，宁可少选也不凑数。这里只是防失控的天花板。
+    categories: [国内]
     top_n_per_category: 15
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-daily-brief.md
-    tags: [时事]
-    description: "每日晚报：{date}"
+    output: content/news/{date}-domestic.md
+    tags: [时事, 国内]
+    description: "时事专栏 · 国内 {date}"
+
+  - name: daily-news-world
+    schedule: "5 11 * * *"        # 比国内晚 5 分钟，避免并发
+    section: news
+    slug: world
+    window: 24h
+    categories: [国际]
+    top_n_per_category: 15
+    workflow: [clean, select, summarize, tldr]
+    prompt_prefix: daily
+    output: content/news/{date}-world.md
+    tags: [时事, 国际]
+    description: "时事专栏 · 国际 {date}"
+
+  - name: daily-news-tech
+    schedule: "10 11 * * *"       # 比国内晚 10 分钟
+    section: news
+    slug: tech
+    window: 24h
+    categories: [科技]
+    top_n_per_category: 15
+    workflow: [clean, select, summarize, tldr]
+    prompt_prefix: daily
+    output: content/news/{date}-tech.md
+    tags: [时事, 科技]
+    description: "时事专栏 · 科技 {date}"
 
   # ── 金融管线：新浪 API 拿市场数据 + 新闻，LLM 只做要闻精选/摘要/总览 ──
   - name: daily-market

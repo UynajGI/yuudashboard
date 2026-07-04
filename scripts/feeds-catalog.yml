@@ -1,0 +1,219 @@
+# RSS 源备选库 —— 从 top-rss-list + awesome-rsshub-routes 整理
+# 字段：name(url的显示名) / url / category(国内/国际/科技/财经/AI) / status(in-use/candidate)
+# 加源时直接取消注释 + 改 status: candidate → in-use 即可
+#
+# 已启用（7 个）
+in_use:
+  - name: 橘鸦日报
+    url: https://daily.juya.uk/rss.xml
+    category: 科技
+    window: 48h
+
+  - name: MIT 科技评论 - 本周热榜
+    url: https://plink.anyfeeder.com/mittrchina/hot
+    category: 科技
+
+  - name: Solidot
+    url: https://www.solidot.org/index.rss
+    category: 科技
+
+  - name: 联合早报 - 国际
+    url: https://plink.anyfeeder.com/zaobao/realtime/world
+    category: 国际
+
+  - name: iDaily 每日环球视野
+    url: https://plink.anyfeeder.com/idaily/today
+    category: 国际
+
+  - name: 新华社新闻 - 新华网
+    url: https://plink.anyfeeder.com/newscn/whxw
+    category: 国内
+
+  - name: 人民日报
+    url: https://plink.anyfeeder.com/people-daily
+    category: 国内
+
+# ── 候选源（按类别分，可直接启用）──
+
+candidates:
+  # --- 国内新闻 ---
+  - name: 环球时报
+    url: https://plink.anyfeeder.com/huanqiu/global
+    category: 国内
+    note: 国际视角国内新闻
+
+  - name: 澎湃新闻
+    url: https://plink.anyfeeder.com/thepaper/channel_25950
+    category: 国内
+    note: 澎湃时事
+
+  - name: 参考消息
+    url: https://plink.anyfeeder.com/cankaoxiaoxi
+    category: 国内
+    note: 参考消息官方
+
+  # --- 国际新闻 ---
+  - name: BBC 中文
+    url: https://plink.anyfeeder.com/bbc/zhongwen/simp
+    category: 国际
+    note: BBC 中文版
+
+  - name: 纽约时报中文
+    url: https://cn.nytimes.com/rss/news.xml
+    category: 国际
+    note: NYT 中文版
+
+  - name: FT 中文网
+    url: https://plink.anyfeeder.com/ftchinese/channel/news
+    category: 国际
+    note: 金融时报中文
+
+  - name: VOA 中文
+    url: https://plink.anyfeeder.com/voachinese/news
+    category: 国际
+    note: 美国之音中文
+
+  - name: 日经中文
+    url: https://plink.anyfeeder.com/cn-nikkei/column
+    category: 国际
+    note: 日经中文版
+
+  - name: DW 中文
+    url: https://plink.anyfeeder.com/dwnews/zh
+    category: 国际
+    note: 德国之声中文
+
+  - name: 路透中文
+    url: https://plink.anyfeeder.com/reuters/cn
+    category: 国际
+    note: 路透社中文
+
+  # --- 科技 ---
+  - name: 36氪
+    url: https://plink.anyfeeder.com/36kr
+    category: 科技
+    note: 创业 / 科技商业
+
+  - name: 少数派
+    url: https://sspai.com/feed
+    category: 科技
+    note: 数字生活 / 效率工具
+
+  - name: 阮一峰的网络日志
+    url: https://www.ruanyifeng.com/blog/atom.xml
+    category: 科技
+    note: 科技人文
+
+  - name: V2EX
+    url: https://v2ex.com/index.xml
+    category: 科技
+    note: 技术创意社区
+
+  - name: HelloGitHub
+    url: https://hellogithub.com/rss
+    category: 科技
+    note: GitHub 开源项目月刊
+
+  - name: 美团技术团队
+    url: https://tech.meituan.com/feed
+    category: 科技
+    note: 美团工程博客
+
+  - name: 有赞技术团队
+    url: https://tech.youzan.com/rss
+    category: 科技
+    note: 有赞工程博客
+
+  - name: InfoQ 中文
+    url: https://plink.anyfeeder.com/infoq/recommend
+    category: 科技
+    note: 技术资讯
+
+  - name: 酷壳 CoolShell
+    url: https://coolshell.cn/feed
+    category: 科技
+    note: 陈皓技术博客
+
+  - name: 知乎每日精选
+    url: https://www.zhihu.com/rss
+    category: 科技
+    note: 知乎热榜精选
+
+  - name: 小众软件
+    url: https://feed.appinn.com
+    category: 科技
+    note: 软件推荐
+
+  # --- AI 专题 ---
+  - name: OpenAI 博客
+    url: https://openai.com/news/rss.xml
+    category: 科技
+    note: GPT 官方动态
+
+  - name: Google DeepMind
+    url: https://deepmind.google/blog/rss.xml
+    category: 科技
+    note: DeepMind 研究动态
+
+  - name: arXiv AI
+    url: https://rss.arxiv.org/rss/cs.AI
+    category: 科技
+    note: AI 预印本
+
+  - name: Hacker News AI
+    url: https://hnrss.org/newest?q=AI
+    category: 科技
+    note: HN AI 话题
+
+  # --- 财经 ---
+  - name: 华尔街见闻
+    url: https://plink.anyfeeder.com/wallstreetcn/news/global
+    category: 国际
+    note: 全球财经实时
+
+  - name: 雪球精选
+    url: https://xueqiu.com/hots/topic/rss
+    category: 国际
+    note: 投资者社区热帖
+
+  - name: 财新网
+    url: https://plink.anyfeeder.com/caixin/latest
+    category: 国内
+    note: 深度财经报道
+
+  - name: 第一财经
+    url: https://plink.anyfeeder.com/yicai/brief
+    category: 国内
+    note: 财经快讯
+
+  # --- 更多 RSSHub 路由（按需启用）---
+  - name: 微博热搜
+    url: https://rsshub.app/weibo/search/hot
+    category: 国内
+    note: RSSHub - 需自建或使用公共实例
+
+  - name: 知乎热榜
+    url: https://rsshub.app/zhihu/hotlist
+    category: 科技
+    note: RSSHub - 需自建或使用公共实例
+
+  - name: 百度实时热点
+    url: https://rsshub.app/baidu/top
+    category: 国内
+    note: RSSHub - 需自建
+
+  # --- 可从 plink 代理的（避免被墙）---
+  - name: Engadget 中文
+    url: https://plink.anyfeeder.com/cn-engadget
+    category: 科技
+    note: 科技新闻
+
+  - name: 腾讯科技
+    url: https://plink.anyfeeder.com/tech-qq
+    category: 科技
+    note: 腾讯科技频道
+
+  - name: 网易科技
+    url: https://plink.anyfeeder.com/tech-163
+    category: 科技
+    note: 网易科技频道

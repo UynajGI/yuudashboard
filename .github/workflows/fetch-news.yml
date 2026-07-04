@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: '要跑的简报任务名（jobs.yml 里定义的 name）'
+        description: '手动跑单个时事 job（留空=全跑国内/国际/科技）'
         required: false
-        default: 'daily-news'
+        default: ''
 
 permissions:
   contents: write
@@ -31,12 +31,21 @@ jobs:
         working-directory: scripts
         run: npm ci
 
-      - name: Run fetch pipeline
+      - name: Run reports
         working-directory: scripts
         env:
           LLM_PROVIDER: deepseek
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: node v2/index.js --job=${{ inputs.job || 'daily-news' }}
+        run: |
+          if [ -n "${{ inputs.job }}" ]; then
+            echo "### 手动触发：${{ inputs.job }}"
+            node v2/index.js --job="${{ inputs.job }}"
+          else
+            for job in daily-news-domestic daily-news-world daily-news-tech; do
+              echo "### $job"
+              node v2/index.js --job="$job" || echo "⚠ $job 失败"
+            done
+          fi
 
       - name: Commit & push
         run: |

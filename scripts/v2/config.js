@@ -39,10 +39,15 @@ function loadEnvFile() {
 export function buildContext(args) {
   loadEnvFile();
 
-  const feeds = loadYaml('feeds.yml').filter((f) => f.enabled !== false);
+  const allFeeds = loadYaml('feeds.yml').filter((f) => f.enabled !== false);
   const { jobs } = loadYaml('jobs.yml');
   const job = jobs.find((j) => j.name === args.job);
   if (!job) throw new Error(`job "${args.job}" 未在 jobs.yml 中定义`);
+
+  // 按 job 筛选 feeds：feed.jobs 指定了哪些 job 用它，缺省=所有 job
+  const feeds = allFeeds.filter((f) =>
+    !f.jobs || f.jobs.length === 0 || f.jobs.includes(job.name)
+  );
 
   // 北京时间
   const now = new Date();

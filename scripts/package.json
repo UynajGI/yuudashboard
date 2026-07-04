@@ -9,12 +9,11 @@
   },
   "scripts": {
     "start": "node v2/index.js",
-    "daily-news": "node v2/index.js --job=daily-news",
-    "daily-news:dry": "node v2/index.js --job=daily-news --dry-run",
-    "daily-news:ingest-only": "node v2/index.js --job=daily-news --stop-after=ingest",
+    "domestic": "node v2/index.js --job=daily-news-domestic",
+    "world": "node v2/index.js --job=daily-news-world",
+    "tech": "node v2/index.js --job=daily-news-tech",
     "daily-market": "node v2/index.js --job=daily-market",
     "daily-market:dry": "node v2/index.js --job=daily-market --dry-run",
-    "daily-market:ingest-only": "node v2/index.js --job=daily-market --stop-after=ingest",
     "sector-scan": "node v2/index.js --job=sector-scan",
     "asset-focus": "node v2/index.js --job=asset-focus",
     "cross-linkage": "node v2/index.js --job=cross-linkage"
