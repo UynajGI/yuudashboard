@@ -192,6 +192,9 @@
 .home-card-body img { display: block; max-width: 100%; margin: 0.5em auto; }
 .home-card-body svg { max-height: 200px; }
 .home-card-body script + br, .home-card-body br { display: none; }
+/* 首页卡片隐藏图表（留给详情页），避免大间距 */
+.home-card-body .xkcd-chart { display: none; }
+.home-card-body script { display: none; }
 
 /* ── 响应式 ── */
 @media (max-width: 860px) {
