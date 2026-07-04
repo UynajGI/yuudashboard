@@ -15,7 +15,9 @@
 #   prompt_prefix        scripts/prompts/ 下本 job 的提示词前缀
 #                        实际文件为 {prompt_prefix}-{stage}.md
 #                        默认 daily，即 daily-select.md / daily-summarize.md / daily-tldr.md
-#   output               输出路径模板，{date} 会替换成 YYYY-MM-DD（北京时间）
+#   output               输出路径模板，占位符：
+#                        {date}=YYYY-MM-DD，{stamp}=HHMMSS（同日重跑防撞），{slug}=job.slug
+#                        例：content/news/{date}-{stamp}-{slug}.md → /news/2026-07-04-143025-domestic.html
 #   tags                 frontmatter 的 tags 字段
 #   description          frontmatter 的 description 字段（{date} 会替换）
 #   renderer             可选，选择哪个渲染器输出。缺省按 section 兜底：
@@ -53,7 +55,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-domestic.md
+    output: content/news/{date}-{stamp}-domestic.md
     tags: [时事, 国内]
     description: "时事专栏 · 国内 {date}"
 
@@ -67,7 +69,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-world.md
+    output: content/news/{date}-{stamp}-world.md
     tags: [时事, 国际]
     description: "时事专栏 · 国际 {date}"
 
@@ -81,7 +83,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-tech.md
+    output: content/news/{date}-{stamp}-tech.md
     tags: [时事, 科技]
     description: "时事专栏 · 科技 {date}"
 
@@ -95,7 +97,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-engineering.md
+    output: content/news/{date}-{stamp}-engineering.md
     tags: [时事, 工程]
     description: "时事专栏 · 工程 {date}"
 
@@ -107,14 +109,14 @@ jobs:
     categories: []
     workflow: [digest]
     renderer: digest
-    output: content/news/{date}-digest.md
+    output: content/news/{date}-{stamp}-digest.md
     tags: [时事, 今日要闻]
     description: "今日要闻汇总：{date}"
     columns:
-      - { name: 国内, file: "content/news/{date}-domestic.md" }
-      - { name: 国际, file: "content/news/{date}-world.md" }
-      - { name: 科技, file: "content/news/{date}-tech.md" }
-      - { name: 工程, file: "content/news/{date}-engineering.md" }
+      - { name: 国内, slug: domestic }
+      - { name: 国际, slug: world }
+      - { name: 科技, slug: tech }
+      - { name: 工程, slug: engineering }
 
   # ═══════════════════════════════════════
   # 金融 —— 按市场拆 5 专栏 + 1 汇总
@@ -133,7 +135,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-ashare.md
+    output: content/finance/{date}-{stamp}-ashare.md
     tags: [金融, A股]
     description: "金融专栏 · A股 {date}"
 
@@ -150,7 +152,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-hk.md
+    output: content/finance/{date}-{stamp}-hk.md
     tags: [金融, 港股]
     description: "金融专栏 · 港股 {date}"
 
@@ -167,7 +169,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-asia.md
+    output: content/finance/{date}-{stamp}-asia.md
     tags: [金融, 亚盘]
     description: "金融专栏 · 亚盘 {date}"
 
@@ -184,7 +186,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-us.md
+    output: content/finance/{date}-{stamp}-us.md
     tags: [金融, 美股]
     description: "金融专栏 · 美股 {date}"
 
@@ -201,7 +203,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-commodity.md
+    output: content/finance/{date}-{stamp}-commodity.md
     tags: [金融, 商品]
     description: "金融专栏 · 商品 {date}"
 
@@ -218,7 +220,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-crypto.md
+    output: content/finance/{date}-{stamp}-crypto.md
     tags: [金融, 加密]
     description: "金融专栏 · 加密 {date}"
 
@@ -230,16 +232,16 @@ jobs:
     categories: []
     workflow: [finance-digest]
     renderer: finance-digest
-    output: content/finance/{date}-digest.md
+    output: content/finance/{date}-{stamp}-digest.md
     tags: [金融, 汇总]
     description: "金融市场汇总：{date}"
     columns:
-      - { name: A股, file: "content/finance/{date}-ashare.md" }
-      - { name: 港股, file: "content/finance/{date}-hk.md" }
-      - { name: 亚盘, file: "content/finance/{date}-asia.md" }
-      - { name: 美股, file: "content/finance/{date}-us.md" }
-      - { name: 商品, file: "content/finance/{date}-commodity.md" }
-      - { name: 加密, file: "content/finance/{date}-crypto.md" }
+      - { name: A股, slug: ashare }
+      - { name: 港股, slug: hk }
+      - { name: 亚盘, slug: asia }
+      - { name: 美股, slug: us }
+      - { name: 商品, slug: commodity }
+      - { name: 加密, slug: crypto }
 
   # ── 以下为预留示例，需要时取消注释 / 复制改参数 ──────────────
   # - name: morning
@@ -250,7 +252,7 @@ jobs:
   #   categories: [国内, 国际, 科技]
   #   top_n_per_category: 3
   #   prompt: daily.md
-  #   output: content/news/{date}-morning-brief.md
+  #   output: content/news/{date}-{stamp}-morning-brief.md
   #   tags: [时事, 早报]
   #   description: "早间简报：{date}"
   #
@@ -262,6 +264,6 @@ jobs:
   #   categories: [国内, 国际, 科技]
   #   top_n_per_category: 3
   #   prompt: daily.md
-  #   output: content/news/{date}-evening-brief.md
+  #   output: content/news/{date}-{stamp}-evening-brief.md
   #   tags: [时事, 晚报]
   #   description: "晚间简报：{date}"

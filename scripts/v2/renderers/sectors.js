@@ -3,12 +3,12 @@
 
 import {
   yamlStr, fmtNum, renderQuoteChange, renderBarChart,
-  renderNewsItem, sectorAvg, collectProcessed, SECTORS,
+  renderNewsItem, sectorAvg, collectProcessed, SECTORS, outputPath,
 } from './helpers.js';
 
 export function renderSectors(ctx) {
   const { job, date, marketData, summarized, agentResult } = ctx;
-  const path = job.output.replace('{date}', date.str);
+  const path = outputPath(job, date);
   const md = marketData || { indices: [], assets: [] };
   const tags = job.tags || ['金融', '板块'];
   const description = (job.description || '板块扫描：{date}').replace('{date}', date.str);

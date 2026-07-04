@@ -2,7 +2,7 @@
 // 迁移自 src/render-linkage.js，用 helpers 消除重复。
 
 import {
-  yamlStr, renderPairChart, collectProcessed,
+  yamlStr, renderPairChart, collectProcessed, outputPath,
 } from './helpers.js';
 import { getSeries } from '../core/series.js';
 import { pearson } from '../core/util.js';
@@ -33,7 +33,7 @@ function computeTopPairs(history, days = 7, topK = 3) {
 
 export function renderLinkage(ctx) {
   const { job, date, summarized, agentResult, marketHistory } = ctx;
-  const path = job.output.replace('{date}', date.str);
+  const path = outputPath(job, date);
   const tags = job.tags || ['金融', '联动'];
   const description = (job.description || '联动观察：{date}').replace('{date}', date.str);
   const title = `联动观察：${date.str}`;

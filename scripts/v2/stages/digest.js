@@ -2,8 +2,8 @@
 // 只服务 news section，finance 有自己的汇总。
 
 import { Stage } from '../core/pipeline.js';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { findColumnFile } from '../renderers/helpers.js';
 
 export class DigestStage extends Stage {
   constructor() {
@@ -20,11 +20,11 @@ export class DigestStage extends Stage {
       return ctx;
     }
 
-    // 读各专栏文件
+    // 读各专栏文件（用 glob 找当天实际文件，兼容带 stamp 的命名）
     const sections = [];
     for (const col of columns) {
-      const path = resolve(ctx.repoRoot, col.file.replace('{date}', ctx.date.str));
-      if (!existsSync(path)) {
+      const path = findColumnFile(ctx.repoRoot, ctx.job.section, ctx.date.str, col.slug);
+      if (!path) {
         console.log(`  ⚠ ${col.name}未生成，跳过`);
         continue;
       }

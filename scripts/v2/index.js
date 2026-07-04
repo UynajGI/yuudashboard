@@ -60,7 +60,7 @@ async function main() {
   // 判断是否需要 LLM
   const stages = ctx.job.workflow || ['ingest', 'select', 'summarize', 'tldr'];
   const stopIdx = args.stopAfter ? stages.indexOf(args.stopAfter) : stages.length;
-  const willCallLLM = stages.slice(0, stopIdx + 1).some((s) => ['select', 'summarize', 'tldr'].includes(s))
+  const willCallLLM = stages.slice(0, stopIdx + 1).some((s) => ['select', 'summarize', 'tldr', 'digest', 'finance-digest'].includes(s))
     || (!!ctx.job.agent && !args.stopAfter);
   const llm = willCallLLM ? createLLM() : null;
 

@@ -4,7 +4,7 @@
 import {
   yamlStr, jsonSafe, fmtNum, fmtChange, changeClass,
   renderQuoteChange, renderNewsItem, renderBarChart, renderSparkline,
-  findQuote, collectProcessed,
+  findQuote, collectProcessed, outputPath,
 } from './helpers.js';
 
 const ASSET_MATCHERS = [
@@ -25,7 +25,7 @@ function classifyNews(item) {
 
 export function renderFinance(ctx) {
   const { job, date, marketData, summarized, tldr, marketHistory } = ctx;
-  const path = job.output.replace('{date}', date.str);
+  const path = outputPath(job, date);
   const md = marketData || { indices: [], assets: [], btc: null, usTreasury: null, kospi: null };
 
   // KOSPI 合入指数列表

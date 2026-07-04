@@ -1,9 +1,57 @@
 // 渲染辅助函数：所有 renderer 共享，消除重复定义。
 // 迁移并合并自 src/render.js / render-finance.js / render-sectors.js 等的重复代码。
 
+import { readdirSync, statSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { getSeries } from '../core/series.js';
 
+// ── 文件查找 ─────────────────────────────────────────────
+
+/**
+ * 找某 section 当天某 slug 的实际输出文件。
+ * 命名规则可能含时间戳（{date}-{stamp}-{slug}.md），这里用 glob 兜底，
+ * 支持新旧两种命名：{date}-{slug}.md（旧）和 {date}-*-{slug}.md（新，带 stamp）。
+ * 多个匹配取修改时间最新的（同日重跑的最后一次）。
+ * @param {string} repoRoot
+ * @param {string} section  news / finance
+ * @param {string} dateStr  YYYY-MM-DD
+ * @param {string} slug     domestic / tech / ashare ...
+ * @returns {string|null}  绝对路径，找不到返回 null
+ */
+export function findColumnFile(repoRoot, section, dateStr, slug) {
+  const dir = resolve(repoRoot, 'content', section);
+  let files = [];
+  try {
+    files = readdirSync(dir).filter((f) =>
+      f.startsWith(`${dateStr}-`) && f.endsWith(`-${slug}.md`));
+  } catch { return null; }
+  if (!files.length) {
+    // 兼容旧命名 {date}-{slug}.md（无 stamp）
+    const legacy = resolve(dir, `${dateStr}-${slug}.md`);
+    return existsSync(legacy) ? legacy : null;
+  }
+  if (files.length === 1) return resolve(dir, files[0]);
+  // 多个：取 mtime 最新
+  files.sort((a, b) => statSync(resolve(dir, b)).mtimeMs - statSync(resolve(dir, a)).mtimeMs);
+  return resolve(dir, files[0]);
+}
+
 // ── 文本格式化 ──────────────────────────────────────────
+
+/**
+ * 把 job.output 模板替换成实际路径。
+ * 占位符：{date}=YYYY-MM-DD，{stamp}=HHMMSS（同日重跑防撞），{slug}=job.slug，{target}=焦点品种。
+ * @param {object} job
+ * @param {{str:string, stamp?:string}} date
+ * @param {string} [target]
+ */
+export function outputPath(job, date, target) {
+  return job.output
+    .replace('{date}', date.str)
+    .replace('{stamp}', date.stamp || '')
+    .replace('{slug}', job.slug || '')
+    .replace('{target}', target || '');
+}
 
 /** YAML 安全字符串 */
 export function yamlStr(s) {

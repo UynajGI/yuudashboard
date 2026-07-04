@@ -2,8 +2,8 @@
 // 汇总含：LLM 综合点评 + 全市场指数表 + 板块对比图（数据平移，不只是文字）。
 
 import { Stage } from '../core/pipeline.js';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { findColumnFile } from '../renderers/helpers.js';
 
 export class FinanceDigestStage extends Stage {
   constructor() {
@@ -16,10 +16,10 @@ export class FinanceDigestStage extends Stage {
     const columns = ctx.job.columns || [];
     const sections = [];
 
-    // 1. 读各专栏文件
+    // 1. 读各专栏文件（glob 找当天实际文件，兼容带 stamp 命名）
     for (const col of columns) {
-      const path = resolve(ctx.repoRoot, col.file.replace('{date}', ctx.date.str));
-      if (!existsSync(path)) {
+      const path = findColumnFile(ctx.repoRoot, ctx.job.section, ctx.date.str, col.slug);
+      if (!path) {
         console.log(`  ⚠ ${col.name}未生成，跳过`);
         continue;
       }

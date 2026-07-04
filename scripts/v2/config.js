@@ -55,6 +55,8 @@ export function buildContext(args) {
   const pad = (n) => String(n).padStart(2, '0');
   const dateStr = `${beijing.getUTCFullYear()}-${pad(beijing.getUTCMonth() + 1)}-${pad(beijing.getUTCDate())}`;
   const dateIso = `${dateStr}T${pad(beijing.getUTCHours())}:${pad(beijing.getUTCMinutes())}:${pad(beijing.getUTCSeconds())}+08:00`;
+  // 文件名时间戳：HHMMSS（秒级，保证同日重跑不撞名，且人类可读）
+  const stamp = `${pad(beijing.getUTCHours())}${pad(beijing.getUTCMinutes())}${pad(beijing.getUTCSeconds())}`;
 
   return {
     args,
@@ -63,7 +65,7 @@ export function buildContext(args) {
     v2Dir: V2_DIR,
     job,
     feeds,
-    date: { str: dateStr, iso: dateIso },
+    date: { str: dateStr, iso: dateIso, stamp },
     store: new Store(REPO_ROOT),
     // 阶段间传递
     items: [],

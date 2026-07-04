@@ -32,8 +32,24 @@
   z-index: 2;
   background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
 }
-.post-apple-news .apple-hero-inner::before    { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
-.post-apple-finance .apple-hero-inner::before { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+.post-apple-news .apple-hero-inner::before     { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
+.post-apple-finance .apple-hero-inner::before  { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+.post-apple-research .apple-hero-inner::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+
+/* 详情页 TL;DR / 正文 panel 顶条统一 Section 色（默认是紫/蓝，会和 hero 不一致） */
+.post-apple-news .apple-tldr::before           { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
+.post-apple-news .apple-tldr-dot               { background: var(--accent-news); box-shadow: 0 0 0 4px rgba(238,90,36,.12); }
+.post-apple-news .apple-tldr-list li::marker   { color: var(--accent-news); }
+.post-apple-news .apple-content-shell::before  { background: linear-gradient(90deg, #ff6b6b, var(--accent-news)); }
+
+.post-apple-finance .apple-tldr::before          { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+.post-apple-finance .apple-tldr-dot              { background: var(--accent-finance); box-shadow: 0 0 0 4px rgba(32,191,107,.12); }
+.post-apple-finance .apple-tldr-list li::marker  { color: var(--accent-finance); }
+.post-apple-finance .apple-content-shell::before { background: linear-gradient(90deg, var(--accent-finance), #0fb9b1); }
+
+.post-apple-research .apple-tldr::before          { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+.post-apple-research .apple-tldr-list li::marker  { color: var(--accent-blue); }
+.post-apple-research .apple-content-shell::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
 
 .apple-breadcrumbs {
   display: inline-flex;
@@ -285,9 +301,11 @@
    简报内容按 Section 差异化排版
    ═══════════════════════════════════════════ */
 
-/* ── 时事：分类卡片式 ── */
+/* ── 时事：分类卡片式（h2 = 一级分类，h3 = 分类·子类，同一橙色卡头） ── */
 .post-apple-news .apple-content h2,
-.home-card-body.post-apple-news h2 {
+.home-card-body.post-apple-news h2,
+.post-apple-news .apple-content h3,
+.home-card-body.post-apple-news h3 {
   font-size: 1.05rem;
   font-weight: 700;
   margin: 16px 0 0;
@@ -295,9 +313,12 @@
   border-radius: var(--dash-radius) var(--dash-radius) 0 0;
   background: rgba(238,90,36,.08);
   color: var(--primary);
+  line-height: 1.3;
 }
 .post-apple-news .apple-content h2:first-child,
-.home-card-body.post-apple-news h2:first-child { margin-top: 0; }
+.home-card-body.post-apple-news h2:first-child,
+.post-apple-news .apple-content h3:first-child,
+.home-card-body.post-apple-news h3:first-child { margin-top: 0; }
 .post-apple-news .apple-content ul,
 .home-card-body.post-apple-news ul {
   margin: 0;
@@ -335,9 +356,11 @@
   font-weight: 700;
 }
 
-/* ── 金融：数据表格卡片化 ── */
+/* ── 金融：数据表格卡片化（h2 = 指数/资产/其他，h3 = 子类，同一绿色卡头） ── */
 .post-apple-finance .apple-content h2,
-.home-card-body.post-apple-finance h2 {
+.home-card-body.post-apple-finance h2,
+.post-apple-finance .apple-content h3,
+.home-card-body.post-apple-finance h3 {
   font-size: 1.05rem;
   font-weight: 700;
   margin: 16px 0 0;
@@ -345,9 +368,19 @@
   border-radius: var(--dash-radius) var(--dash-radius) 0 0;
   background: rgba(32,191,107,.08);
   color: var(--primary);
+  line-height: 1.3;
 }
 .post-apple-finance .apple-content h2:first-child,
-.home-card-body.post-apple-finance h2:first-child { margin-top: 0; }
+.home-card-body.post-apple-finance h2:first-child,
+.post-apple-finance .apple-content h3:first-child,
+.home-card-body.post-apple-finance h3:first-child { margin-top: 0; }
+/* 金融正文里的小标题（### 子类）后面若不是 table 而是段落/列表，给个浅底块兜住，避免裸露 */
+.post-apple-finance .apple-content h3 + p,
+.post-apple-finance .apple-content h3 + ul,
+.home-card-body.post-apple-finance h3 + p,
+.home-card-body.post-apple-finance h3 + ul {
+  margin-top: 0;
+}
 .post-apple-finance .apple-content table,
 .home-card-body.post-apple-finance table {
   display: table;
@@ -407,7 +440,9 @@
 
 /* ── 科研：论文条目卡片化 ── */
 .post-apple-research .apple-content h2,
-.home-card-body.post-apple-research h2 {
+.home-card-body.post-apple-research h2,
+.post-apple-research .apple-content h3,
+.home-card-body.post-apple-research h3 {
   font-size: 1.05rem;
   font-weight: 700;
   margin: 16px 0 0;
@@ -415,9 +450,12 @@
   border-radius: var(--dash-radius) var(--dash-radius) 0 0;
   background: rgba(79,172,254,.08);
   color: var(--primary);
+  line-height: 1.3;
 }
 .post-apple-research .apple-content h2:first-child,
-.home-card-body.post-apple-research h2:first-child { margin-top: 0; }
+.home-card-body.post-apple-research h2:first-child,
+.post-apple-research .apple-content h3:first-child,
+.home-card-body.post-apple-research h3:first-child { margin-top: 0; }
 .post-apple-research .apple-content ul,
 .home-card-body.post-apple-research ul {
   margin: 0;

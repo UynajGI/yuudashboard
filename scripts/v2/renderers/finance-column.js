@@ -4,12 +4,12 @@
 
 import {
   yamlStr, fmtNum, renderQuoteChange, renderBarChart,
-  renderNewsItem, collectProcessed,
+  renderNewsItem, collectProcessed, outputPath,
 } from './helpers.js';
 
 export function renderFinanceColumn(ctx) {
   const { job, date, marketData, summarized, tldr } = ctx;
-  const path = job.output.replace('{date}', date.str);
+  const path = outputPath(job, date);
   const md = marketData || { indices: [], assets: [] };
   const tags = job.tags || ['金融'];
   const description = (job.description || '金融专栏 {date}').replace('{date}', date.str);

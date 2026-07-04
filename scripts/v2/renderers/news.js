@@ -1,11 +1,11 @@
 // Renderer: 新闻简报（daily job）。
 // 迁移自 src/render.js，用 helpers 消除重复。
 
-import { yamlStr, renderNewsItem, collectProcessed } from './helpers.js';
+import { yamlStr, renderNewsItem, collectProcessed, outputPath } from './helpers.js';
 
 export function renderNews(ctx) {
   const { job, date, summarized, tldr } = ctx;
-  const path = job.output.replace('{date}', date.str);
+  const path = outputPath(job, date);
   const tags = job.tags || ['时事'];
   const description = (job.description || '每日晚报：{date}').replace('{date}', date.str);
   const title = (job.description || '每日晚报：{date}').replace('{date}', date.str).replace('：', '：').replace('每日晚报', '每日晚报');

@@ -2,12 +2,12 @@
 // LLM 点评 + 全市场指数表 + 板块对比图 + 北向资金 + 申万行业。
 
 import {
-  yamlStr, fmtNum, renderQuoteChange, renderBarChart,
+  yamlStr, fmtNum, renderQuoteChange, renderBarChart, outputPath, findColumnFile,
 } from './helpers.js';
 
 export function renderFinanceDigest(ctx) {
-  const { job, date } = ctx;
-  const path = job.output.replace('{date}', date.str);
+  const { job, date, repoRoot } = ctx;
+  const path = outputPath(job, date);
   const digest = ctx.digestContent || [];
   const md = ctx.digestMarketData || { indices: [], assets: [] };
 
@@ -83,10 +83,13 @@ export function renderFinanceDigest(ctx) {
     body.push(`**北向资金**：${net > 0 ? '+' : ''}${(net / 10000).toFixed(2)} 亿元\n`);
   }
 
-  // 5. 跳转链接
-  const cols = (job.columns || []).map((c) =>
-    `[${c.name}](${c.file.replace('content/finance/', '').replace('{date}', date.str).replace('.md', '.html')})`
-  );
+  // 5. 跳转链接（glob 找当天实际文件名，带 stamp）
+  const cols = (job.columns || []).map((c) => {
+    const file = findColumnFile(repoRoot, job.section, date.str, c.slug);
+    if (!file) return null;
+    const html = file.replace(/\.md$/, '.html').replace(/^.*\/content\//, '');
+    return `[${c.name}](/${html})`;
+  }).filter(Boolean);
   if (cols.length) {
     body.push(`> 详细分析见各专栏：${cols.join(' · ')}`);
   }

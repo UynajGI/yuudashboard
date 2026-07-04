@@ -3,7 +3,7 @@
 
 import {
   yamlStr, fmtNum, renderQuoteChange, renderSparkline,
-  renderNewsItem, findQuote, collectProcessed,
+  renderNewsItem, findQuote, collectProcessed, outputPath,
 } from './helpers.js';
 
 function filterNewsByKeyword(items, keyword) {
@@ -15,7 +15,7 @@ function filterNewsByKeyword(items, keyword) {
 export function renderFocus(ctx) {
   const { job, date, marketData, summarized, agentResult, marketHistory } = ctx;
   const target = job.focus_target || 'BTC';
-  const path = job.output.replace('{date}', date.str).replace('{target}', target);
+  const path = outputPath(job, date, target);
   const md = marketData || {};
   const data = findQuote(md, target);
   const tags = job.tags || ['金融', '资产聚焦'];
