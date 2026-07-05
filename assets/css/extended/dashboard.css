@@ -217,11 +217,11 @@
 .js-infinite .home-card {
   transition: opacity 0.45s var(--dash-ease), transform 0.45s var(--dash-ease), max-height 0.5s var(--dash-ease), padding 0.5s var(--dash-ease), margin 0.5s var(--dash-ease);
 }
+/* 展开状态 —— 不要设 overflow，继承 .home-card 的 overflow:hidden 以裁剪 ::before 色条到圆角 */
 .js-infinite .home-card:not(.home-card-folded) {
   opacity: 1;
   transform: translateY(0);
   max-height: 4000px;
-  overflow: visible;
 }
 .home-scroll-sentinel {
   height: 1px;
