@@ -260,6 +260,53 @@ jobs:
       - { name: 商品, slug: commodity }
       - { name: 加密, slug: crypto }
 
+  # ═══════════════════════════════════════
+  # 金融 —— Agent 深度分析（原生 function calling）
+  # ═══════════════════════════════════════
+
+  - name: daily-finance-sectors
+    schedule: "30 11 * * *"
+    section: finance
+    slug: sectors
+    window: 24h
+    market: all
+    categories: []
+    workflow: [ingest]
+    agent: sectors-commentary
+    renderer: sectors
+    output: content/finance/{date}-{stamp}-sectors.md
+    tags: [金融, 板块]
+    description: "板块扫描：{date}"
+
+  - name: daily-finance-focus
+    schedule: "30 11 * * *"
+    section: finance
+    slug: focus-btc
+    window: 24h
+    market: crypto
+    focus_target: BTC
+    categories: []
+    workflow: [ingest]
+    agent: focus-analysis
+    renderer: focus
+    output: content/finance/{date}-{stamp}-focus-btc.md
+    tags: [金融, 资产聚焦]
+    description: "资产聚焦：BTC {date}"
+
+  - name: daily-finance-linkage
+    schedule: "30 11 * * *"
+    section: finance
+    slug: linkage
+    window: 24h
+    market: all
+    categories: []
+    workflow: [ingest]
+    agent: linkage-analysis
+    renderer: linkage
+    output: content/finance/{date}-{stamp}-linkage.md
+    tags: [金融, 联动]
+    description: "联动观察：{date}"
+
   # ── 以下为预留示例，需要时取消注释 / 复制改参数 ──────────────
   # - name: morning
   #   schedule: "0 0 * * *"       # 北京早 8

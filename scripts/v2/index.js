@@ -19,6 +19,9 @@ import { renderNews } from './renderers/news.js';
 import { renderFinanceColumn } from './renderers/finance-column.js';
 import { renderFinanceDigest } from './renderers/finance-digest.js';
 import { renderDigest } from './renderers/digest.js';
+import { renderSectors } from './renderers/sectors.js';
+import { renderFocus } from './renderers/focus.js';
+import { renderLinkage } from './renderers/linkage.js';
 import { collectProcessed } from './renderers/helpers.js';
 
 // Renderer 注册表
@@ -27,6 +30,9 @@ const RENDERERS = {
   'finance-column': renderFinanceColumn,
   'finance-digest': renderFinanceDigest,
   digest: renderDigest,
+  sectors: renderSectors,
+  focus: renderFocus,
+  linkage: renderLinkage,
 };
 
 // Agent profile 注册表
