@@ -132,7 +132,7 @@ jobs:
     slug: ashare
     window: 24h
     market: ashare
-    search: ["A股 沪深 上证 今日 行情", "创业板 科创板 北向资金 今日", "央行 LPR 降准 政策 今日 股市"]
+    # search: ["A股 沪深 上证 今日 行情", "创业板 科创板 北向资金 今日", "央行 LPR 降准 政策 今日 股市"]  # ddgs text snippet 常无日期，旧文漏网，暂时禁用
     categories: [A股]
     subs: [大盘, 行业板块, 资金流向, 个股, 政策, 其他]
     news_filter: [A股, 沪深, 上证, 深证, 创业板, 科创板, 北向资金, 降准, LPR, 央行, 证监会, 交易所, 港股通, 涨停, 跌停, 降息, MLF, 社融, PMI]
@@ -151,7 +151,7 @@ jobs:
     slug: hk
     window: 24h
     market: hk
-    search: ["港股 恒生指数 恒生科技 今日 行情", "南向资金 港股通 今日", "港股 IPO 二级市场 今日"]
+    # search: ["港股 恒生指数 恒生科技 今日 行情", "南向资金 港股通 今日", "港股 IPO 二级市场 今日"]  # ddgs text snippet 常无日期，旧文漏网，暂时禁用
     categories: [港股]
     subs: [大盘, 科技, 金融, 地产, 其他]
     news_filter: [港股, 恒生, 恒生科技, 南向资金, 港股通, 港交所, 蓝筹, 红筹, H股]
@@ -170,7 +170,7 @@ jobs:
     slug: asia
     window: 24h
     market: asia
-    search: ["日经 KOSPI 亚太股市 今日 行情", "日本央行 韩国央行 利率 今日", "台积电 三星 财报 今日 亚太"]
+    # search: ["日经 KOSPI 亚太股市 今日 行情", "日本央行 韩国央行 利率 今日", "台积电 三星 财报 今日 亚太"]  # ddgs text snippet 常无日期，旧文漏网，暂时禁用
     categories: [亚盘]
     subs: [日本, 韩国, 东盟, 其他]
     news_filter: [日经, 日经225, KOSPI, 韩国股市, 台股, 加权指数, 东盟股市, 三星电子, 台积电, 日本央行, 韩国央行, 亚太股市]
@@ -189,7 +189,7 @@ jobs:
     slug: us
     window: 24h
     market: us
-    search: ["美股 纳斯达克 道琼斯 标普 今日 行情", "美联储 鲍威尔 CPI 非农 今日", "英伟达 苹果 特斯拉 财报 今日 美股"]
+    # search: ["美股 纳斯达克 道琼斯 标普 今日 行情", "美联储 鲍威尔 CPI 非农 今日", "英伟达 苹果 特斯拉 财报 今日 美股"]  # ddgs text snippet 常无日期，旧文漏网，暂时禁用
     categories: [美股]
     subs: [大盘, 科技, 宏观, 国债, 其他]
     news_filter: [美股, 纳斯达克, 道琼斯, 标普500, 美联储, 鲍威尔, 非农, CPI, PPI, 美债收益率, 英伟达, 苹果, 特斯拉, 微软, 谷歌, Meta]
@@ -208,7 +208,7 @@ jobs:
     slug: commodity
     window: 24h
     market: commodity
-    search: ["黄金 金价 原油 油价 今日 行情", "美元指数 OPEC 利率 今日 大宗", "铜价 铁矿石 天然气 价格 今日"]
+    # search: ["黄金 金价 原油 油价 今日 行情", "美元指数 OPEC 利率 今日 大宗", "铜价 铁矿石 天然气 价格 今日"]  # ddgs text snippet 常无日期，旧文漏网，暂时禁用
     categories: [商品]
     subs: [贵金属, 能源, 外汇, 其他]
     # news_filter 宽进（召回优先）：让 LLM 在 select 阶段用 scope 精筛
@@ -228,7 +228,7 @@ jobs:
     slug: crypto
     window: 24h
     market: crypto
-    search: ["比特币 BTC 以太坊 ETH 价格 今日 行情", "加密货币 币安 Coinbase 监管 今日", "狗狗币 XRP 稳定币 DeFi 今日 加密"]
+    # search: ["比特币 BTC 以太坊 ETH 价格 今日 行情", "加密货币 币安 Coinbase 监管 今日", "狗狗币 XRP 稳定币 DeFi 今日 加密"]  # ddgs text snippet 常无日期，旧文漏网，暂时禁用
     categories: [加密]
     subs: [BTC, ETH, 监管, 链上, 其他]
     news_filter: [BTC, 比特币, 以太坊, ETH, 加密货币, 区块链, 稳定币, 币安, Coinbase, 狗狗币, 瑞波币, XRP, DeFi, NFT, 链上数据]
