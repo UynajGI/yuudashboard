@@ -160,15 +160,35 @@ function dedupe(items, windowMs, seen, today) {
     return today ? dateStr < today : true;
   };
 
-  // 硬拦截：从 URL 里提取日期（/2026/06/19/ 或 2026-06-19），
-  // 防止 RSS 把"收录时间"当 pubDate 导致旧文混入（HN/聚合源常见）
+  // 硬拦截：从 URL 里提取日期，防止 RSS 把"收录时间"当 pubDate 导致旧文混入
+  // 覆盖格式：2026-06-19 / 2026/06/19 / 2026.06.19 / 2026年6月19日 / 06-19-2026 / Jun 19 2026 / June 19, 2026
+  const MONTHS_EN = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
   const urlDateStale = (url) => {
     if (!url) return false;
-    const m = url.match(/20\d{2}[/-](0?[1-9]|1[0-2])[/-]([0-2]?[0-9]|3[01])/);
-    if (!m) return false;
-    const d = new Date(m[0].replace(/\//g, '-'));
-    if (isNaN(d.getTime())) return false;
-    return d.getTime() < cutoff;
+    // 数字日期：YYYY-MM-DD / YYYY/MM/DD / YYYY.MM.DD / M-D-YYYY / M/D/YYYY
+    const numM = url.match(/(?:20\d{2}[\/\-.](0?[1-9]|1[0-2])[\/\-.]([0-2]?[0-9]|3[01])|(0?[1-9]|1[0-2])[\/\-]([0-2]?[0-9]|3[01])[\/\-]20\d{2})/);
+    if (numM) {
+      const d = new Date(numM[0].replace(/[/\.]/g, '-'));
+      if (!isNaN(d.getTime())) return d.getTime() < cutoff;
+    }
+    // 中文日期：2026年6月19日
+    const cnM = url.match(/20\d{2}\s*年\s*(0?[1-9]|1[0-2])\s*月\s*([0-2]?[0-9]|3[01])\s*日/);
+    if (cnM) {
+      const d = new Date(`${cnM[0].match(/20\d{2}/)[0]}-${cnM[1].padStart(2,'0')}-${cnM[2].padStart(2,'0')}`);
+      if (!isNaN(d.getTime())) return d.getTime() < cutoff;
+    }
+    // 英文日期：Jun 19 2026 / June 19, 2026 / 19 Jun 2026 / jun-19-2026
+    const enM = url.match(/\b(\d{1,2})?\s*[-\s]*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*[-\s]*(\d{1,2})?,?\s*[-\s]*(20\d{2})\b/i);
+    if (enM) {
+      const mon = MONTHS_EN[enM[2].toLowerCase()];
+      const day = parseInt(enM[1] || enM[3], 10);
+      const yr = parseInt(enM[4], 10);
+      if (mon != null && day) {
+        const d = new Date(yr, mon, day);
+        if (!isNaN(d.getTime())) return d.getTime() < cutoff;
+      }
+    }
+    return false;
   };
 
   // 按日期降序（最新在前，保证多源同事件保留最新）
@@ -176,7 +196,10 @@ function dedupe(items, windowMs, seen, today) {
 
   for (const it of sorted) {
     // 时间窗过滤：有日期过旧丢弃；URL 含旧日期也丢弃（防 RSS 日期造假）
+    // 注意：搜索源 date 为 null（search.js 故意），靠 search.py 的 timelimit='d' 保证时效，这里不卡
     if (it.date && it.date.getTime() < cutoff) continue;
+    // 防篡改：date 距今超过 windowMs*2 视为旧文伪装（pubDate 被改）→ 丢弃
+    if (it.date && it.date.getTime() < Date.now() - windowMs * 2) continue;
     if (urlDateStale(it.link)) continue;
     if (!it.title || it.title.length < 4) continue;
 
