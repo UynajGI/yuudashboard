@@ -33,8 +33,9 @@ node v2/index.js --job=daily-news-domestic --stop-after=ingest  # 只看抓取�
 ## 架构
 
 ```
-feeds.yml (62 RSS源) + API源 (新浪/Tushare/CoinGecko/Gate.io/Yahoo/东方财富)
+feeds.yml (45 RSS源) + API源 (新浪/Tushare/CoinGecko/Gate.io/Yahoo/东方财富)
   + ddgs 搜索源 (18 个搜索词补 RSS 盲区，每金融专栏 3 个)
+  + 财经 RSS 源 (10 个硬编码在 sources/index.js)
         ↓
   v2/sources/         每个源一个 Source 适配器（ItemSource/MarketSource/SearchSource）
         ↓
@@ -58,7 +59,7 @@ feeds.yml (62 RSS源) + API源 (新浪/Tushare/CoinGecko/Gate.io/Yahoo/东方财
 | daily-news-domestic | news | 14 国内 RSS | 国内专栏 |
 | daily-news-world | news | 12 国际 RSS | 国际专栏 |
 | daily-news-tech | news | 11 科技 RSS | 科技专栏 |
-| daily-news-engineering | news | 25 工程博客 | 工程专栏 |
+| daily-news-engineering | news | 科技源（工程类博客已并入科技类别） | 工程专栏 |
 | daily-news-digest | news | 读 4 专栏 | 今日要闻汇总 |
 | daily-finance-ashare | finance | 新浪 A股 + Tushare + ddgs×3 | A股专栏（含申万行业+北向资金） |
 | daily-finance-hk | finance | 新浪港股 + KOSPI + ddgs×3 | 港股专栏 |
@@ -89,8 +90,8 @@ scripts/
 │   ├── config.js          # 配置加载（jobs.yml/feeds.yml → ctx）
 │   └── prompt.js          # Prompt 加载器（文件缓存）
 ├── src/                   # 旧管线（已停用，保留备查）
-├── jobs.yml               # Job 定义（12 个）
-├── feeds.yml              # RSS 源清单（62 源）
+├── jobs.yml               # Job 定义（15 个：12 主报告 + 3 Agent 分析）
+├── feeds.yml              # RSS 源清单（45 源）
 ├── feeds-tested.md        # 459 源可用性测试结果（备查）
 ├── prompts/               # Prompt 模板（daily-*/finance-*）
 └── package.json
