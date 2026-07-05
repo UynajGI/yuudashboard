@@ -12,6 +12,7 @@ jobs:
   # ── Job 1: 时事（4 专栏 + digest）──
   news:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,6 +21,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: scripts/package-lock.json
 
       - name: Install deps
         working-directory: scripts
@@ -50,6 +53,7 @@ jobs:
   # ── Job 2: 金融（6 专栏 + digest）──
   finance:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,6 +62,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: scripts/package-lock.json
 
       - name: Install deps
         working-directory: scripts
@@ -67,6 +73,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
+
       - run: pip install ddgs
 
       - name: Run finance reports
@@ -76,7 +84,7 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
         run: |
-          for job in daily-finance-ashare daily-finance-hk daily-finance-asia daily-finance-us daily-finance-commodity daily-finance-crypto; do
+          for job in daily-finance-ashare daily-finance-hk daily-finance-asia daily-finance-us daily-finance-commodity daily-finance-crypto daily-finance-sectors daily-finance-focus daily-finance-linkage; do
             echo "### $job"
             node v2/index.js --job="$job" || echo "⚠ $job 失败"
           done
@@ -96,6 +104,7 @@ jobs:
   publish:
     needs: [news, finance]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -118,40 +127,35 @@ jobs:
           ls -la content/news/ content/finance/ data/ 2>/dev/null || true
 
       - name: Commit & push
-        id: push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add content/ data/
           if git diff --cached --quiet; then
             echo "无改动，跳过提交"
-            echo "pushed=false" >> $GITHUB_OUTPUT
           else
             git commit -m "chore: 自动报告 $(date -u +%Y-%m-%d)"
             git push origin main
-            echo "pushed=true" >> $GITHUB_OUTPUT
           fi
 
-  # ── Job 4: 上线（等 publish push 完，Hugo build → gh-pages）──
-  # 合并进 generate，保证 收集 → publish → deploy 一条龙。
-  # （GITHUB_TOKEN 的 push 不触发 on:push 事件，单独的 deploy.yml 收不到 generate 的 push）
+  # ── Job 4: 上线（Hugo build → gh-pages）──
+  # publish push 后，本 job 直接 checkout main 拿最新 commit（不用 git pull，避免 rebase 冲突）
+  # GITHUB_TOKEN 的 push 不触发 on:push 事件，所以 deploy 必须在本 workflow 内
   deploy:
     needs: publish
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      # checkout 后必须 pull 最新——publish job 刚 push 了新 commit，
-      # 默认 checkout 拿的是 workflow 触发时的旧 commit
       - uses: actions/checkout@v4
         with:
+          ref: main            # 拿 publish 刚 push 的最新 commit，不用 git pull
           submodules: true
           fetch-depth: 0
-      - name: Pull latest (publish 可能刚 push)
-        run: git pull --rebase origin main || true
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: 'latest'
+          hugo-version: '0.163.3'
           extended: true
 
       - name: Build

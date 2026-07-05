@@ -45,8 +45,8 @@ case "${1:-help}" in
     ;;
 
   deploy)
-    echo "🌐 触发 deploy..."
-    gh workflow run deploy.yml --ref main
+    echo "🌐 触发 deploy（走 generate.yml 全链路）..."
+    gh workflow run generate.yml --ref main
     ;;
 
   help|*)

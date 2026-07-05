@@ -8,10 +8,19 @@ import { Quote } from '../core/item.js';
 const BASE = 'https://api.tushare.pro';
 const TIMEOUT = 15000;
 
+let _tokenChecked = false;  // 避免每次调用都重复打"未配置"日志
+
 /** Tushare POST 请求封装 */
 async function tushareCall(apiName, params = {}, fields = '') {
   const token = process.env.TUSHARE_TOKEN;
-  if (!token) throw new Error('TUSHARE_TOKEN 未设置');
+  if (!token) {
+    if (!_tokenChecked) {
+      console.warn('  ℹ Tushare：TUSHARE_TOKEN 未配置，跳过申万行业/北向资金（不影响其他行情）');
+      _tokenChecked = true;
+    }
+    throw new Error('TUSHARE_TOKEN 未配置');
+  }
+  _tokenChecked = true;
 
   const res = await fetch(BASE, {
     method: 'POST',
