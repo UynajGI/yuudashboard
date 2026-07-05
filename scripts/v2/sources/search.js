@@ -35,16 +35,34 @@ function isSpam(title, href) {
   return false;
 }
 
-/** 从文本中提取可能的日期（返回 Date 或 null） */
-function extractDate(text) {
-  // 匹配 2024-01-15 / 2024/01/15 / 2024年1月15日 等格式
-  const m = text.match(/20(\d{2})[-/年](\d{1,2})[-/月](\d{1,2})/);
-  if (!m) return null;
-  const y = 2000 + parseInt(m[1], 10);
-  const mo = parseInt(m[2], 10) - 1;
-  const d = parseInt(m[3], 10);
-  const dt = new Date(y, mo, d);
-  return isNaN(dt.getTime()) ? null : dt;
+/** 从文本中提取日期（返回 Date 或 null）。扫描 title+body+url 三处。
+ *  覆盖：2024-01-15 / 2024/1/15 / 2024年1月15日 / Jan 15 2024 等 */
+const MONTHS_EN = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
+function extractDate(...texts) {
+  const s = texts.filter(Boolean).join(' ');
+  // 数字日期：YYYY-MM-DD / YYYY/MM/DD / YYYY.MM.DD
+  let m = s.match(/20(\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  if (m) {
+    const d = new Date(2000+ +m[1], +m[2]-1, +m[3]);
+    if (!isNaN(d.getTime())) return d;
+  }
+  // 中文日期：2024年1月15日
+  m = s.match(/20(\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})/);
+  if (m) {
+    const d = new Date(2000+ +m[1], +m[2]-1, +m[3]);
+    if (!isNaN(d.getTime())) return d;
+  }
+  // 英文日期：Jan 15 2024 / January 15, 2024 / 15 Jan 2024
+  m = s.match(/(\d{1,2})?\s*[-\s]*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*[-\s]*(\d{1,2})?,?\s*[-\s]*20(\d{2})/i);
+  if (m) {
+    const mon = MONTHS_EN[m[2].toLowerCase()];
+    const day = parseInt(m[1] || m[3], 10);
+    if (mon != null && day) {
+      const d = new Date(2000 + +m[4], mon, day);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  return null;
 }
 
 /**
@@ -83,27 +101,29 @@ export class SearchSource extends ItemSource {
     return runSearch(this.query, this.max, this.timelimit);
   }
 
-  /** raw [{title,href,body}] → NewsItem[] */
+  /** raw [{title,href,body}] → NewsItem[]
+   *  策略：搜索结果信任级别低于 RSS。
+   *  - body/title/url 能提取到日期且 >48h → 明确旧文，丢弃
+   *  - 提取不到日期 → 保留（标 null），让 ingest 的 urlDateStale 再拦 + select 阶段判断
+   *    （ddgs text 的 snippet 常无日期，全丢弃会饿死）
+   */
   normalize(raw) {
     if (!Array.isArray(raw)) return [];
+    const now = Date.now();
     return raw
       .filter((r) => r.title && r.title.length >= 4)
       .filter((r) => !isSpam(r.title, r.href))
       .map((r) => {
-        const extracted = extractDate(r.body || '');
-        const now = Date.now();
-        // 只信任从 body 中明确提取到的日期；取不到就 null（ingest 保守保留）
-        // 如果提取到的日期距今超过 48h，视为明显过时丢弃
-        const valid = !extracted || (now - extracted.getTime() <= 48 * 3600_000);
-        if (!valid) return null;
+        const d = extractDate(r.title, r.body, r.href);
+        // 提取到且明确过旧 → 丢弃
+        if (d && (now - d.getTime() > 48 * 3600_000)) return null;
         return new NewsItem({
           title: r.title,
           link: r.href || '',
           summary: (r.body || '').slice(0, 300),
           source: this.name,
           category: this.category,
-          // 有明确日期的用提取值，没有的留 null——绝不造假为 new Date()
-          date: extracted || null,
+          date: d || null,
         });
       })
       .filter(Boolean);

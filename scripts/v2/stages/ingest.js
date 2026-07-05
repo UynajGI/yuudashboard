@@ -191,6 +191,17 @@ function dedupe(items, windowMs, seen, today) {
     return false;
   };
 
+  /** 从正文中提取日期（搜索源旧文检测用）。覆盖常见中文/数字/英文日期格式 */
+  const MONTHS_BODY = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
+  function extractBodyDate(s) {
+    if (!s) return null;
+    let m = s.match(/20(\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+    if (m) { const d = new Date(2000+ +m[1], +m[2]-1, +m[3]); if (!isNaN(d.getTime())) return d; }
+    m = s.match(/20(\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})/);
+    if (m) { const d = new Date(2000+ +m[1], +m[2]-1, +m[3]); if (!isNaN(d.getTime())) return d; }
+    return null;
+  }
+
   // 按日期降序（最新在前，保证多源同事件保留最新）
   const sorted = [...items].sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0));
 
@@ -201,6 +212,11 @@ function dedupe(items, windowMs, seen, today) {
     // 防篡改：date 距今超过 windowMs*2 视为旧文伪装（pubDate 被改）→ 丢弃
     if (it.date && it.date.getTime() < Date.now() - windowMs * 2) continue;
     if (urlDateStale(it.link)) continue;
+    // 搜索来源额外扫描正文日期（信任级别低，无日期或旧日期 = 高概率旧文）
+    if ((it.source || '').startsWith('搜索·')) {
+      const bodyDate = extractBodyDate(it.title + ' ' + (it.summary || ''));
+      if (bodyDate && bodyDate.getTime() < cutoff) continue;  // 正文明确含旧日期
+    }
     if (!it.title || it.title.length < 4) continue;
 
     const { urlHash: uh, titleHash: th } = it;
