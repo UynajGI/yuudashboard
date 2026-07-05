@@ -17,7 +17,7 @@
 #                        默认 daily，即 daily-select.md / daily-summarize.md / daily-tldr.md
 #   output               输出路径模板，占位符：
 #                        {date}=YYYY-MM-DD，{stamp}=HHMMSS（同日重跑防撞），{slug}=job.slug
-#                        例：content/news/{date}-{stamp}-{slug}.md → /news/2026-07-04-143025-domestic.html
+#                        例：content/news/{date}-{slug}.md → /news/2026-07-04-143025-domestic.html
 #   tags                 frontmatter 的 tags 字段
 #   description          frontmatter 的 description 字段（{date} 会替换）
 #   renderer             可选，选择哪个渲染器输出。缺省按 section 兜底：
@@ -55,7 +55,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-{stamp}-domestic.md
+    output: content/news/{date}-domestic.md
     tags: [时事, 国内]
     description: "时事专栏 · 国内 {date}"
     scope: "中国大陆范围内的时政、经济、社会、军事、外交、教育重大事件；不含纯财经行情、个股新闻、加密货币、天气预报。"
@@ -70,7 +70,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-{stamp}-world.md
+    output: content/news/{date}-world.md
     tags: [时事, 国际]
     description: "时事专栏 · 国际 {date}"
     scope: "中国大陆以外地区的地缘、经贸、社会、军事、科技重大事件；不含国内新闻、纯财经行情、个股新闻、加密货币。"
@@ -85,7 +85,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-{stamp}-tech.md
+    output: content/news/{date}-tech.md
     tags: [时事, 科技]
     description: "时事专栏 · 科技 {date}"
     scope: "人工智能、半导体硬件、互联网产品、工具软件、科研学术的技术进展与产业动态；不含纯财经行情、个股新闻、加密货币、天气、股票披露。"
@@ -100,7 +100,7 @@ jobs:
     top_n_per_category: 30
     workflow: [clean, select, summarize, tldr]
     prompt_prefix: daily
-    output: content/news/{date}-{stamp}-engineering.md
+    output: content/news/{date}-engineering.md
     tags: [时事, 工程]
     description: "时事专栏 · 工程 {date}"
     scope: "软件开发工程实践：平台/工具动态、编程语言与框架、架构设计、AI 工程、安全漏洞与补丁、开源项目；不含纯财经行情、个股新闻、加密货币、天气。"
@@ -113,7 +113,7 @@ jobs:
     categories: []
     workflow: [digest]
     renderer: digest
-    output: content/news/{date}-{stamp}-digest.md
+    output: content/news/{date}-digest.md
     tags: [时事, 今日要闻]
     description: "今日要闻汇总：{date}"
     columns:
@@ -140,7 +140,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-{stamp}-ashare.md
+    output: content/finance/{date}-ashare.md
     tags: [金融, A股]
     description: "金融专栏 · A股 {date}"
     scope: "A 股市场（沪深交易所上市品种）的大盘走势、行业板块、资金流向、个股重大事件、监管政策；不含港股/美股/加密、商品、天气、非上市公司新闻、纯内幕交易披露。"
@@ -159,7 +159,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-{stamp}-hk.md
+    output: content/finance/{date}-hk.md
     tags: [金融, 港股]
     description: "金融专栏 · 港股 {date}"
     scope: "港交所上市品种的大盘走势、恒生科技/金融/地产板块、南向资金、港股 IPO；不含 A 股/美股/加密、商品、天气、其他市场个股新闻、纯内幕交易披露。"
@@ -178,7 +178,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-{stamp}-asia.md
+    output: content/finance/{date}-asia.md
     tags: [金融, 亚盘]
     description: "金融专栏 · 亚盘 {date}"
     scope: "亚太地区（日韩+东盟+台印澳）股市指数、央行政策、区域龙头企业重大事件；不含 A 股/港股/美股/加密、商品、天气、非亚太个股新闻、纯内幕交易披露。"
@@ -197,7 +197,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-{stamp}-us.md
+    output: content/finance/{date}-us.md
     tags: [金融, 美股]
     description: "金融专栏 · 美股 {date}"
     scope: "美股三大指数、龙头科技股、美联储货币政策、宏观经济数据（CPI/非农/PPI）、美债；不含 A 股/港股/加密、商品、天气、非美股个股新闻、纯内幕交易披露。"
@@ -217,7 +217,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-{stamp}-commodity.md
+    output: content/finance/{date}-commodity.md
     tags: [金融, 商品]
     description: "金融专栏 · 商品 {date}"
     scope: "贵金属（金/银）、能源（原油/天然气/煤炭）、基本金属（铜/铁/铝/锂/镍）、外汇（美元指数）、农产品等大宗商品的价格走势、供需、OPEC/政策、地缘事件；不含个股新闻、内幕交易披露、其他市场 IPO、加密货币、天气预报、公司治理。"
@@ -236,7 +236,7 @@ jobs:
     workflow: [fetch, select, summarize, tldr]
     prompt_prefix: finance
     renderer: finance-column
-    output: content/finance/{date}-{stamp}-crypto.md
+    output: content/finance/{date}-crypto.md
     tags: [金融, 加密]
     description: "金融专栏 · 加密 {date}"
     scope: "加密货币（BTC/ETH/主流币）价格走势、链上数据、交易所动态、各国监管政策、DeFi/NFT 事件；不含传统股市、商品、外汇、天气、非加密个股新闻、纯内幕交易披露。"
@@ -249,7 +249,7 @@ jobs:
     categories: []
     workflow: [finance-digest]
     renderer: finance-digest
-    output: content/finance/{date}-{stamp}-digest.md
+    output: content/finance/{date}-digest.md
     tags: [金融, 汇总]
     description: "金融市场汇总：{date}"
     columns:
@@ -274,7 +274,7 @@ jobs:
     workflow: [ingest]
     agent: sectors-commentary
     renderer: sectors
-    output: content/finance/{date}-{stamp}-sectors.md
+    output: content/finance/{date}-sectors.md
     tags: [金融, 板块]
     description: "板块扫描：{date}"
 
@@ -289,7 +289,7 @@ jobs:
     workflow: [ingest]
     agent: focus-analysis
     renderer: focus
-    output: content/finance/{date}-{stamp}-focus-btc.md
+    output: content/finance/{date}-focus-btc.md
     tags: [金融, 资产聚焦]
     description: "资产聚焦：BTC {date}"
 
@@ -303,7 +303,7 @@ jobs:
     workflow: [ingest]
     agent: linkage-analysis
     renderer: linkage
-    output: content/finance/{date}-{stamp}-linkage.md
+    output: content/finance/{date}-linkage.md
     tags: [金融, 联动]
     description: "联动观察：{date}"
 
@@ -316,7 +316,7 @@ jobs:
   #   categories: [国内, 国际, 科技]
   #   top_n_per_category: 3
   #   prompt: daily.md
-  #   output: content/news/{date}-{stamp}-morning-brief.md
+  #   output: content/news/{date}-morning-brief.md
   #   tags: [时事, 早报]
   #   description: "早间简报：{date}"
   #
@@ -328,6 +328,6 @@ jobs:
   #   categories: [国内, 国际, 科技]
   #   top_n_per_category: 3
   #   prompt: daily.md
-  #   output: content/news/{date}-{stamp}-evening-brief.md
+  #   output: content/news/{date}-evening-brief.md
   #   tags: [时事, 晚报]
   #   description: "晚间简报：{date}"
