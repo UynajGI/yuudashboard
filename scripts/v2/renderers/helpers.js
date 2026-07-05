@@ -161,11 +161,7 @@ export function renderBarChart(labels, data, dateStr, idPrefix, title, maxColors
     },
   };
   return [
-    `<svg class="xkcd-chart" id="${id}" style="width:100%;max-width:680px;display:block;margin:8px auto 4px"></svg>`,
-    '<script>',
-    `(function(){var c=document.getElementById("${id}");if(!c||!window.chartXkcd)return;`,
-    `new chartXkcd.Bar(c,${jsonSafe(cfg)});})();`,
-    '</script>',
+    `<svg class="xkcd-chart" id="${id}" data-chart-type="Bar" data-chart-cfg='${jsonSafe(cfg)}' style="width:100%;max-width:680px;display:block;margin:8px auto 4px"></svg>`,
   ].join('');
 }
 
@@ -190,11 +186,7 @@ export function renderSparkline(history, name, idKey, dateStr) {
     options: { yTickCount: 3, dotSize: 0.6, showLine: true, dataColors: ['#4facfe'] },
   };
   return [
-    `<svg class="xkcd-chart xkcd-spark" id="${id}" style="width:100%;max-width:480px;display:block;margin:4px auto"></svg>`,
-    '<script>',
-    `(function(){var c=document.getElementById("${id}");if(!c||!window.chartXkcd)return;`,
-    `new chartXkcd.Line(c,${jsonSafe(cfg)});})();`,
-    '</script>',
+    `<svg class="xkcd-chart xkcd-spark" id="${id}" data-chart-type="Line" data-chart-cfg='${jsonSafe(cfg)}' style="width:100%;max-width:480px;display:block;margin:4px auto"></svg>`,
   ].join('');
 }
 
@@ -228,11 +220,7 @@ export function renderPairChart(history, a, b, dateStr, idx) {
     options: { yTickCount: 4, dotSize: 0.5, showLine: true, dataColors: ['#4facfe', '#eb3b5a'] },
   };
   return [
-    `<svg class="xkcd-chart" id="${id}" style="width:100%;max-width:560px;display:block;margin:8px auto"></svg>`,
-    '<script>',
-    `(function(){var c=document.getElementById("${id}");if(!c||!window.chartXkcd)return;`,
-    `new chartXkcd.Line(c,${jsonSafe(cfg)});})();`,
-    '</script>',
+    `<svg class="xkcd-chart" id="${id}" data-chart-type="Line" data-chart-cfg='${jsonSafe(cfg)}' style="width:100%;max-width:560px;display:block;margin:8px auto"></svg>`,
   ].join('');
 }
 

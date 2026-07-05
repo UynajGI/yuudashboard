@@ -5,6 +5,13 @@
   <link crossorigin="anonymous" href="{{ $custom_css.RelPermalink }}" integrity="{{ $custom_css.Data.Integrity }}" rel="stylesheet">
 {{- end }}
 <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1/dist/chart.xkcd.min.js"></script>
+<script>
+// chart.xkcd 渲染入口：所有 SVG 挂 data-chart-type + data-chart-cfg，
+// load 后统一渲染（避免 Goldmark 转义 inline script 里的引号）
+function __renderXkcdCharts(){var els=document.querySelectorAll('svg[data-chart-type]:not([data-rendered])');for(var i=0;i<els.length;i++){var el=els[i];if(!window.chartXkcd)continue;try{var cfg=JSON.parse(el.getAttribute('data-chart-cfg'));new chartXkcd[el.getAttribute('data-chart-type')](el,cfg);el.setAttribute('data-rendered','1')}catch(e){console.warn('xkcd chart',e)}}}
+window.addEventListener('load',__renderXkcdCharts);
+if(!window.chartXkcd){var __iv=setInterval(function(){if(window.chartXkcd){clearInterval(__iv);__renderXkcdCharts()}},100);setTimeout(function(){clearInterval(__iv)},5000)}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8/dist/turbo.es2017-umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet">
