@@ -37,6 +37,13 @@ export class SelectStage extends Stage {
     const prefix = ctx.job.prompt_prefix || 'daily';
     const tpl = loadPrompt(ctx.scriptsDir, prefix, 'select');
 
+    // 加载前 2 天已发布事件标题（RAG：检索近期标题注入 prompt，供 LLM 判断延续报道）
+    const recentTitles = ctx.store.loadRecentTitles(ctx.job.name, 2);
+    const recentBlock = recentTitles.length
+      ? recentTitles.map((t) => `- ${t}`).join('\n')
+      : '（无近期已发布事件）';
+    if (recentTitles.length) console.log(`    RAG：注入 ${recentTitles.length} 条近期标题`);
+
     const selected = {};
     let totalUsage = { inputTokens: 0, outputTokens: 0 };
 
@@ -61,7 +68,8 @@ export class SelectStage extends Stage {
         .replace('{top_n}', ctx.job.top_n_per_category)
         .replace('{items}', capped.map((it) => it.toPromptText()).join('\n\n'))
         .replace('{subs}', subsBlock)
-        .replace('{scope}', scope);
+        .replace('{scope}', scope)
+        .replace('{recent}', recentBlock);
 
       const { content, usage } = await llm.complete({
         system: '你是新闻编辑，负责把候选条目合并成事件、分类，并丢弃明显不属于本专栏的条目。只输出 JSON。',
