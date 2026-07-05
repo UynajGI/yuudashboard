@@ -47,16 +47,6 @@ function extractDate(text) {
   return isNaN(dt.getTime()) ? null : dt;
 }
 
-/** 检查结果是否明显过时（body 或 title 中含 2024 年及以前的年份引用） */
-function isStale(title, body) {
-  const text = (title + ' ' + body).toLowerCase();
-  // 匹配 4 位年份，过滤 2024 年及更早
-  const years = text.match(/20\d{2}/g);
-  if (!years) return false;
-  const thisYear = new Date().getFullYear();
-  return years.some((y) => parseInt(y, 10) < thisYear);
-}
-
 /**
  * 调 Python ddgs 脚本，返回原始结果数组 [{title, href, body}]。
  * 失败返回 []，不阻塞 pipeline。
@@ -98,20 +88,24 @@ export class SearchSource extends ItemSource {
     if (!Array.isArray(raw)) return [];
     return raw
       .filter((r) => r.title && r.title.length >= 4)
-      .filter((r) => !isSpam(r.title, r.href))    // 过滤 SEO 垃圾/下载站/仿冒站
-      .filter((r) => !isStale(r.title, r.body))   // 过滤明显过时的结果（含 2024 年及更早年份）
+      .filter((r) => !isSpam(r.title, r.href))
       .map((r) => {
         const extracted = extractDate(r.body || '');
+        const now = Date.now();
+        // 只信任从 body 中明确提取到的日期；取不到就 null（ingest 保守保留）
+        // 如果提取到的日期距今超过 48h，视为明显过时丢弃
+        const valid = !extracted || (now - extracted.getTime() <= 48 * 3600_000);
+        if (!valid) return null;
         return new NewsItem({
           title: r.title,
           link: r.href || '',
           summary: (r.body || '').slice(0, 300),
           source: this.name,
           category: this.category,
-          // 优先用 body 中提取的日期，否则用当日（timelimit='d' 下大部分结果是近期的；
-          // 设置 date 是为了让 ingest 的 dedupeWindowMs 时间窗能正确过滤）
-          date: extracted || new Date(),
+          // 有明确日期的用提取值，没有的留 null——绝不造假为 new Date()
+          date: extracted || null,
         });
-      });
+      })
+      .filter(Boolean);
   }
 }
