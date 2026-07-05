@@ -72,10 +72,9 @@ export class SummarizeStage extends Stage {
         return {
           title: s.title || ev.mergedTitle || ev.items[0]?.title || '',
           summary: s.summary || '',
-          sources: Array.isArray(s.sources) && s.sources.length
-            ? s.sources
-            : [...new Set(ev.items.map((it) => it.source))],
-          link: s.link || ev.items[0]?.link || '',
+          // sources/link 强制用真实来源，不信 LLM（会编造假的 reuters/cnbc URL）
+          sources: [...new Set(ev.items.map((it) => it.source))],
+          link: ev.items[0]?.link || '',
           sub: ev.sub || '',  // LLM 分配的子分类
           _rawItems: ev.items,
         };
