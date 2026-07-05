@@ -207,15 +207,15 @@ function dedupe(items, windowMs, seen, today) {
 
   for (const it of sorted) {
     // 时间窗过滤：有日期过旧丢弃；URL 含旧日期也丢弃（防 RSS 日期造假）
-    // 注意：搜索源 date 为 null（search.js 故意），靠 search.py 的 timelimit='d' 保证时效，这里不卡
     if (it.date && it.date.getTime() < cutoff) continue;
     // 防篡改：date 距今超过 windowMs*2 视为旧文伪装（pubDate 被改）→ 丢弃
     if (it.date && it.date.getTime() < Date.now() - windowMs * 2) continue;
     if (urlDateStale(it.link)) continue;
-    // 搜索来源额外扫描正文日期（信任级别低，无日期或旧日期 = 高概率旧文）
-    if ((it.source || '').startsWith('搜索·')) {
+    // 无 date 的条目（RSS 聚合源无 pubDate / 搜索结果无日期）扫正文日期兜底：
+    // 标题或摘要里明确出现 cutoff 前的日期 → 判定为旧文丢弃
+    if (!it.date) {
       const bodyDate = extractBodyDate(it.title + ' ' + (it.summary || ''));
-      if (bodyDate && bodyDate.getTime() < cutoff) continue;  // 正文明确含旧日期
+      if (bodyDate && bodyDate.getTime() < cutoff) continue;
     }
     if (!it.title || it.title.length < 4) continue;
 
