@@ -11,12 +11,7 @@
     "start": "node v2/index.js",
     "domestic": "node v2/index.js --job=daily-news-domestic",
     "world": "node v2/index.js --job=daily-news-world",
-    "tech": "node v2/index.js --job=daily-news-tech",
-    "daily-market": "node v2/index.js --job=daily-market",
-    "daily-market:dry": "node v2/index.js --job=daily-market --dry-run",
-    "sector-scan": "node v2/index.js --job=sector-scan",
-    "asset-focus": "node v2/index.js --job=asset-focus",
-    "cross-linkage": "node v2/index.js --job=cross-linkage"
+    "tech": "node v2/index.js --job=daily-news-tech"
   },
   "dependencies": {
     "fast-xml-parser": "^4.5.0",
