@@ -35,6 +35,28 @@ function isSpam(title, href) {
   return false;
 }
 
+/** 从文本中提取可能的日期（返回 Date 或 null） */
+function extractDate(text) {
+  // 匹配 2024-01-15 / 2024/01/15 / 2024年1月15日 等格式
+  const m = text.match(/20(\d{2})[-/年](\d{1,2})[-/月](\d{1,2})/);
+  if (!m) return null;
+  const y = 2000 + parseInt(m[1], 10);
+  const mo = parseInt(m[2], 10) - 1;
+  const d = parseInt(m[3], 10);
+  const dt = new Date(y, mo, d);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+/** 检查结果是否明显过时（body 或 title 中含 2024 年及以前的年份引用） */
+function isStale(title, body) {
+  const text = (title + ' ' + body).toLowerCase();
+  // 匹配 4 位年份，过滤 2024 年及更早
+  const years = text.match(/20\d{2}/g);
+  if (!years) return false;
+  const thisYear = new Date().getFullYear();
+  return years.some((y) => parseInt(y, 10) < thisYear);
+}
+
 /**
  * 调 Python ddgs 脚本，返回原始结果数组 [{title, href, body}]。
  * 失败返回 []，不阻塞 pipeline。
@@ -76,15 +98,20 @@ export class SearchSource extends ItemSource {
     if (!Array.isArray(raw)) return [];
     return raw
       .filter((r) => r.title && r.title.length >= 4)
-      .filter((r) => !isSpam(r.title, r.href))  // 过滤 SEO 垃圾/下载站/仿冒站
-      .map((r) => new NewsItem({
-        title: r.title,
-        link: r.href || '',
-        summary: (r.body || '').slice(0, 300),
-        source: this.name,
-        category: this.category,
-        // ddgs text 无精确日期，timelimit='d' 已保证 24h 内；date 留空走 window 保留策略
-        date: null,
-      }));
+      .filter((r) => !isSpam(r.title, r.href))    // 过滤 SEO 垃圾/下载站/仿冒站
+      .filter((r) => !isStale(r.title, r.body))   // 过滤明显过时的结果（含 2024 年及更早年份）
+      .map((r) => {
+        const extracted = extractDate(r.body || '');
+        return new NewsItem({
+          title: r.title,
+          link: r.href || '',
+          summary: (r.body || '').slice(0, 300),
+          source: this.name,
+          category: this.category,
+          // 优先用 body 中提取的日期，否则用当日（timelimit='d' 下大部分结果是近期的；
+          // 设置 date 是为了让 ingest 的 dedupeWindowMs 时间窗能正确过滤）
+          date: extracted || new Date(),
+        });
+      });
   }
 }
