@@ -9,7 +9,13 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><link crossorigin=anonymous href=/yuudashboard/_custom.min.64c81fa40950ba93c22b307a88db8da41944d6cb9c922096e96775377bdf29a8.css integrity="sha256-ZMgfpAlQupPCKzB6iNuNpBlE1suckiCW6Wd1N3vfKag=" rel=stylesheet><script src=https://cdn.jsdelivr.net/npm/chart.xkcd@1/dist/chart.xkcd.min.js></script><script src=https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1/dist/lenis.min.js></script><script src=https://cdn.jsdelivr.net/npm/@hotwired/turbo@8/dist/turbo.es2017-umd.min.js></script><link href=https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css rel=stylesheet><script src=https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js></script><script>
+</script><link crossorigin=anonymous href=/yuudashboard/_custom.min.64c81fa40950ba93c22b307a88db8da41944d6cb9c922096e96775377bdf29a8.css integrity="sha256-ZMgfpAlQupPCKzB6iNuNpBlE1suckiCW6Wd1N3vfKag=" rel=stylesheet><script src=https://cdn.jsdelivr.net/npm/chart.xkcd@1/dist/chart.xkcd.min.js></script><script>
+
+
+function __renderXkcdCharts(){var els=document.querySelectorAll('svg[data-chart-type]:not([data-rendered])');for(var i=0;i<els.length;i++){var el=els[i];if(!window.chartXkcd)continue;try{var cfg=JSON.parse(el.getAttribute('data-chart-cfg'));new chartXkcd[el.getAttribute('data-chart-type')](el,cfg);el.setAttribute('data-rendered','1')}catch(e){console.warn('xkcd chart',e)}}}
+window.addEventListener('load',__renderXkcdCharts);
+if(!window.chartXkcd){var __iv=setInterval(function(){if(window.chartXkcd){clearInterval(__iv);__renderXkcdCharts()}},100);setTimeout(function(){clearInterval(__iv)},5000)}
+</script><script src=https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1/dist/lenis.min.js></script><script src=https://cdn.jsdelivr.net/npm/@hotwired/turbo@8/dist/turbo.es2017-umd.min.js></script><link href=https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css rel=stylesheet><script src=https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js></script><script>
 document.addEventListener("DOMContentLoaded",function(){var lenis=new Lenis({duration:0.6,easing:function(t){return 1-Math.pow(1-t,3)},smoothWheel:true});function raf(t){lenis.raf(t);requestAnimationFrame(raf)}requestAnimationFrame(raf)});
 </script><meta property="og:url" content="https://uynajgi.github.io/yuudashboard/tags/index.html"><meta property="og:site_name" content="Yuunagi Dashboard"><meta property="og:title" content="Tags"><meta property="og:locale" content="zh"><meta property="og:type" content="website"><meta name=twitter:card content="summary"><meta name=twitter:title content="Tags"></head><body class=list id=top><header class=header><nav class=header-nav><div class=logo><a href=https://uynajgi.github.io/yuudashboard/ accesskey=h title="Yuunagi Dashboard (Alt + H)">Yuunagi Dashboard</a><div class=logo-switches><button id=theme-toggle class=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
 <svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -18,32 +24,7 @@ document.addEventListener("DOMContentLoaded",function(){var lenis=new Lenis({dur
 <a href=/yuudashboard/finance/index.html class=home-nav-item>金融</a>
 <a href=/yuudashboard/research/index.html class=home-nav-item>科研</a>
 <a href=/yuudashboard/tags/index.html class="home-nav-item active">标签</a>
-<a href=/yuudashboard/about.html class=home-nav-item>关于</a></nav></aside><div class=home-feed><section class=apple-section-hero style=width:100%;margin:0><div class=apple-section-hero-inner><div class=apple-section-kicker>Tags</div><h1 class=apple-section-title>Tags</h1><p class=apple-section-description>按主题浏览所有文章</p></div></section><section class=apple-section-body style="width:100%;margin:16px 0 0"><div class=apple-tag-cloud><a href=/yuudashboard/tags/A%E8%82%A1.html class=apple-tag-chip><span class=tag-name>A股</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E6%B8%AF%E8%82%A1.html class=apple-tag-chip><span class=tag-name>港股</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E5%9B%BD%E9%99%85.html class=apple-tag-chip><span class=tag-name>国际</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E5%9B%BD%E5%86%85.html class=apple-tag-chip><span class=tag-name>国内</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E6%B1%87%E6%80%BB.html class=apple-tag-chip><span class=tag-name>汇总</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E5%8A%A0%E5%AF%86.html class=apple-tag-chip><span class=tag-name>加密</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E4%BB%8A%E6%97%A5%E8%A6%81%E9%97%BB.html class=apple-tag-chip><span class=tag-name>今日要闻</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E9%87%91%E8%9E%8D.html class=apple-tag-chip><span class=tag-name>金融</span>
-<span class=apple-tag-count>14</span>
-</a><a href=/yuudashboard/tags/%E7%A7%91%E6%8A%80.html class=apple-tag-chip><span class=tag-name>科技</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E7%BE%8E%E8%82%A1.html class=apple-tag-chip><span class=tag-name>美股</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E5%95%86%E5%93%81.html class=apple-tag-chip><span class=tag-name>商品</span>
-<span class=apple-tag-count>2</span>
-</a><a href=/yuudashboard/tags/%E6%97%B6%E4%BA%8B.html class=apple-tag-chip><span class=tag-name>时事</span>
-<span class=apple-tag-count>8</span>
-</a><a href=/yuudashboard/tags/%E4%BA%9A%E7%9B%98.html class=apple-tag-chip><span class=tag-name>亚盘</span>
-<span class=apple-tag-count>2</span></a></div></section></div></div></main><footer class=footer><span>© Yuunagi</span> ·
+<a href=/yuudashboard/about.html class=home-nav-item>关于</a></nav></aside><div class=home-feed><section class=apple-section-hero style=width:100%;margin:0><div class=apple-section-hero-inner><div class=apple-section-kicker>Tags</div><h1 class=apple-section-title>Tags</h1><p class=apple-section-description>按主题浏览所有文章</p></div></section><section class=apple-section-body style="width:100%;margin:16px 0 0"><div class=apple-tag-cloud></div></section></div></div></main><footer class=footer><span>© Yuunagi</span> ·
 <span>Powered by
 <a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
