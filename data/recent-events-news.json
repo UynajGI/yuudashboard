@@ -1,7 +1,7 @@
 {
   "_meta": {
     "desc": "近期事件标题 [news]，供 select 跨天语义去重",
-    "updated": "2026-07-06"
+    "updated": "2026-07-07"
   },
   "jobs": {
     "daily-news-domestic": {
@@ -68,6 +68,34 @@
         "双语百科：为什么鸟儿在黎明歌唱？",
         "中国品牌赛车又登领奖台",
         "“快，截住她！”"
+      ],
+      "2026-07-07": [
+        "迎峰度夏，电力硬核举措保民生",
+        "湖北强对流天气致多人死亡，加快保险理赔",
+        "深圳理工：开实验班，逐步取消大学英语",
+        "到底谁拿走了人们的个人信息？",
+        "普京将与特朗普通话",
+        "习近平对防汛救灾工作作出重要指示",
+        "建设社会主义现代化强国，关键在科技自立自强",
+        "天天学习｜抗战烽火闪耀伟大精神",
+        "半年处置超500亿！消金公司放量甩卖不良资产",
+        "港澳台简讯：香港6月底外汇储备资产为4459亿美元",
+        "广西横州市强降雨致4人死亡8人失联，急需救援力量",
+        "LV起诉茉莉奶白后，有高校“连夜抢注”商标？",
+        "青海博物馆回应观音像现广告字样",
+        "方红卫被“双开”",
+        "习近平致电祝贺藤森庆子当选秘鲁总统",
+        "伟大征程丨携手构建人类命运共同体",
+        "后续建筑业走势取决于基建资金能否快速落地",
+        "日本民间团体集会纪念七七事变89周年",
+        "甘肃宕昌山体滑坡，已致5人遇难",
+        "涉对华出口，俄公布最新数据",
+        "习近平同黑山总统米拉托维奇就中国同黑山建交20周年互致贺电",
+        "拾光纪·中国人民“绝不答应！”",
+        "6月理财市场“双降”：民生理财跻身前十",
+        "这个暑期，铁路旅游“上新”了",
+        "李家超：香港黄金中央清算及结算系统今起试运行",
+        "在“从0到1”的地方，做“从0到1”的创新"
       ]
     },
     "daily-news-world": {
@@ -131,6 +159,38 @@
         "香港6月PMI升至52，增速四个月最佳",
         "北约峰会前俄乌战事升温",
         "西藏活动人士在纽约联合国总部外自焚身亡"
+      ],
+      "2026-07-07": [
+        "美国特朗普儿童储蓄账户启动，申请破600万",
+        "超强台风巴威侵袭北马里亚纳群岛并逼近台湾",
+        "法国总统马克龙访问叙利亚，大马士革发生爆炸",
+        "特朗普称俄乌接近停战方案",
+        "美国对中国试射导弹表示担忧，敦促军控磋商",
+        "美国AI公司指责中国竞争对手非法蒸馏其技术",
+        "深度求索据报正开发自有AI芯片，或加剧华为挑战",
+        "北京研究限制海外获取中国最先进AI模型",
+        "阿里巴巴人工智能模型备受欢迎，但难以变现",
+        "同方威视引发中欧贸易摩擦担忧",
+        "印度总理访问印尼，签署军购协议",
+        "中国外长王毅访问挪威，推动自贸协定",
+        "特朗普介入世界杯红牌，美欧关系再添紧张",
+        "意大利外长称不再回应特朗普挑衅，避免盟友争端升温",
+        "美国不排除在海外生产PAC-3爱国者导弹",
+        "台国安会副秘书长：备战应对大陆攻击并非挑衅",
+        "西欧多国面临第三波热浪袭击，加剧野火风险",
+        "印度孟买暴雨洪灾，至少6人死亡",
+        "刚果（金）埃博拉疫情仍在扩大",
+        "七七事变89周年，多个团体到日本驻港总领馆外抗议",
+        "港交所上半年IPO金额同比升92%",
+        "刚果矿产冲突：美国制裁涉嫌资助M23的卢旺达商人和公司",
+        "哈马斯解散加沙政府委员会，移交权力",
+        "巴基斯坦警察遇袭，9人死亡",
+        "苏丹北科尔多凡州健康危机，逾20万人面临疾病威胁",
+        "日本探测器隼鸟2号成功飞掠小行星鸟船",
+        "塞内加尔总统宣布组建新政党，政治分裂加剧",
+        "美国企业家布莱恩·约翰逊确诊自身免疫性胃病",
+        "台风美莎克引发广西洪灾，至少15人死亡",
+        "伊朗百万民众送别前最高领袖哈梅内伊"
       ]
     },
     "daily-news-tech": {
@@ -197,6 +257,37 @@
         "超频三推出北境 GT240M 一体式水冷散热器：2.8 英寸冷头屏，可选黑白双色，479 元起",
         "Self Hosted LLM Gateway and Feature Rich Chat UI with RBAC",
         "隼鸟2号近距离飞越小行星鸟船"
+      ],
+      "2026-07-07": [
+        "证监会2024年罚没款153.42亿元",
+        "054B护卫舰首舰漯河舰入列",
+        "AI Agent会自己选CDN了：当网站访问者从“人”扩展到“AI”，内容分发已升级",
+        "PhotoGIMP – 把GIMP改成Photoshop的样子",
+        "iFLYTEK-Embodied-Omni Technical Report",
+        "Improving LLMs via Validator-to-Generator Alignment",
+        "AWS Weekly Roundup: Claude Sonnet 5 on AWS, Amazon WorkSpaces for AI agents, and more",
+        "韩国新法严惩网络传播虚假信息，最高罚10亿韩元",
+        "Persistent Control of Self-Evolving LLM Agents via Self-Reinforcing Injections",
+        "把世界学习拆成两条互补路径，悟界·RoboBrain Orca成通用世界基础模型基石",
+        "美国人的每天社交时间比20年前少10分钟",
+        "Open Printer – 开源打印机，超小的！",
+        "Internal Pluralism and the Limits of Pairwise Comparisons",
+        "Echoes of Unrest: A Multimodal NLP Framework for Early Warning of Fake News and Violence-Driven Mob Activity",
+        "模型发布 阿里升级语音模型Fun ASR Realtime",
+        "智能眼镜初创公司Even Realities完成1.5亿美元融资，跻身独角兽行列",
+        "Show HN: Access-aware text-to-SQL – stop LLM agents overfetching data",
+        "微软通过Copilot Autofix将基于AI的漏洞修复功能引入Azure DevOps",
+        "微软裁员4800人，游戏业务深受影响",
+        "用Option给macOS操作加点料",
+        "ASK in the Dark: Uncertainty-Gated LLM Assistance under Partial Observability",
+        "Reinforcement Learning for Data-Efficient Code-Switched ASR",
+        "蚂蚁灵波科技发布LingBot Vision视觉基础模型及深度补全2.0",
+        "全球首颗商用核动力卫星成功入轨，为深空探测提供新动力方案",
+        "Show HN: Shadow Web – Cut 64–97% of web page tokens for LLM agents",
+        "让AI真正“懂时间”：QC-MHM时序知识图谱问答的全新突破",
+        "美国最高法院允许德州要求移动应用验证用户年龄",
+        "Automated Data Readiness for Scientific AI",
+        "LuxSQA: Ask Me in Luxembourgish with TTS-Augmented Spoken Question Answering"
       ]
     }
   }
