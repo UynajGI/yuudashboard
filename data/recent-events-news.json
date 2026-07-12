@@ -1,27 +1,10 @@
 {
   "_meta": {
     "desc": "近期事件标题 [news]，供 select 跨天语义去重",
-    "updated": "2026-07-11"
+    "updated": "2026-07-12"
   },
   "jobs": {
     "daily-news-domestic": {
-      "2026-07-09": [
-        "国家科学技术奖励大会、两院院士大会、中国科协第十一次全国代表大会在京召开",
-        "广西洪灾已致39人遇难，万名师生被困校园",
-        "超强台风“巴威”或正面登陆我国东南地区",
-        "外交部：北约应停止渲染“中国威胁”",
-        "外交部：美国对中国导弹试射说三道四是典型的双重标准和霸权主义",
-        "朝鲜内阁总理朴泰成将访华",
-        "聚焦演出、赛事等领域，一批服务消费新举措即将出台",
-        "又一“中国造”全球爆单",
-        "福建晋江一鞋厂发生火灾，现场有人员被困",
-        "公安机关发布暑期防范电信网络诈骗安全提示",
-        "通报！72款移动应用涉个人信息违规，民生银行、汇丰银行等多家金融机构被点名",
-        "未来5年，“好房子”这样建",
-        "酒店“24小时退房制”受好评，能推广吗？",
-        "“上海的党建重点是楼宇”",
-        "《习近平关于基层工作方法的重要论述学习读本》出版发行"
-      ],
       "2026-07-10": [
         "福建晋江鞋厂火灾致28人遇难，中央指示加强安全生产",
         "广西洪灾救援：张国清指导救灾，社会各界驰援",
@@ -63,29 +46,21 @@
         "为什么说反腐败是最彻底的自我革命？",
         "文旅供给提质扩容 融合业态提振夏日消费",
         "国产新能源重卡，组团出海！订单量刷新纪录"
+      ],
+      "2026-07-12": [
+        "央行下调LPR利率25个基点",
+        "2025年我国集装箱吞吐量稳居世界第一",
+        "台风“巴威”影响持续，各部门全力防汛防台风",
+        "年轻人把电车当手机换，平均车龄仅1.8年",
+        "火到海外的中国“预制房”，到底是怎样建成的？",
+        "一国企董事长被曝在办公室收礼金，官方通报",
+        "一水泥罐车侧翻致6人死亡，警方通报",
+        "外资加码！华平投资拟再度增持，中欧基金股权变更迎新进展",
+        "美军：打击约140个目标",
+        "南非国脚亚当斯世界杯赛回国后去世"
       ]
     },
     "daily-news-world": {
-      "2026-07-09": [
-        "缅甸强震已致144人死亡",
-        "韩国最高法院终审判尹锡悦七年 戒严首宗案件定谳",
-        "台陆委会通报一地方法官赴陆旅行被大陆公安盘查",
-        "英国遭遇破纪录热浪",
-        "北约峰会：特朗普展示团结，承诺对乌援助",
-        "Meta拟投百亿美元建首个加拿大数据中心",
-        "华尔街点评美联储6月会议纪要：核心看通胀，短期无加息紧迫性",
-        "AI会降低利率么？",
-        "全球经济坚韧抵御中东战局冲击 惟前景仍多变",
-        "前中国外交官上月据报访美厘清华盛顿对贸易休战立场",
-        "美油企预期从美伊战争获取暴利 或惹恼特朗普",
-        "欧盟最快今夏推出青少年社媒限制令",
-        "坦桑尼亚反对派发起静默抗议",
-        "美国能挺住吗？",
-        "美伊冲突升级：停火破裂、霍尔木兹海峡受阻、伊朗核设施周边遭袭",
-        "加沙人道危机持续：物资匮乏、袭击不断",
-        "苏丹快速支援部队被指实施大规模暴行",
-        "伊拉克举行前最高领袖哈梅内伊送葬仪式"
-      ],
       "2026-07-10": [
         "美考虑放宽赴华旅行警告",
         "美儿童新冠疫苗接种率下降",
@@ -137,41 +112,32 @@
         "以色列报告称马尔万·巴尔古提狱中管理影响力",
         "伊朗战争如何重塑非洲地缘政治地图",
         "俄禁柴油出口冲击全球市场 燃油供应紧张加剧价格飙升"
+      ],
+      "2026-07-12": [
+        "美伊冲突升级：霍尔木兹海峡受阻，伊朗袭击波斯湾邻国，美国保持南部航道开放",
+        "南中国海仲裁10周年：14国发表联合声明重申裁决，中国驳斥",
+        "卡塔尔前埃米尔哈马德去世，各方哀悼",
+        "叙利亚新议会开幕，宪法法院宣誓就职",
+        "乌克兰无人机袭击俄油轮引发火灾，俄燃料短缺加剧",
+        "美国参议员格雷厄姆去世，以色列等国哀悼",
+        "印度总理莫迪拉拢印太伙伴，深化与印尼、澳、新合作",
+        "也门换俘协议受阻，政府和胡塞互相指责",
+        "美国儿童合唱团40名青少年赴新疆交流",
+        "南美洲安第斯山脉降雪不足，滑雪胜地面临消融风险",
+        "国际能源署批评欧洲电气化缓慢，称是重大失误",
+        "原油价格回落但燃油价格反弹，消费者承压",
+        "韩国佛教界办相亲营应对低生育率",
+        "尼日利亚诈骗案：数百万美元流向不存在的机构",
+        "阿富汗排斥女性导致经济年损失近13亿元",
+        "日本企业发放奖金鼓励员工采用AI技术",
+        "香港与海湾国家贸易额今年首五个月升逾35%",
+        "韩国海军舰艇兵执行警备任务时失联",
+        "大陆学者建议声索巴丹群岛主权，台湾国安人士回应",
+        "习近平祝贺基里巴斯独立47周年",
+        "云南曲靖富源县一搅拌车侧翻 致六人死亡"
       ]
     },
     "daily-news-tech": {
-      "2026-07-09": [
-        "Why we cannot wait for better post-quantum signature algorithms",
-        "前香草社资深员工耗时6年开发，《真理谭：黑暗城堡的女巫》登陆Steam",
-        "Slopera: a browser that hallucinates every page with an LLM",
-        "上海燧原科技股份有限公司科创板IPO注册生效",
-        "自言卡 – 每天在Windows桌面显示一条你自己写的话",
-        "Euclid望远镜发现已知最遥远的类星体",
-        "Agent进化论：从对话到协作",
-        "小米耳夹式耳机体验",
-        "AgentLens: Production-Assessed Trajectory Reviews for Coding Agent Evaluation",
-        "Healthier LLMs: Retrieval-Augmented Generation for Public Health Question Answering",
-        "AI早报2026-07-09视频版",
-        "Rewriting Bun in Rust",
-        "Introducing GPT-Live / OpenAI 发布 GPT Live 系列全双工语音模型",
-        "Innersource security advisories are generally available",
-        "Introducing Meerkat: an experiment in global consensus",
-        "时隔10余年重返PC芯片市场：消息称三星研发4nm制程AI PC芯片Gaia，目标明年量产",
-        "Battle LLM Robots – Prompt your LLM, Submit your bot, Watch it battle",
-        "Terraink – 创建地图海报：把去过的地方变成一张可以挂在墙上的地图",
-        "2026年二季度PC出货量下滑5%",
-        "AI Infra拼什么？",
-        "iOS 27 Beta 2 & 3 值得关注的新特性",
-        "When Does In-Context Search Help? A Sampling-Complexity Theory of Reflection-Driven Reasoning",
-        "Ad Headline Generation using Self-Critical Masked Language Model",
-        "字节跳动发布 Seedream 5.0 Pro",
-        "Quoting Kenton Varda",
-        "Our approach to government and national security partnerships",
-        "Enterprise-managed OpenTelemetry export for VS Code and CLI",
-        "滴滴网约车“车载AED”将纳入城市120急救调度，西安/深圳成为首批试点城市",
-        "A control-theory approach to detecting LLM agent instability",
-        "OpenMandriva项目发生破坏事件"
-      ],
       "2026-07-10": [
         "消息称一加迭代新机硅电池容量达10000mAh±",
         "长征十号乙火箭成功回收",
@@ -235,6 +201,38 @@
         "GPT-5.6全面围剿Claude Fable 5，“超级应用”ChatGPT Work上位，Altman紧急澄清：不会取代Coedx",
         "派早报：蔚来 ES8 大五座版正式上市等",
         "Aligning Clinical Needs and AI Capabilities: A Survey on LLMs for Medical Reasoning"
+      ],
+      "2026-07-12": [
+        "OpenAI 重置用量并承认更新体验问题",
+        "华为 MatePad Pro Max 平板获鸿蒙 HarmonyOS 6.1.0.130 SP17 升级，新增 3D 影像壁纸功能",
+        "An AI gateway that signs a receipt for every LLM response",
+        "frp v0.70：开源内网穿透工具教程，完善 API、规定兼容性策略",
+        "面向 Qwen 系列模型线性注意力的高性能优化实践｜AICon深圳",
+        "AI 早报 2026 07 12 视频版",
+        "sqlite-utils 4.1",
+        "布朗大学经济学教授怀疑班级里多数学生使用 AI 作弊",
+        "VisionRay Flow Pro 智能眼镜发布：20Mp 摄像头、35g 重量，199 美元",
+        "今年A股最大IPO要来了",
+        "Finetuning a Reasoning LLM with Supervised or Reinforcement Learning?",
+        "QQ 邮箱发布 AI 专用邮箱：Agent Mail，每人可抢注两个地址[内测]",
+        "开发生态 ChatGPT Work 和 Codex 再次用量重置",
+        "苹果起诉 OpenAI，指控前华裔员工窃取商业机密",
+        "AI 热潮太费电，燃气轮机价格 3 年涨了约 300%",
+        "LLMlet: P2P distributed LLM inference on browsers",
+        "技术与洞察 Thinking Machines Lab发文",
+        "日本成功测试可回收火箭技术",
+        "华硕 ROG 龙王 4 颜值版水冷散热器新增 AMD 联名版本，2699 元",
+        "Reducing HBM Bottlenecks in JAX-Based LLM Training with Host Offloading",
+        "其他 GPT 5.6 Sol 被曝误删用户文件 OpenAI 已展开调查",
+        "全球首款可变形个人机器人，上纬新材启元 T1 亮相",
+        "英国投20亿英镑建设人工智能作战实验室",
+        "Mesh LLM: distributed AI computing on iroh",
+        "要闻 智谱创始人唐杰发布内部信 宣布启动Touch High",
+        "外设制造商北通统一品牌英文标识为“BEITONG”，原“BETOP”全面停用",
+        "ContextOps, an ESLint-like static analyzer for LLM context",
+        "京东物流调集多架应急无人机前往广西灾区，用于物资运输与灾情勘测",
+        "Stop Telling Me to Ask an LLM",
+        "模型发布 Wan 发布 Wan Streamer v0.2"
       ]
     }
   }
